@@ -8,6 +8,6 @@
 </head>
 <body>
     <span id="hola">Hola Mundo</span>
-    
+    <span>ESTA ES UNA PRUEBA DE FUNCIONALIDAD</span>
 </body>
 </html>
