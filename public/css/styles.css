@@ -1,0 +1,154 @@
+body {
+    background-color: #1b1b2f;
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+    }
+.sidebar {
+    background-color: #111827;
+    min-height: 100vh;
+    padding: 20px 15px;
+    position: fixed;
+    width: 250px;
+}
+.sidebar .logo img {
+    width: 150px;
+    margin: 0 auto 20px;
+    display: block;
+}
+.sidebar h6 {
+    color: #76c7c0;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+.sidebar .nav-link {
+    color: #c5c6ca;
+    margin: 6px 0;
+    font-weight: 500;
+    border-radius: 10px;
+    font-size: 0.9rem;
+}
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    background-color: #2563eb;
+    color: white;
+}
+.content {
+    margin-left: 260px;
+    padding: 15px;
+    max-width: calc(100vw - 260px);
+}
+.card {
+    background-color: #202234;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    height: 100%;
+}
+.card h5 {
+    font-size: 0.9rem;
+    color: #a0aec0;
+    margin-bottom: 0.5rem;
+}
+.card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 0.3rem;
+}
+.card small {
+    font-size: 0.75rem;
+    color: #8b9bb4;
+}
+.gauges-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.gauge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.gauge {
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+.gauge-name {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    color: #a0aec0;
+    font-weight: 500;
+}
+.gauge-value {
+    position: absolute;
+    top: 65%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: white;
+}
+canvas {
+    background: transparent;
+}
+.chart-container {
+    /* Elimina height: 200px; */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.chart-container canvas {
+    height: 200px !important;
+    width: 100% !important;
+    max-width: 100%;
+}
+.camera-placeholder {
+    background: linear-gradient(135deg, #2d3748, #4a5568);
+    border-radius: 8px;
+    height: 180px; /* Altura fija para cámara */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+.row.g-2 {
+    --bs-gutter-y: 0.5rem;
+}
+
+/* NUEVOS ESTILOS PARA CORREGIR EL LARGO EXCESIVO */
+.main-content-row {
+    min-height: auto;
+    max-height: calc(200vh - 100px); /* Limita la altura máxima */
+}
+
+.charts-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.charts-column .card {
+    padding: 0 !important; /* Elimina padding extra */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.gauges-column {
+    max-height: 500px; /* Limita altura de gauges */
+    overflow: hidden;
+}
+
+.camera-column {
+    max-height: 200px; /* Limita altura de cámara y gauges derecha */
+}
