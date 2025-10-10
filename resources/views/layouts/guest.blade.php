@@ -31,6 +31,20 @@
     </head>
     <body class="font-sans antialiased bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
 
+        <!-- Botón volver (arriba-izquierda) -->
+        <div class="fixed left-4 top-4 z-50">
+            <a href="/"
+               class="inline-flex items-center gap-2 rounded-xl border border-gray-300/60 dark:border-gray-700/60
+                      bg-white/80 dark:bg-gray-800/80 backdrop-blur px-3 py-2 text-xs font-medium
+                      text-gray-700 dark:text-gray-200 hover:bg-white/90 dark:hover:bg-gray-800 transition"
+               aria-label="Volver al inicio">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span class="hidden sm:inline">Volver</span>
+            </a>
+        </div>
+
         <!-- Toggle de tema visible en guest (arriba-derecha) -->
         <div class="fixed right-4 top-4 z-50">
             <x-theme-toggle />
@@ -97,8 +111,6 @@
               });
             });
           }
-
-          // engancha al cargar y también si el slot cambia (por Inertia no aplica, pero es seguro)
           document.addEventListener('DOMContentLoaded', hookPasswordToggles);
         })();
         </script>
