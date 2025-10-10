@@ -8,7 +8,7 @@
     <div class="flex w-full" style="min-height: 100vh; max-height: 100vh; overflow: hidden;">
         <div class="w-full">
             <!-- Tarjetas superiores -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6 mt-10 mx-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6 mt-6 mx-6">
                 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Temperatura del aire</h5>
                     <h2 id="tempAireValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">21.2°C</h2>
@@ -110,17 +110,6 @@
                             <div class="text-sm font-semibold">ORP</div>
                             <div id="gaugeORPValue" class="text-gray-600 text-sm">16.9 mV</div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- Gráfica inferior -->
-            <div class="mt-2 flex justify-center">
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full max-w-4xl p-4 transition-colors">
-                    <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2">Mediciones Recientes</h6>
-                    <div class="relative w-full h-64">
-                        <canvas id="lineChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
             </div>
