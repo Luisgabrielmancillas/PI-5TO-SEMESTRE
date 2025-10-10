@@ -49,3 +49,4 @@ class RegistroMediciones extends Model
 		'fecha'
 	];
 }
+
