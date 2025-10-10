@@ -25,7 +25,7 @@
                             <svg class="h-5 w-5 {{ $isDash ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/>
                             </svg>
-                            <span>Dashboard</span>
+                            <span>Resumen</span>
                         </a>
 
                         <!-- HISTORIAL -->
@@ -66,14 +66,14 @@
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
+                            {{ __('Perfil') }}
                         </x-dropdown-link>
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
                                 onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                                {{ __('Cerrar sesión') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
@@ -105,7 +105,7 @@
                 <!-- icon + label -->
                 <span class="inline-flex items-center gap-2">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/></svg>
-                    Dashboard
+                    Resumen
                 </span>
             </x-responsive-nav-link>
 
@@ -129,14 +129,14 @@
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('Perfil') }}
                 </x-responsive-nav-link>
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link :href="route('logout')"
                         onclick="event.preventDefault(); this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('Cerrar sesión') }}
                     </x-responsive-nav-link>
                 </form>
             </div>
