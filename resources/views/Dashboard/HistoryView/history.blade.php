@@ -81,9 +81,11 @@
                     </div>
 
                     {{-- Paginación inicial (se actualizará con el partial) --}}
-                    <div id="tablePagination" class="mt-4">
-                        {{ $items->links() }}
-                    </div>
+                    @if ($items)
+                        <div id="tablePagination" class="mt-4">
+                            {{ $items->links() }}
+                        </div>
+                    @endif
                 </div>
             </section>
         </div>

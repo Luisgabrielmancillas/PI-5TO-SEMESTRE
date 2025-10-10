@@ -118,7 +118,7 @@ class HistoryController extends Controller
                 $labels = $rows->map(function($r){
                     $a = Carbon::parse($r->x_start)->format('M d');
                     $b = Carbon::parse($r->x_end)->format('M d');
-                    return "$a–$b";
+                    return "$a – $b";
                 });
                 $series = $rows->pluck('y')->map(fn($v) => $v === null ? null : round($v, 2));
                 return ['type'=>'line','label'=>$niceLabel,'labels'=>$labels,'series'=>$series];
@@ -134,7 +134,7 @@ class HistoryController extends Controller
                 $labels = $rows->map(function($r){
                     $a = Carbon::parse($r->x_start_key.'-01')->isoFormat('MMM');
                     $b = Carbon::parse($r->x_end_key.'-01')->isoFormat('MMM');
-                    return "$a–$b";
+                    return "$a – $b";
                 });
                 $series = $rows->pluck('y')->map(fn($v) => $v === null ? null : round($v, 2));
                 return ['type'=>'line','label'=>$niceLabel,'labels'=>$labels,'series'=>$series];

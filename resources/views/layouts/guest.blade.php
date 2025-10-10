@@ -62,29 +62,6 @@
             </div>
         </div>
 
-        <!-- Conector: habilita todos los toggles con data-theme-toggle -->
-        <script>
-        (function () {
-          function syncIcon(btn) {
-            const isDark = document.documentElement.classList.contains('dark');
-            btn.querySelector('[data-theme-sun]')?.classList.toggle('hidden', isDark);
-            btn.querySelector('[data-theme-moon]')?.classList.toggle('hidden', !isDark);
-          }
-          function bindToggle(btn) {
-            syncIcon(btn);
-            btn.addEventListener('click', () => {
-              const el = document.documentElement;
-              const nowDark = el.classList.toggle('dark');
-              localStorage.setItem('theme', nowDark ? 'dark' : 'light');
-              document.querySelectorAll('[data-theme-toggle]').forEach(syncIcon);
-            });
-          }
-          document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-theme-toggle]').forEach(bindToggle);
-          });
-        })();
-        </script>
-
         <!-- Script: mostrar/ocultar contraseñas para cualquier botón con data-toggle-password -->
         <script>
         (function () {
