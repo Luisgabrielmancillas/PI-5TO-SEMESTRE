@@ -14,6 +14,8 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/history', [HistoryController::class, 'index'])->name('history');
+    Route::get('/history/data', [HistoryController::class, 'data'])->name('history.data');
+    Route::get('/history/table', [HistoryController::class, 'table'])->name('history.table');
 });
 
 Route::middleware('auth')->group(function () {
