@@ -282,70 +282,119 @@
         <p class="muted mt-2">Indicadores con rangos de referencia para un crecimiento sano.</p>
       </div>
 
-      <!-- Indicador -->
+      {{-- Indicador de hortaliza seleccionada --}}
       <div class="flex justify-end mb-8">
         <span class="pill pill-emerald">
-          Hortaliza seleccionada: <b>No hay</b>
+          Hortaliza seleccionada:
+          @if(!empty($selectedCrop))
+            <b>{{ $selectedCrop->nombre }}</b>
+          @else
+            <b>No hay</b>
+          @endif
         </span>
       </div>
 
+      {{-- Helpers locales para formatear (opcional) --}}
+      @php
+        $fmt = function($v) {
+          // Quita ceros finales y punto sobrante (2 decimales como máximo)
+          $s = number_format((float)$v, 2, '.', '');
+          $s = rtrim(rtrim($s, '0'), '.');
+          return $s;
+        };
+        $printRange = function($key) use ($ranges, $fmt) {
+          if (isset($ranges[$key])) {
+            $min = $fmt($ranges[$key]['min']);
+            $max = $fmt($ranges[$key]['max']);
+            $unit = $ranges[$key]['unit'] ?? '';
+            return "{$min}–{$max}{$unit}";
+          }
+          return null; // sin datos
+        };
+      @endphp
+
       <!-- Fila 1 -->
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- Temperatura ambiente --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <p class="kicker">Temperatura ambiente</p>
             <i class="ri-temp-hot-line text-2xl text-emerald-500 dark:text-emerald-300"></i>
           </header>
           <div class="mt-3">
-            <p class="text-2xl font-extrabold">— °C</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @if($val = $printRange('temp_ambiente'))
+              <p class="text-2xl font-extrabold">{{ $val }}</p>
+            @else
+              <p class="text-2xl font-extrabold">— °C</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @endif
           </div>
         </article>
 
+        {{-- Humedad ambiente --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <p class="kicker">Humedad ambiente</p>
             <i class="ri-water-percent-line text-2xl text-sky-500 dark:text-sky-300"></i>
           </header>
           <div class="mt-3">
-            <p class="text-2xl font-extrabold">— %</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @if($val = $printRange('humedad'))
+              <p class="text-2xl font-extrabold">{{ $val }}</p>
+            @else
+              <p class="text-2xl font-extrabold">— %</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @endif
           </div>
         </article>
 
+        {{-- pH del agua --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <p class="kicker">pH del agua</p>
             <i class="ri-test-tube-line text-2xl text-indigo-500 dark:text-indigo-300"></i>
           </header>
           <div class="mt-3">
-            <p class="text-2xl font-extrabold">—</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @if($val = $printRange('ph'))
+              <p class="text-2xl font-extrabold">{{ $val }}</p>
+            @else
+              <p class="text-2xl font-extrabold">—</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @endif
           </div>
         </article>
       </div>
 
       <!-- Fila 2 -->
       <div class="mt-6 max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {{-- Temperatura del agua --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <p class="kicker">Temperatura del agua</p>
             <i class="ri-temp-cold-line text-2xl text-emerald-500 dark:text-emerald-300"></i>
           </header>
           <div class="mt-3">
-            <p class="text-2xl font-extrabold">— °C</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @if($val = $printRange('temp_agua'))
+              <p class="text-2xl font-extrabold">{{ $val }}</p>
+            @else
+              <p class="text-2xl font-extrabold">— °C</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @endif
           </div>
         </article>
 
+        {{-- ORP --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <p class="kicker">ORP (potencial RedOx)</p>
             <i class="ri-bubble-chart-line text-2xl text-indigo-500 dark:text-indigo-300"></i>
           </header>
           <div class="mt-3">
-            <p class="text-2xl font-extrabold">— mV</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @if($val = $printRange('orp'))
+              <p class="text-2xl font-extrabold">{{ $val }}</p>
+            @else
+              <p class="text-2xl font-extrabold">— mV</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sin datos</p>
+            @endif
           </div>
         </article>
       </div>
@@ -357,10 +406,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="mb-8 text-center">
         <h2 class="text-3xl font-bold">Guía de cultivo por especie</h2>
-        <p class="muted mt-2">Pasos y rangos para Lechuga, Espinaca, Arúgula, Albahaca y Mostaza en HydroBox.</p>
+        <p class="muted mt-2">Rangos y tips por hortaliza.</p>
       </div>
 
       <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- Lechuga (id 1) --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <h3 class="font-semibold">Lechuga</h3>
@@ -369,44 +419,75 @@
           <ul class="mt-3 text-sm muted space-y-2">
             <li>• <b>Germinación:</b> 2–4 días en esponja.</li>
             <li>• <b>Trasplante:</b> raíz 1–2 cm.</li>
-            <li>• <b>pH:</b> 5.8–6.2 · <b>Temp agua:</b> 18–22°C</li>
-            <li>• <b>ORP:</b> 250–400 mV</li>
+            <li>
+              • <b>pH:</b> {{ $guide[1]['ph'] ?? '5.8–6.2' }}
+              · <b>Temp agua:</b> {{ $guide[1]['temp_agua'] ?? '18–22°C' }}
+            </li>
+            <li>• <b>ORP:</b> {{ $guide[1]['orp'] ?? '250–400 mV' }}</li>
             <li>• <b>Luz:</b> 12–16 h · LED medio</li>
             <li>• <b>Nutrientes:</b> Micro/Grow/Bloom semanal (ligero)</li>
             <li>• <b>Cosecha:</b> 30–45 días</li>
           </ul>
         </article>
 
+        {{-- Espinaca (id 2) --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <h3 class="font-semibold">Espinaca</h3>
             <span class="pill pill-sky">Follaje</span>
           </header>
           <ul class="mt-3 text-sm muted space-y-2">
-            <li>• <b>Germinación:</b> 5–8 días (remojar semillas opcional).</li>
-            <li>• <b>pH:</b> 6.0–6.5 · <b>Temp agua:</b> 18–20°C</li>
-            <li>• <b>ORP:</b> 250–400 mV</li>
+            <li>• <b>Germinación:</b> 5–8 días (remojo previo opcional).</li>
+            <li>
+              • <b>pH:</b> {{ $guide[2]['ph'] ?? '6.0–6.5' }}
+              · <b>Temp agua:</b> {{ $guide[2]['temp_agua'] ?? '18–20°C' }}
+            </li>
+            <li>• <b>ORP:</b> {{ $guide[2]['orp'] ?? '250–400 mV' }}</li>
             <li>• <b>Luz:</b> 12–14 h · ambiente fresco</li>
             <li>• <b>Nutrientes:</b> Micro/Grow/Bloom semanal (moderado)</li>
             <li>• <b>Cosecha:</b> 35–50 días (corte por hojas)</li>
           </ul>
         </article>
 
+        {{-- Acelga (id 3) --}}
         <article class="card">
           <header class="flex items-center justify-between">
-            <h3 class="font-semibold">Arúgula</h3>
+            <h3 class="font-semibold">Acelga</h3>
+            <span class="pill pill-amber">Rústica</span>
+          </header>
+          <ul class="mt-3 text-sm muted space-y-2">
+            <li>• <b>Germinación:</b> 5–7 días.</li>
+            <li>
+              • <b>pH:</b> {{ $guide[3]['ph'] ?? '6.0–6.5' }}
+              · <b>Temp agua:</b> {{ $guide[3]['temp_agua'] ?? '18–24°C' }}
+            </li>
+            <li>• <b>ORP:</b> {{ $guide[3]['orp'] ?? '300–400 mV' }}</li>
+            <li>• <b>Luz:</b> 12–14 h · tolera ligeros calores</li>
+            <li>• <b>Nutrientes:</b> Micro/Grow/Bloom semanal (moderado)</li>
+            <li>• <b>Cosecha:</b> 45–60 días (cortes sucesivos)</li>
+          </ul>
+        </article>
+
+        {{-- Rúcula / Arúgula (id 4) --}}
+        <article class="card">
+          <header class="flex items-center justify-between">
+            <h3 class="font-semibold">Rúcula</h3>
             <span class="pill pill-indigo">Rápida</span>
           </header>
           <ul class="mt-3 text-sm muted space-y-2">
             <li>• <b>Germinación:</b> 2–3 días.</li>
-            <li>• <b>pH:</b> 5.8–6.2 · <b>Temp agua:</b> 18–22°C</li>
-            <li>• <b>ORP:</b> 250–400 mV</li>
+            <li>
+              • <b>pH:</b> {{ $guide[4]['ph'] ?? '5.8–6.2' }}
+              · <b>Temp agua:</b> {{ $guide[4]['temp_agua'] ?? '18–22°C' }}
+            </li>
+            <li>• <b>ORP:</b> {{ $guide[4]['orp'] ?? '250–400 mV' }}</li>
             <li>• <b>Luz:</b> 12–16 h</li>
             <li>• <b>Nutrientes:</b> Micro/Grow/Bloom semanal (ligero)</li>
             <li>• <b>Cosecha:</b> 25–35 días</li>
           </ul>
         </article>
 
+        {{-- Albahaca (id 5) --}}
         <article class="card">
           <header class="flex items-center justify-between">
             <h3 class="font-semibold">Albahaca</h3>
@@ -414,47 +495,41 @@
           </header>
           <ul class="mt-3 text-sm muted space-y-2">
             <li>• <b>Germinación:</b> 4–7 días.</li>
-            <li>• <b>pH:</b> 5.8–6.2 · <b>Temp agua:</b> 20–22°C</li>
-            <li>• <b>ORP:</b> 250–400 mV</li>
+            <li>
+              • <b>pH:</b> {{ $guide[5]['ph'] ?? '5.8–6.2' }}
+              · <b>Temp agua:</b> {{ $guide[5]['temp_agua'] ?? '20–22°C' }}
+            </li>
+            <li>• <b>ORP:</b> {{ $guide[5]['orp'] ?? '250–400 mV' }}</li>
             <li>• <b>Luz:</b> 14–16 h · luz alta</li>
             <li>• <b>Nutrientes:</b> Micro/Grow/Bloom semanal (moderado)</li>
             <li>• <b>Cosecha:</b> 35–50 días (poda apical)</li>
           </ul>
         </article>
 
+        {{-- Mostaza (id 6) --}}
         <article class="card">
           <header class="flex items-center justify-between">
-            <h3 class="font-semibold">Mostaza (greens)</h3>
-            <span class="pill pill-sky">Picante</span>
+            <h3 class="font-semibold">Mostaza</h3>
+            <span class="pill pill-rose">Picante</span>
           </header>
           <ul class="mt-3 text-sm muted space-y-2">
             <li>• <b>Germinación:</b> 2–4 días.</li>
-            <li>• <b>pH:</b> 6.0–6.5 · <b>Temp agua:</b> 18–22°C</li>
-            <li>• <b>ORP:</b> 250–400 mV</li>
+            <li>
+              • <b>pH:</b> {{ $guide[6]['ph'] ?? '6.0–6.5' }}
+              · <b>Temp agua:</b> {{ $guide[6]['temp_agua'] ?? '18–22°C' }}
+            </li>
+            <li>• <b>ORP:</b> {{ $guide[6]['orp'] ?? '250–400 mV' }}</li>
             <li>• <b>Luz:</b> 12–14 h</li>
             <li>• <b>Nutrientes:</b> Micro/Grow/Bloom semanal (moderado)</li>
             <li>• <b>Cosecha:</b> 25–40 días (cortes sucesivos)</li>
           </ul>
         </article>
-
-        <article class="card bg-gradient-to-b from-emerald-100 to-transparent dark:from-emerald-400/10">
-          <header class="flex items-center gap-2">
-            <i class="ri-seedling-line text-emerald-500 dark:text-emerald-300 text-xl"></i>
-            <h3 class="font-semibold">Pasos generales</h3>
-          </header>
-          <ol class="mt-3 text-sm muted space-y-2 list-decimal list-inside">
-            <li>Hidrata esponjas, siembra 2–3 semillas por celda.</li>
-            <li>Mantén humedad alta hasta emergencia; luego luz suave.</li>
-            <li>Trasplanta al canal/cesta cuando raíz mida 1–2 cm.</li>
-            <li>Mantén <b>ORP 250–400 mV</b> y pH en 5.8–6.5.</li>
-            <li>Rellena con agua baja en minerales cuando el nivel baje.</li>
-          </ol>
-        </article>
       </div>
 
-      <p class="mt-6 text-center text-xs muted">Ajusta la dosis según especie y etapa; dosifica Micro/Grow/Bloom 1 vez/semana.</p>
     </div>
   </section>
+
+
 
   <!-- Footer -->
   <footer class="border-t border-slate-200 dark:border-white/5 py-8">
