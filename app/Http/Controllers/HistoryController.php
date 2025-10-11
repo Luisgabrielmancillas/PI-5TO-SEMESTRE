@@ -86,7 +86,6 @@ class HistoryController extends Controller
         return response()->json($this->seriesForSensorAndRange($sensor, $range, $label));
     }
 
-    // Endpoint HTML para TBODY de la tabla (filtro independiente)
     public function table(Request $request)
     {
         $tableRange = $request->get('tableRange', 'week');
@@ -96,8 +95,12 @@ class HistoryController extends Controller
 
         $items = $query->paginate(15)->withQueryString();
 
-        return view('Dashboard.HistoryView.partials.tables.tbody', compact('items'))->render();
+        return response()->json([
+            'tbody'      => view('Dashboard.HistoryView.partials.tables.tbody', compact('items'))->render(),
+            'pagination' => view('Dashboard.HistoryView.partials.tables.pagination', compact('items'))->render(),
+        ]);
     }
+
 
     // Helpers
 

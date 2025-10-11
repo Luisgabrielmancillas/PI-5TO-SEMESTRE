@@ -36,7 +36,6 @@
                     </header>
 
                     <div id="chartsHost" class="mt-6 space-y-6">
-                        {{-- Contenedor donde se inyectan los canvas de las gráficas --}}
                         @include('Dashboard.HistoryView.partials.graphs.placeholder')
                     </div>
                 </div>
@@ -73,75 +72,57 @@
                                 </tr>
                             </thead>
 
-                            {{-- TBODY dinámico (partial) --}}
                             <tbody id="tableBody" class="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                                 @include('Dashboard.HistoryView.partials.tables.tbody', ['items' => $items])
                             </tbody>
                         </table>
                     </div>
 
-                    {{-- Paginación inicial (se actualizará con el partial) --}}
-                    @if ($items)
-                        <div id="tablePagination" class="mt-4">
-                            {{ $items->links() }}
-                        </div>
-                    @endif
+                    {{-- Paginación (contenedor fijo, se rellena por AJAX) --}}
+                    <div id="tablePagination" class="mt-4">
+                        @include('Dashboard.HistoryView.partials.tables.pagination', ['items' => $items])
+                    </div>
                 </div>
             </section>
         </div>
     </div>
 
-    {{-- Chart.js desde CDN --}}
+    {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+    {{-- ====== JS TABLA (paginación + filtro por rango) ====== --}}
     <script>
-        (() => {
+    (() => {
         const tableRangeSelect = document.getElementById('tableRangeSelect');
-        const tbody    = document.getElementById('tableBody');
-        const pagWrap  = document.getElementById('tablePagination');
+        const tbody   = document.getElementById('tableBody');
+        const pagWrap = document.getElementById('tablePagination');
         const urlTable = "{{ route('history.table') }}";
 
-        async function loadTable() {
+        async function refreshTable(url = null) {
             const params = new URLSearchParams({ tableRange: tableRangeSelect.value });
-            const res = await fetch(`${urlTable}?${params.toString()}`, { headers: {'X-Requested-With':'XMLHttpRequest'} });
-            const html = await res.text();
+            const target = url ? url : `${urlTable}?${params.toString()}`;
 
-            // Insertar nuevo tbody
-            tbody.innerHTML = html;
+            const res = await fetch(target, { headers: {'X-Requested-With':'XMLHttpRequest'} });
+            const json = await res.json();
 
-            // Actualizar paginación: buscamos links en la respuesta (si tuvieras un contenedor dedicado en el partial, podríamos aislarlo)
-            // Aquí, pedimos otra vez la misma URL pero sin XHR para obtener links? Mejor: interceptar clicks del paginador:
-            attachPaginationHandlers();
+            tbody.innerHTML   = json.tbody;
+            pagWrap.innerHTML = json.pagination;
         }
 
-        function attachPaginationHandlers() {
-            // Interceptar paginación si existe
-            document.querySelectorAll('#tablePagination a').forEach(a => {
-            a.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const href = a.getAttribute('href');
-                if (!href) return;
-                const res = await fetch(href, { headers:{'X-Requested-With':'XMLHttpRequest'} });
-                const html = await res.text();
-                tbody.innerHTML = html;
+        // Filtro por rango
+        tableRangeSelect.addEventListener('change', () => refreshTable());
 
-                // reconstruir paginación del contenedor externo
-                const dom = new DOMParser().parseFromString(html, 'text/html');
-                const innerLinks = dom.querySelectorAll('nav[role="navigation"]');
-                pagWrap.innerHTML = '';
-                innerLinks.forEach(n => pagWrap.appendChild(n));
-                attachPaginationHandlers();
-            });
-            });
-        }
-
-        tableRangeSelect.addEventListener('change', loadTable);
-
-        // Primer enganche para la paginación inicial
-        attachPaginationHandlers();
-        })();
+        // Delegación de eventos para paginación (no necesitamos re-enganchar)
+        pagWrap.addEventListener('click', (e) => {
+            const a = e.target.closest('a[href]');
+            if (!a) return;
+            e.preventDefault();
+            refreshTable(a.href);
+        });
+    })();
     </script>
 
-
+    {{-- ====== JS GRÁFICAS (tu partial existente) ====== --}}
     @include('Dashboard.HistoryView.partials.graphs.scripts', [
         'initialSensor' => $initialSensor,
         'initialRange'  => $initialRange,

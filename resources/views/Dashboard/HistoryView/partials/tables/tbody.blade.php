@@ -1,5 +1,4 @@
 @php
-    // Para enumerar desde 1 en cada página
     $start = ($items->currentPage() - 1) * $items->perPage();
 @endphp
 
@@ -21,12 +20,3 @@
     </td>
 </tr>
 @endforelse
-
-{{-- Paginación (reemplazaremos el bloque #tablePagination desde JS si vienes por AJAX) --}}
-@if(request()->ajax() === false)
-<tr>
-    <td colspan="8" class="px-4 py-4">
-        {{ $items->links() }}
-    </td>
-</tr>
-@endif
