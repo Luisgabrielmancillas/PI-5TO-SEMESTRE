@@ -29,47 +29,66 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased bg-white dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <body class="font-sans antialiased bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+
+        <!-- Botón volver (arriba-izquierda) -->
+        <div class="fixed left-4 top-4 z-50">
+            <a href="/"
+               class="inline-flex items-center gap-2 rounded-xl border border-gray-300/60 dark:border-gray-700/60
+                      bg-white/80 dark:bg-gray-800/80 backdrop-blur px-3 py-2 text-xs font-medium
+                      text-gray-700 dark:text-gray-200 hover:bg-white/90 dark:hover:bg-gray-800 transition"
+               aria-label="Volver al inicio">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span class="hidden sm:inline">Volver</span>
+            </a>
+        </div>
 
         <!-- Toggle de tema visible en guest (arriba-derecha) -->
         <div class="fixed right-4 top-4 z-50">
             <x-theme-toggle />
         </div>
 
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500 dark:text-gray-300" />
-                </a>
-            </div>
+        <div class="min-h-screen flex flex-col items-center justify-center px-4">
+            <!-- Logo -->
+            <a href="/" class="mt-10 mb-6 opacity-95 hover:opacity-100 transition">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-28 w-28 sm:h-40 sm:w-40">
+            </a>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg transition-colors duration-200">
+            <!-- Card -->
+            <div class="mb-10 w-full sm:max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl sm:rounded-2xl p-6 sm:p-8 border border-gray-200/60 dark:border-gray-700/60">
                 {{ $slot }}
             </div>
         </div>
 
-        <!-- Conector: habilita todos los toggles con data-theme-toggle -->
+        <!-- Script: mostrar/ocultar contraseñas para cualquier botón con data-toggle-password -->
         <script>
         (function () {
-          function syncIcon(btn) {
-            const isDark = document.documentElement.classList.contains('dark');
-            btn.querySelector('[data-theme-sun]')?.classList.toggle('hidden', isDark);
-            btn.querySelector('[data-theme-moon]')?.classList.toggle('hidden', !isDark);
-          }
+          function hookPasswordToggles() {
+            document.querySelectorAll('[data-toggle-password]').forEach((btn) => {
+              const selector = btn.getAttribute('data-toggle-password');
+              const input = document.querySelector(selector);
+              if (!input) return;
 
-          function bindToggle(btn) {
-            syncIcon(btn);
-            btn.addEventListener('click', () => {
-              const el = document.documentElement;
-              const nowDark = el.classList.toggle('dark');
-              localStorage.setItem('theme', nowDark ? 'dark' : 'light');
-              document.querySelectorAll('[data-theme-toggle]').forEach(syncIcon);
+              const eye = btn.querySelector('[data-eye]');
+              const eyeOff = btn.querySelector('[data-eye-off]');
+
+              function sync() {
+                const isPwd = input.type === 'password';
+                eye?.classList.toggle('hidden', !isPwd);
+                eyeOff?.classList.toggle('hidden', isPwd);
+              }
+              sync();
+
+              btn.addEventListener('click', () => {
+                input.type = input.type === 'password' ? 'text' : 'password';
+                sync();
+                input.focus({ preventScroll: true });
+              });
             });
           }
-
-          document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('[data-theme-toggle]').forEach(bindToggle);
-          });
+          document.addEventListener('DOMContentLoaded', hookPasswordToggles);
         })();
         </script>
     </body>

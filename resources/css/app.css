@@ -1,3 +1,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  /* Tarjeta neutra y accesible en ambos temas */
+  .card {
+    @apply rounded-2xl p-6 ring-1 transition;
+    @apply bg-white ring-slate-200 hover:bg-slate-50;
+    @apply dark:bg-white/5 dark:ring-white/10 dark:hover:bg-white/[0.08];
+  }
+
+  /* Tarjeta “suave” para contenedores grandes (marco) */
+  .card-soft {
+    @apply rounded-xl p-5 ring-1;
+    @apply bg-white/70 ring-black/10;
+    @apply dark:bg-slate-900/60 dark:ring-white/10;
+  }
+
+  /* Texto secundario */
+  .muted {
+    @apply text-slate-600;
+    @apply dark:text-slate-300/90;
+  }
+
+  /* Etiquetas (pills) */
+  .pill {
+    @apply text-xs rounded-full px-2 py-0.5 ring-1;
+  }
+  .pill-emerald {
+    @apply bg-emerald-100 text-emerald-700 ring-emerald-200;
+    @apply dark:bg-emerald-400/20 dark:text-emerald-200 dark:ring-emerald-300/30;
+  }
+  .pill-sky {
+    @apply bg-sky-100 text-sky-700 ring-sky-200;
+    @apply dark:bg-sky-400/20 dark:text-sky-200 dark:ring-sky-300/30;
+  }
+  .pill-indigo {
+    @apply bg-indigo-100 text-indigo-700 ring-indigo-200;
+    @apply dark:bg-indigo-400/20 dark:text-indigo-200 dark:ring-indigo-300/30;
+  }
+
+  /* Título pequeño de bloque */
+  .kicker {
+    @apply text-xs uppercase tracking-wider text-slate-500;
+    @apply dark:text-slate-400;
+  }
+
+  /* Sección clara/oscura con bordes suaves */
+  .section-alt {
+    @apply bg-gradient-to-b from-slate-50 to-slate-100 border-y border-slate-200;
+    @apply dark:from-slate-950 dark:to-slate-900 dark:border-white/5;
+  }
+  .section-dark {
+    @apply bg-gradient-to-b from-slate-100 to-white border-y border-slate-200;
+    @apply dark:from-slate-900 dark:to-slate-950 dark:border-white/5;
+  }
+}
