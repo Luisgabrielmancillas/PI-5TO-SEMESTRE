@@ -6,6 +6,13 @@
 *.md diff=markdown
 *.php diff=php
 
+* text=auto eol=lf
+
+# Si necesitas CRLF para scripts de Windows:
+*.bat eol=crlf
+*.cmd eol=crlf
+
+
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore

@@ -1,14 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
+            {{ __('Resumen') }}
         </h2>
     </x-slot>
 
     <div class="flex w-full" style="min-height: 100vh; max-height: 100vh; overflow: hidden;">
         <div class="w-full">
             <!-- Tarjetas superiores -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6 mt-10 mx-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6 mt-6 mx-6">
                 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Temperatura del aire</h5>
                     <h2 id="tempAireValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
@@ -34,14 +34,14 @@
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel ORP</h5>
-                    <h2 id="orpValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">-- mV</h2>
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel del agua</h5>
+                    <h2 id="nivelAguaValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
                     <small id="orpTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel del agua</h5>
-                    <h2 id="nivelAguaValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel ORP</h5>
+                    <h2 id="orpValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--  mV</h2>
                     <small id="nivelAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
             </div>
@@ -151,7 +151,6 @@
                 updateGauge('gaugePH', data.ph, 14, '');
                 updateGauge('gaugeNivel', data.nivelAgua, 100, '');
                 updateGauge('gaugeORP', data.orp, 100, 'mV');
-
             } catch (error) {
                 console.error('Error fetching sensor data:', error);
             }
@@ -186,7 +185,7 @@
             barChartInstance = new Chart(document.getElementById('barChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['pH', 'CE', 'Temp Agua', 'Nivel Agua'],
+                    labels: ['pH', 'ORP', 'Temp Agua', 'Nivel Agua'],
                     datasets: [{
                         label: 'Valor promedio',
                         data: [
@@ -241,7 +240,7 @@
                             fill: false 
                         },
                         { 
-                            label: 'CE', 
+                            label: 'ORP', 
                             data: chartData.datasets.ce, 
                             borderColor: '#d946ef', 
                             borderWidth: 2,

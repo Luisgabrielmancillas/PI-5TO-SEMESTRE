@@ -9,6 +9,6 @@
   aria-label="Cambiar tema claro/oscuro"
   data-theme-toggle
 >
-  <span data-theme-sun class="hidden">🌞</span>
+  <span data-theme-sun class="hidden">☀️</span>
   <span data-theme-moon class="hidden">🌙</span>
 </button>
