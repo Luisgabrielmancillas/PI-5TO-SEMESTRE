@@ -1,4 +1,5 @@
-<nav x-data="{ open: false }" class="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+<nav x-data="{ open: false }" 
+     class="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -13,16 +14,18 @@
                     @php
                         $isDash = request()->routeIs('dashboard');
                         $isHist = request()->routeIs('history');
+                        $isHort = request()->routeIs('hortalizas');
                     @endphp
 
-                    <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
+                    <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1 transition-colors duration-200">
                         <!-- DASHBOARD -->
                         <a href="{{ route('dashboard') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
                                 {{ $isDash
-                                        ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200'
-                                        : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isDash ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isDash ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/>
                             </svg>
                             <span>Resumen</span>
@@ -30,23 +33,35 @@
 
                         <!-- HISTORIAL -->
                         <a href="{{ route('history') }}"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
                                 {{ $isHist
-                                        ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200'
-                                        : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isHist ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHist ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
                             </svg>
                             <span>Historial</span>
                         </a>
+
+                        <!-- HORTALIZAS -->
+                        <a href="{{ route('hortalizas') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isHort
+                                    ? 'bg-white text-green-700 shadow-sm dark:bg-gray-700 dark:text-green-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                            </svg>
+                            <span>Hortalizas</span>
+                        </a>
                     </div>
                 </div>
-
             </div>
 
             <!-- Right side (desktop) -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <!-- Theme Toggle (antes del perfil) -->
                 <x-theme-toggle class="me-3" />
 
                 <!-- Settings Dropdown -->
@@ -58,7 +73,9 @@
                             <div>{{ Auth::user()->name }}</div>
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" 
+                                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" 
+                                          clip-rule="evenodd" />
                                 </svg>
                             </div>
                         </button>
@@ -102,17 +119,29 @@
     <div :class="{ 'block': open, 'hidden': ! open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                <!-- icon + label -->
                 <span class="inline-flex items-center gap-2">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/></svg>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/>
+                    </svg>
                     Resumen
                 </span>
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">
+            <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history')">
                 <span class="inline-flex items-center gap-2">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/></svg>
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
+                    </svg>
                     Historial
+                </span>
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('hortalizas')" :active="request()->routeIs('hortalizas')">
+                <span class="inline-flex items-center gap-2">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                    </svg>
+                    Hortalizas
                 </span>
             </x-responsive-nav-link>
         </div>

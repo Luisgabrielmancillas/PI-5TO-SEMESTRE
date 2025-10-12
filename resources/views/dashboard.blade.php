@@ -5,66 +5,66 @@
         </h2>
     </x-slot>
 
-    <div class="flex w-full" style="min-height: 100vh; max-height: 100vh; overflow: hidden;">
-        <div class="w-full">
+    <div class="flex flex-col w-full min-h-screen overflow-x-hidden overflow-y-auto">
+        <div class="w-full px-4 sm:px-6 lg:px-8 py-4">
             <!-- Tarjetas superiores -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-6 mt-6 mx-6">
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Temperatura del aire</h5>
                     <h2 id="tempAireValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
                     <small id="tempAireTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Humedad del aire</h5>
                     <h2 id="humAireValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--%</h2>
                     <small id="humAireTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Temperatura del agua</h5>
                     <h2 id="tempAguaValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
                     <small id="tempAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel pH del agua</h5>
                     <h2 id="phValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
                     <small id="phTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel del agua</h5>
                     <h2 id="nivelAguaValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
-                    <small id="orpTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
+                    <small id="nivelAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 text-center transition-colors">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
                     <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel ORP</h5>
-                    <h2 id="orpValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--  mV</h2>
-                    <small id="nivelAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
+                    <h2 id="orpValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">-- mV</h2>
+                    <small id="orpTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
             </div>
 
             <!-- Sección principal -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mt-0">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <!-- Columna de gauges izquierda -->
-                <div class="md:col-span-2 flex flex-col space-y-3">
-                    <div class="space-y-3">
+                <div class="md:col-span-3 lg:col-span-2 flex flex-col space-y-4">
+                    <div class="space-y-4">
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeTempAire" class="mb-2"></canvas>
+                            <canvas id="gaugeTempAire" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">Temp. Aire</div>
                             <div id="gaugeTempAireValue" class="text-gray-600 text-sm">--°C</div>
                         </div>
 
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeHumedad" class="mb-2"></canvas>
+                            <canvas id="gaugeHumedad" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">Humedad Aire</div>
                             <div id="gaugeHumedadValue" class="text-gray-600 text-sm">--%</div>
                         </div>
 
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeTempAgua" class="mb-2"></canvas>
+                            <canvas id="gaugeTempAgua" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">Temp. Agua</div>
                             <div id="gaugeTempAguaValue" class="text-gray-600 text-sm">--°C</div>
                         </div>
@@ -72,41 +72,41 @@
                 </div>
 
                 <!-- Columna central con gráficas -->
-                <div class="md:col-span-8 flex flex-col items-center justify-center space-y-6">
+                <div class="md:col-span-6 lg:col-span-8 flex flex-col items-center justify-center space-y-6">
                     <!-- Gráfica superior -->
-                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-2 transition-colors">
-                        <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-1">Promedio de Mediciones</h6>
-                        <div class="relative w-full h-52">
-                            <canvas id="barChart" class="w-full h-full" style="max-height: 180px;"></canvas>
+                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3 transition-colors">
+                        <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2">Promedio de Mediciones</h6>
+                        <div class="relative w-full h-56 sm:h-64 lg:h-72">
+                            <canvas id="barChart" class="w-full h-full"></canvas>
                         </div>
                     </div>
 
                     <!-- Gráfica inferior -->
-                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-2 transition-colors">
+                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3 transition-colors">
                         <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2">Mediciones Recientes</h6>
-                        <div class="relative w-full h-52">
-                            <canvas id="lineChart" class="w-full h-full" style="max-height: 180px;"></canvas>
+                        <div class="relative w-full h-56 sm:h-64 lg:h-72">
+                            <canvas id="lineChart" class="w-full h-full"></canvas>
                         </div>
                     </div>
                 </div>
 
                 <!-- Columna derecha con gauges -->
-                <div class="md:col-span-2 flex flex-col space-y-3">
-                    <div class="space-y-3">
+                <div class="md:col-span-3 lg:col-span-2 flex flex-col space-y-4">
+                    <div class="space-y-4">
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugePH" class="mb-2"></canvas>
+                            <canvas id="gaugePH" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">pH Agua</div>
                             <div id="gaugePHValue" class="text-gray-600 text-sm">--</div>
                         </div>
             
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeNivel" class="mb-2"></canvas>
+                            <canvas id="gaugeNivel" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">Nivel Agua</div>
                             <div id="gaugeNivelValue" class="text-gray-600 text-sm">--</div>
                         </div>
             
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeORP" class="mb-2"></canvas>
+                            <canvas id="gaugeORP" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">ORP</div>
                             <div id="gaugeORPValue" class="text-gray-600 text-sm">-- mV</div>
                         </div>
@@ -115,7 +115,7 @@
             </div>
         </div>
     </div>
-
+    
     @push('scripts')
     <script>
         
