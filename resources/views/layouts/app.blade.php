@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>Panel de Control</title>
 
         <!-- Anti-FOUC: fija el tema antes de pintar -->
         <script>
@@ -28,7 +28,15 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <!-- Favicons PNG -->
+        <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
+        <link rel="icon" href="{{ asset('favicon-16.png') }}" sizes="16x16" type="image/png">
 
+        <!-- iOS -->
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
+
+        <!-- (Opcional) Compatibilidad extra -->
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>

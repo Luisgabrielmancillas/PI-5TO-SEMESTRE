@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HydroBox — Grow Tent Hidropónico</title>
+  <title>HydroBox</title>
   <meta name="description" content="Grow tent hidropónico con depósito de 10 L recirculado, nutrientes FloraMicro/FloraGrow/FloraBloom semanales, ventilación, luz 07:00–19:00, y sensores de ambiente y agua.">
 
   {{-- Anti-FOUC: fija el tema antes de pintar --}}
@@ -26,7 +26,15 @@
 
   {{-- Iconos --}}
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
+  <!-- Favicons PNG -->
+  <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
+  <link rel="icon" href="{{ asset('favicon-16.png') }}" sizes="16x16" type="image/png">
 
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
+
+  <!-- (Opcional) Compatibilidad extra -->
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
   <style>
     /* Glow del hero + evitar overflow horizontal */
     .halo{position:relative; overflow:hidden;}
