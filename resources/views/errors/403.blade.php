@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Error 403 — Acceso denegado">
   <main class="min-h-[70vh] grid place-items-center px-4">
     <section class="text-center max-w-xl">
       <div class="inline-flex items-center justify-center rounded-2xl h-16 w-16 bg-amber-100 text-amber-600 dark:bg-amber-400/10 dark:text-amber-300 mb-5">

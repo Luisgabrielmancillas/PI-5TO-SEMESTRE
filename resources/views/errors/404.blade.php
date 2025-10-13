@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="Error 404 — Página no encontrada">
   <main class="min-h-[70vh] grid place-items-center px-4">
     <section class="text-center max-w-xl">
       <div class="inline-flex items-center justify-center rounded-2xl h-16 w-16 bg-rose-100 text-rose-600 dark:bg-rose-400/10 dark:text-rose-300 mb-5">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>500 — Error del servidor</title>
+  <title>Error 500 — Error del servidor</title>
   @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body class="bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">

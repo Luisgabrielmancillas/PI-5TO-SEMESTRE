@@ -1,3 +1,4 @@
+@props(['title' => 'Panel de Control'])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -8,7 +9,7 @@
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <title>Panel de Control</title>
+        <title>{{ $title }}</title>
 
         <!-- Anti-FOUC: fija el tema antes de pintar -->
         <script>
