@@ -28,8 +28,8 @@ class DashboardController extends Controller
             'humAire' => $latest->hum_value,
             'tempAgua' => $latest->tagua_value,
             'ph' => $latest->ph_value,
-            'orp' => $latest->us_value,
-            'nivelAgua' => $latest->ce_value,
+            'orp' => $latest->ce_value,
+            'nivelAgua' => $latest->us_value,
             'timestamp' => Carbon::parse($latest->fecha)->format('d/m H:i:s')
         ]);
     }

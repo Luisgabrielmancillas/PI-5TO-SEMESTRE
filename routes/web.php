@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -17,13 +18,13 @@ Route::middleware('guest')->group(function () {
 });
 
 
-if (app()->environment('local')) {
+/* if (app()->environment('local')) {
     Route::get('/forzar-404', fn() => abort(404))->name('test.404');
     Route::get('/forzar-403', fn() => abort(403))->name('test.403');
     Route::get('/forzar-419', fn() => abort(419))->name('test.419');
     Route::get('/forzar-500', fn() => abort(500))->name('test.500');
     Route::get('/forzar-503', fn() => abort(503))->name('test.503');
-}
+} */
 
 
 /*
@@ -37,6 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/history', [HistoryController::class, 'index'])->name('history');
     Route::get('/history/data', [HistoryController::class, 'data'])->name('history.data');
     Route::get('/history/table', [HistoryController::class, 'table'])->name('history.table');
+
+    Route::get('/hortalizas', [HortalizasController::class, 'index'])->name('hortalizas');
+    Route::post('/hortalizas/cambiar', [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
 });
 
 Route::middleware('auth')->group(function () {

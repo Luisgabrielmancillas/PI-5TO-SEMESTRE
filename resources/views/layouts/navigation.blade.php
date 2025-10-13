@@ -14,6 +14,7 @@
                     @php
                         $isDash = request()->routeIs('dashboard');
                         $isHist = request()->routeIs('history') || request()->routeIs('history.*');
+                        $isHort = request()->routeIs('hortalizas');
                     @endphp
 
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
@@ -40,6 +41,19 @@
                             </svg>
                             <span>Historial</span>
                         </a>
+
+                        <!-- HORTALIZAS -->
+                        <a href="{{ route('hortalizas') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isHort
+                                    ? 'bg-white text-green-700 shadow-sm dark:bg-gray-700 dark:text-green-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                            </svg>
+                            <span>Hortalizas</span>
+                        </a>
                     </div>
                 </div>
                 @endauth
@@ -47,57 +61,57 @@
 
             <!-- Right side (desktop) -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-            @guest
-                <div class="flex items-center gap-3">
-                <a href="{{ route('login') }}"
-                    class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition">
-                    <i class="ri-login-circle-line text-base opacity-90"></i> <span>Ingresar</span>
-                </a>
-                <a href="{{ route('register') }}"
-                    class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-emerald-400 to-sky-600 px-3 py-1.5 text-xs font-semibold shadow-lg shadow-emerald-900/20 hover:brightness-110 transition text-slate-900">
-                    <i class="ri-user-add-line text-base"></i> <span>Registrarse</span>
-                </a>
+                @guest
+                    <div class="flex items-center gap-3">
+                    <a href="{{ route('login') }}"
+                        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                        <i class="ri-login-circle-line text-base opacity-90"></i> <span>Ingresar</span>
+                    </a>
+                    <a href="{{ route('register') }}"
+                        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-emerald-400 to-sky-600 px-3 py-1.5 text-xs font-semibold shadow-lg shadow-emerald-900/20 hover:brightness-110 transition text-slate-900">
+                        <i class="ri-user-add-line text-base"></i> <span>Registrarse</span>
+                    </a>
 
-                {{-- Toggle de tema al final --}}
-                <x-theme-toggle class="ms-1" />
-                </div>
-            @endguest
-
-            @auth
-                <div class="flex items-center gap-3">
                     {{-- Toggle de tema al final --}}
                     <x-theme-toggle class="ms-1" />
+                    </div>
+                @endguest
 
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md
-                                            text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white
-                                            focus:outline-none transition">
-                                <div>{{ Auth::user()->name }}</div>
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-                        </x-slot>
+                @auth
+                    <div class="flex items-center gap-3">
+                        {{-- Toggle de tema al final --}}
+                        <x-theme-toggle class="ms-1" />
 
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Perfil') }}
-                            </x-dropdown-link>
+                        <x-dropdown align="right" width="48">
+                            <x-slot name="trigger">
+                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md
+                                                text-gray-600 dark:text-gray-300 bg-white/60 dark:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white
+                                                focus:outline-none transition">
+                                    <div>{{ Auth::user()->name }}</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
 
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Cerrar sesión') }}
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('profile.edit')">
+                                    {{ __('Perfil') }}
                                 </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                </div>
-            @endauth
+
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault(); this.closest('form').submit();">
+                                    {{ __('Cerrar sesión') }}
+                                    </x-dropdown-link>
+                                </form>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
+                @endauth
             </div>
 
 
@@ -123,21 +137,30 @@
     <div :class="{ 'block': open, 'hidden': ! open }" class="hidden sm:hidden">
         {{-- Links principales SOLO autenticado --}}
         @auth
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                <span class="inline-flex items-center gap-2">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/></svg>
-                    Resumen
-                </span>
-            </x-responsive-nav-link>
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    <span class="inline-flex items-center gap-2">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/></svg>
+                        Resumen
+                    </span>
+                </x-responsive-nav-link>
 
-            <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">
-                <span class="inline-flex items-center gap-2">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/></svg>
-                    Historial
-                </span>
-            </x-responsive-nav-link>
-        </div>
+                <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">
+                    <span class="inline-flex items-center gap-2">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/></svg>
+                        Historial
+                    </span>
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('hortalizas')" :active="request()->routeIs('hortalizas')">
+                    <span class="inline-flex items-center gap-2">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                        </svg>
+                        Hortalizas
+                    </span>
+                </x-responsive-nav-link>
+            </div>
         @endauth
 
         <!-- Responsive Settings Options -->
