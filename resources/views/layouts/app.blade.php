@@ -28,6 +28,7 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
         <!-- Favicons PNG -->
         <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
         <link rel="icon" href="{{ asset('favicon-16.png') }}" sizes="16x16" type="image/png">
@@ -52,6 +53,36 @@
                     </div>
                 </header>
             @endisset
+            
+            {{-- Flash (autocierre 5s con Alpine) --}}
+            @if (session('error') || session('status'))
+              <div x-data="{ show: true }"
+                  x-init="setTimeout(() => show = false, 5000)"
+                  x-show="show"
+                  x-transition.opacity.duration.300ms
+                  class="border-b border-slate-200 dark:border-white/5 bg-white/70 dark:bg-slate-900/60 backdrop-blur">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+                  @if (session('error'))
+                    <div class="relative rounded-lg px-4 py-2 text-sm font-medium
+                                bg-rose-50 text-rose-700 ring-1 ring-rose-200
+                                dark:bg-rose-900/20 dark:text-rose-200 dark:ring-rose-800">
+                      {{ session('error') }}
+                      <button type="button" @click="show=false"
+                              class="absolute right-2 top-1/2 -translate-y-1/2 text-rose-500 hover:text-rose-700">&times;</button>
+                    </div>
+                  @endif
+                  @if (session('status'))
+                    <div class="relative mt-2 rounded-lg px-4 py-2 text-sm font-medium
+                                bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
+                                dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800">
+                      {{ session('status') }}
+                      <button type="button" @click="show=false"
+                              class="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-600 hover:text-emerald-800">&times;</button>
+                    </div>
+                  @endif
+                </div>
+              </div>
+            @endif
 
             <!-- Page Content -->
             <main>
