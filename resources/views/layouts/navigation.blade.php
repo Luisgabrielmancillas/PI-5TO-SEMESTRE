@@ -13,8 +13,9 @@
                 <div class="hidden sm:flex items-center">
                     @php
                         $isDash = request()->routeIs('dashboard');
-                        $isHist = request()->routeIs('history') || request()->routeIs('history.*');
+                        $isComp = request()->routeIs('comparacion');
                         $isHort = request()->routeIs('hortalizas');
+                        $isHist = request()->routeIs('history') || request()->routeIs('history.*');
                     @endphp
 
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
@@ -30,18 +31,19 @@
                             <span>Resumen</span>
                         </a>
 
-                        <!-- HISTORIAL -->
-                        <a href="{{ route('history') }}"
+                        <!-- Comparación -->
+                        <a href="{{ route('comparacion') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
-                                  {{ $isHist
-                                      ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200'
-                                      : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isHist ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
+                                {{ $isComp
+                                    ? 'bg-white text-purple-700 shadow-sm dark:bg-gray-700 dark:text-purple-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isComp ? 'text-purple-600 dark:text-purple-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
                             </svg>
-                            <span>Historial</span>
+                            <span>Comparación</span>
                         </a>
-
+                        
                         <!-- HORTALIZAS -->
                         <a href="{{ route('hortalizas') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
@@ -54,6 +56,19 @@
                             </svg>
                             <span>Hortalizas</span>
                         </a>
+
+                        <!-- HISTORIAL -->
+                        <a href="{{ route('history') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                  {{ $isHist
+                                      ? 'bg-white text-pink-700 shadow-sm dark:bg-gray-700 dark:text-pink-200'
+                                      : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHist ? 'text-pink-600 dark:text-pink-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
+                            </svg>
+                            <span>Historial</span>
+                        </a>
+
                     </div>
                 </div>
                 @endauth
@@ -145,10 +160,13 @@
                     </span>
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">
+
+                <x-responsive-nav-link :href="route('comparacion')" :active="request()->routeIs('hortalizas')">
                     <span class="inline-flex items-center gap-2">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/></svg>
-                        Historial
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                        </svg>
+                        Comparación
                     </span>
                 </x-responsive-nav-link>
 
@@ -158,6 +176,13 @@
                             <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
                         </svg>
                         Hortalizas
+                    </span>
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">
+                    <span class="inline-flex items-center gap-2">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/></svg>
+                        Historial
                     </span>
                 </x-responsive-nav-link>
             </div>

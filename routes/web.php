@@ -5,6 +5,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ComparacionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/hortalizas', [HortalizasController::class, 'index'])->name('hortalizas');
     Route::post('/hortalizas/cambiar', [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
+
+    Route::get('/comparacion', [ComparacionController::class, 'index'])->name('comparacion');
 });
 
 Route::middleware('auth')->group(function () {
