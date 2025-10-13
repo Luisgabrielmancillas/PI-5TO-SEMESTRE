@@ -17,28 +17,93 @@
         <div class="space-y-3">
             @foreach($hortalizas as $hortaliza)
                 @php
-                    $icons = [
-                        'lechuga' => 'lechuga.png',
-                        'espinaca' => 'espinaca.png',
-                        'acelga' => 'acelga.png',
-                        'rucula' => 'rucula.png',
-                        'albahaca' => 'albahaca.png',
-                        'mostaza' => 'mostaza.png',
-                    ];
                     $nombre = strtolower($hortaliza->nombre);
                     $iconPath = asset('images/' . ($icons[$nombre] ?? 'lechuga.png'));
+
+                    // Diccionario de unidades según el sensor
+                    $unidades = [
+                        'temperatura' => '°C',
+                        'ph' => '',
+                        'orp' => 'mV',
+                        'conductividad' => 'µS/cm',
+                        'nivel de agua' => '%',
+                        'humedad' => '%',
+                        'luminosidad' => 'lux',
+                    ];
                 @endphp
 
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl px-4 sm:px-5 py-4 border transition-colors duration-200
+                <div class="rounded-xl px-4 sm:px-5 py-4 border transition-colors duration-200
                     bg-white/70 dark:bg-gray-800
                     {{ $hortaliza->seleccion ? 'border-teal-400' : 'border-gray-300 dark:border-gray-700 hover:border-gray-500 dark:hover:border-gray-400' }}">
-                    <div class="flex items-center space-x-3">
-                        <img src="{{ $iconPath }}" alt="{{ $hortaliza->nombre }}" class="w-8 h-8 object-contain">
-                        <span class="text-lg">{{ ucfirst($hortaliza->nombre) }}</span>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="flex items-center space-x-3">
+                            <img src="{{ $iconPath }}" alt="{{ $hortaliza->nombre }}" class="w-8 h-8 object-contain">
+                            <span class="text-lg font-semibold">{{ ucfirst($hortaliza->nombre) }}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            @if($hortaliza->seleccion)
+                                <span class="text-teal-500 font-semibold text-sm">Seleccionada</span>
+                            @endif
+
+                            <!-- Icono desplegable -->
+                            <button 
+                                onclick="toggleRangos({{ $hortaliza->id_hortaliza }})"
+                                id="icono-{{ $hortaliza->id_hortaliza }}"
+                                class="transition-transform duration-300 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100">
+                                <!-- Flecha SVG -->
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    @if($hortaliza->seleccion)
-                        <span class="text-teal-500 font-semibold sm:text-right">Seleccionada</span>
+
+                <!-- Rangos óptimos (ocultos por defecto) -->
+                <div id="rangos-{{ $hortaliza->id_hortaliza }}" class="hidden mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-sm">
+                    <h5 class="font-semibold mb-2 text-center text-gray-800 dark:text-gray-100">🌿 Rangos óptimos</h5>
+                                
+                    @if($hortaliza->config_sensores->isEmpty())
+                        <p class="text-gray-500">No hay configuraciones registradas para esta hortaliza.</p>
+                    @else
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-300 dark:border-gray-600">
+                                    <th class="py-1">Sensor</th>
+                                    <th class="py-1 text-center">Valor Mínimo</th>
+                                    <th class="py-1 text-center">Valor Máximo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($hortaliza->config_sensores as $config)
+                                    @php
+                                        // Nombre del sensor en minúsculas y sin espacios extras
+                                        $nombreSensor = strtolower(trim($config->sensore->nombre));
+                                
+                                        // Asignar unidad según tipo de sensor
+                                        $unidad = '';
+                                        if (str_contains($nombreSensor, 'temperatura')) $unidad = '°C';
+                                        elseif (str_contains($nombreSensor, 'ph')) $unidad = 'pH';
+                                        elseif (str_contains($nombreSensor, 'orp')) $unidad = 'mV';
+                                        elseif (str_contains($nombreSensor, 'conductividad')) $unidad = 'µS/cm';
+                                        elseif (str_contains($nombreSensor, 'nivel de agua') 
+                                                || str_contains($nombreSensor, 'ultrasónico') 
+                                                || str_contains($nombreSensor, 'ultrasonico')) $unidad = 'cm';
+                                        elseif (str_contains($nombreSensor, 'humedad')) $unidad = '%';
+                                        elseif (str_contains($nombreSensor, 'luminosidad')) $unidad = 'lux';
+                                    @endphp
+                
+                                    <tr class="border-b border-gray-200 dark:border-gray-600">
+                                        <td class="py-1">{{ $config->sensore->nombre }} {{ $unidad }}</td>
+                                        <td class="py-1 text-center">{{ $config->valor_min_acept }} {{ $unidad }}</td>
+                                        <td class="py-1 text-center">{{ $config->valor_max_acept }} {{ $unidad }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     @endif
+                </div>
                 </div>
             @endforeach
         </div>
@@ -83,5 +148,14 @@
         openModal.addEventListener('click', () => modal.classList.remove('hidden'));
         closeModal.addEventListener('click', () => modal.classList.add('hidden'));
         window.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+
+        // Mostrar/Ocultar rangos con animación de flecha
+        function toggleRangos(id) {
+            const div = document.getElementById(`rangos-${id}`);
+            const icono = document.getElementById(`icono-${id}`);
+
+            div.classList.toggle('hidden');
+            icono.classList.toggle('rotate-180'); // Rota la flecha al abrir
+        }
     </script>
 </x-app-layout>

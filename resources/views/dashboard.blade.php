@@ -102,7 +102,7 @@
                         <div class="flex flex-col items-center">
                             <canvas id="gaugeNivel" class="mb-2 w-28 sm:w-32"></canvas>
                             <div class="text-sm font-semibold">Nivel Agua</div>
-                            <div id="gaugeNivelValue" class="text-gray-600 text-sm">--</div>
+                            <div id="gaugeNivelValue" class="text-gray-600 text-sm">-- cm</div>
                         </div>
             
                         <div class="flex flex-col items-center">
@@ -136,7 +136,7 @@
                 document.getElementById('tempAguaValue').textContent = data.tempAgua.toFixed(1) + '°C';
                 document.getElementById('phValue').textContent = data.ph.toFixed(1);
                 document.getElementById('orpValue').textContent = data.orp.toFixed(1) + ' mV';
-                document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1);
+                document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1) + ' cm';
                 
                 
                 const timeElements = document.querySelectorAll('[id$="Time"]');
@@ -149,7 +149,7 @@
                 updateGauge('gaugeHumedad', data.humAire, 100, '%');
                 updateGauge('gaugeTempAgua', data.tempAgua, 50, '°C');
                 updateGauge('gaugePH', data.ph, 14, '');
-                updateGauge('gaugeNivel', data.nivelAgua, 100, '');
+                updateGauge('gaugeNivel', data.nivelAgua, 100, ' cm');
                 updateGauge('gaugeORP', data.orp, 100, 'mV');
             } catch (error) {
                 console.error('Error fetching sensor data:', error);
