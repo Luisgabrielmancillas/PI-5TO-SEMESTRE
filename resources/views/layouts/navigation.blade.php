@@ -16,6 +16,8 @@
                         $isComp = request()->routeIs('comparacion');
                         $isHort = request()->routeIs('hortalizas');
                         $isHist = request()->routeIs('history') || request()->routeIs('history.*');
+                        $isAct  = request()->routeIs('actuadores.index');
+                        $isSens = request()->routeIs('sensores.index');
                     @endphp
 
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
@@ -50,8 +52,7 @@
                                 {{ $isHort
                                     ? 'bg-white text-green-700 shadow-sm dark:bg-gray-700 dark:text-green-200'
                                     : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" 
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
                             </svg>
                             <span>Hortalizas</span>
@@ -69,8 +70,31 @@
                             <span>Historial</span>
                         </a>
 
-                    </div>
-                </div>
+                        <!-- SENSORES -->
+                        <a href="{{ route('sensores.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isSens
+                                    ? 'bg-white text-sky-700 shadow-sm dark:bg-gray-700 dark:text-sky-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isSens ? 'text-sky-600 dark:text-sky-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM12 12v6m0-6l3-3m-3 3l-3-3"/>
+                            </svg>
+                            <span>Sensores</span>
+                        </a>
+
+                        <!-- ACTUADORES -->
+                        <a href="{{ route('actuadores.index') }}"
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isAct
+                                    ? 'bg-white text-orange-700 shadow-sm dark:bg-gray-700 dark:text-orange-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isAct ? 'text-orange-600 dark:text-orange-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M9 12h6M12 9v6m6 3H6a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v7a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Actuadores</span>
+                        </a>
+                    </div> <!-- Cierre de tabs -->
+                </div> <!-- Cierre sm:flex -->
                 @endauth
             </div>
 
@@ -78,25 +102,19 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 @guest
                     <div class="flex items-center gap-3">
-                    <a href="{{ route('login') }}"
-                        class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition">
-                        <i class="ri-login-circle-line text-base opacity-90"></i> <span>Ingresar</span>
-                    </a>
-                    <a href="{{ route('register') }}"
-                        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-emerald-400 to-sky-600 px-3 py-1.5 text-xs font-semibold shadow-lg shadow-emerald-900/20 hover:brightness-110 transition text-slate-900">
-                        <i class="ri-user-add-line text-base"></i> <span>Registrarse</span>
-                    </a>
-
-                    {{-- Toggle de tema al final --}}
-                    <x-theme-toggle class="ms-1" />
+                        <a href="{{ route('login') }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-white/10 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                            <i class="ri-login-circle-line text-base opacity-90"></i> <span>Ingresar</span>
+                        </a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-emerald-400 to-sky-600 px-3 py-1.5 text-xs font-semibold shadow-lg shadow-emerald-900/20 hover:brightness-110 transition text-slate-900">
+                            <i class="ri-user-add-line text-base"></i> <span>Registrarse</span>
+                        </a>
+                        <x-theme-toggle class="ms-1" />
                     </div>
                 @endguest
 
                 @auth
                     <div class="flex items-center gap-3">
-                        {{-- Toggle de tema al final --}}
                         <x-theme-toggle class="ms-1" />
-
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md
@@ -110,17 +128,12 @@
                                     </div>
                                 </button>
                             </x-slot>
-
                             <x-slot name="content">
-                                <x-dropdown-link :href="route('profile.edit')">
-                                    {{ __('Perfil') }}
-                                </x-dropdown-link>
-
+                                <x-dropdown-link :href="route('profile.edit')">Perfil</x-dropdown-link>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Cerrar sesión') }}
+                                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                                        Cerrar sesión
                                     </x-dropdown-link>
                                 </form>
                             </x-slot>
@@ -129,19 +142,12 @@
                 @endauth
             </div>
 
-
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 dark:text-gray-400
-                               hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': ! open }" class="inline-flex"
-                              stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': ! open, 'inline-flex': open }" class="hidden"
-                              stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12" />
+                        <path :class="{ 'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        <path :class="{ 'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
@@ -150,49 +156,21 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': ! open }" class="hidden sm:hidden">
-        {{-- Links principales SOLO autenticado --}}
         @auth
             <div class="pt-2 pb-3 space-y-1">
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    <span class="inline-flex items-center gap-2">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M3 12l9-9 9 9M4 10v10h6V14h4v6h6V10"/></svg>
-                        Resumen
-                    </span>
-                </x-responsive-nav-link>
-
-
-                <x-responsive-nav-link :href="route('comparacion')" :active="request()->routeIs('hortalizas')">
-                    <span class="inline-flex items-center gap-2">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
-                        </svg>
-                        Comparación
-                    </span>
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('hortalizas')" :active="request()->routeIs('hortalizas')">
-                    <span class="inline-flex items-center gap-2">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
-                        </svg>
-                        Hortalizas
-                    </span>
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">
-                    <span class="inline-flex items-center gap-2">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/></svg>
-                        Historial
-                    </span>
-                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">Resumen</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('comparacion')" :active="request()->routeIs('comparacion')">Comparación</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('hortalizas')" :active="request()->routeIs('hortalizas')">Hortalizas</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">Historial</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('sensores.index')" :active="request()->routeIs('sensores.index')">Sensores</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('actuadores.index')" :active="request()->routeIs('actuadores.index')">Actuadores</x-responsive-nav-link>
             </div>
         @endauth
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-700">
-            <div class="px-4 flex items-center justify-between">
-                {{-- Guest: texto genérico --}}
-                @guest
+            @guest
+                <div class="px-4 flex items-center justify-between">
                     <div>
                         <div class="font-medium text-base text-gray-800 dark:text-gray-200">Invitado</div>
                         <div class="font-medium text-sm text-gray-500">—</div>
@@ -202,33 +180,26 @@
                         <a href="{{ route('register') }}" class="rounded-lg px-3 py-1.5 text-xs font-semibold bg-emerald-500 text-white hover:brightness-110 transition">Registrarse</a>
                     </div>
                     <x-theme-toggle class="ms-3" />
-                @endguest
+                </div>
+            @endguest
 
-                {{-- Auth: muestra nombre/email --}}
-                @auth
+            @auth
+                <div class="px-4 flex items-center justify-between">
                     <div>
                         <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
                         <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
                     </div>
                     <x-theme-toggle />
-                @endauth
-            </div>
+                </div>
 
-            <div class="mt-3 space-y-1">
-                @auth
-                    <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Perfil') }}
-                    </x-responsive-nav-link>
-
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('profile.edit')">Perfil</x-responsive-nav-link>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault(); this.closest('form').submit();">
-                            {{ __('Cerrar sesión') }}
-                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">Cerrar sesión</x-responsive-nav-link>
                     </form>
-                @endauth
-            </div>
+                </div>
+            @endauth
         </div>
     </div>
 </nav>
