@@ -48,8 +48,8 @@
 
             <!-- Sección principal -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <!-- Columna izquierda -->
-                <div class="md:col-span-3 lg:col-span-2 flex flex-col gauges-col space-y-4">
+
+                <div class="hidden md:flex md:col-span-3 lg:col-span-2 flex-col gauges-col space-y-4">
                     <div class="space-y-4">
                         <div class="flex flex-col items-center">
                             <canvas id="gaugeTempAire" class="mb-2 w-24 sm:w-28"></canvas>
@@ -71,7 +71,7 @@
                     </div>
                 </div>
 
-                <!-- Columna central -->
+
                 <div class="md:col-span-6 lg:col-span-8 flex flex-col items-center justify-center space-y-6">
                     <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3">
                         <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2 text-sm sm:text-base">Promedio de Mediciones</h6>
@@ -88,8 +88,8 @@
                     </div>
                 </div>
 
-                <!-- Columna derecha -->
-                <div class="md:col-span-3 lg:col-span-2 flex flex-col gauges-col space-y-4">
+
+                <div class="hidden md:flex md:col-span-3 lg:col-span-2 flex-col gauges-col space-y-4">
                     <div class="space-y-4">
                         <div class="flex flex-col items-center">
                             <canvas id="gaugePH" class="mb-2 w-24 sm:w-28"></canvas>
@@ -111,26 +111,79 @@
                     </div>
                 </div>
             </div>
+
+
+            <div class="md:hidden mt-6">
+                <div class="grid grid-cols-2 gap-4 sm:gap-6">
+                    <div class="flex flex-col items-center bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                        <canvas id="gaugeTempAireMobile" class="mb-2 w-20 sm:w-24"></canvas>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">Temp. Aire</div>
+                        <div id="gaugeTempAireValueMobile" class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">--°C</div>
+                    </div>
+
+                    <div class="flex flex-col items-center bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                        <canvas id="gaugeHumedadMobile" class="mb-2 w-20 sm:w-24"></canvas>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">Humedad Aire</div>
+                        <div id="gaugeHumedadValueMobile" class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">--%</div>
+                    </div>
+
+                    <div class="flex flex-col items-center bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                        <canvas id="gaugeTempAguaMobile" class="mb-2 w-20 sm:w-24"></canvas>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">Temp. Agua</div>
+                        <div id="gaugeTempAguaValueMobile" class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">--°C</div>
+                    </div>
+
+                    <div class="flex flex-col items-center bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                        <canvas id="gaugePHMobile" class="mb-2 w-20 sm:w-24"></canvas>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">pH Agua</div>
+                        <div id="gaugePHValueMobile" class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">--</div>
+                    </div>
+
+                    <div class="flex flex-col items-center bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                        <canvas id="gaugeNivelMobile" class="mb-2 w-20 sm:w-24"></canvas>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">Nivel Agua</div>
+                        <div id="gaugeNivelValueMobile" class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">-- cm</div>
+                    </div>
+
+                    <div class="flex flex-col items-center bg-white dark:bg-gray-800 shadow rounded-lg p-4">
+                        <canvas id="gaugeORPMobile" class="mb-2 w-20 sm:w-24"></canvas>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200">ORP</div>
+                        <div id="gaugeORPValueMobile" class="text-gray-600 dark:text-gray-400 text-xs sm:text-sm">-- mV</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- Estilos responsivos adicionales --}}
     <style>
-        @media (max-width: 768px) {
-            /* En pantallas pequeñas, los gauges se apilan centrados */
-            .gauges-col {
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1rem;
-            }
-            .gauges-col > div {
-                width: 100%;
-                display: flex;
-                justify-content: center;
-            }
+    @media (min-width: 768px) {
+        html, body {
+            height: 100%;
+            overflow-y: auto; 
         }
+    
+        .flex.flex-col.w-full.min-h-screen {
+            box-sizing: border-box;
+            min-height: 100vh; 
+            max-height: none;  
+            overflow-y: visible; 
+            padding-bottom: 2.5rem; 
+        }
+    
+        .md\:hidden {
+            display: none !important;
+        }
+    
+        .bg-white.shadow.rounded-lg.w-full.p-3 {
+            margin-bottom: 1rem;
+        }
+    }
     </style>
+
+
+
+
+
     @push('scripts')
     <script>
         
@@ -145,7 +198,7 @@
                 }
                 const data = await response.json();
                 
-                
+
                 document.getElementById('tempAireValue').textContent = data.tempAire.toFixed(1) + '°C';
                 document.getElementById('humAireValue').textContent = data.humAire.toFixed(1) + '%';
                 document.getElementById('tempAguaValue').textContent = data.tempAgua.toFixed(1) + '°C';
@@ -153,19 +206,27 @@
                 document.getElementById('orpValue').textContent = data.orp.toFixed(1) + ' mV';
                 document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1) + ' cm';
                 
-                
+
                 const timeElements = document.querySelectorAll('[id$="Time"]');
                 timeElements.forEach(element => {
                     element.textContent = data.timestamp;
                 });
 
-            
+
                 updateGauge('gaugeTempAire', data.tempAire, 50, '°C');
                 updateGauge('gaugeHumedad', data.humAire, 100, '%');
                 updateGauge('gaugeTempAgua', data.tempAgua, 50, '°C');
                 updateGauge('gaugePH', data.ph, 14, '');
                 updateGauge('gaugeNivel', data.nivelAgua, 100, ' cm');
                 updateGauge('gaugeORP', data.orp, 100, 'mV');
+                
+
+                updateGauge('gaugeTempAireMobile', data.tempAire, 50, '°C');
+                updateGauge('gaugeHumedadMobile', data.humAire, 100, '%');
+                updateGauge('gaugeTempAguaMobile', data.tempAgua, 50, '°C');
+                updateGauge('gaugePHMobile', data.ph, 14, '');
+                updateGauge('gaugeNivelMobile', data.nivelAgua, 100, ' cm');
+                updateGauge('gaugeORPMobile', data.orp, 100, 'mV');
             } catch (error) {
                 console.error('Error fetching sensor data:', error);
             }
@@ -192,7 +253,7 @@
             const gridColor = isDark ? '#374151' : '#2d3748';
             const legendColor = isDark ? '#d1d5db' : '#a0aec0';
 
-        
+
             if (barChartInstance) {
                 barChartInstance.destroy();
             }
@@ -236,7 +297,7 @@
                 }
             });
 
-        
+
             if (lineChartInstance) {
                 lineChartInstance.destroy();
             }
@@ -297,6 +358,8 @@
 
         function createGauge(id, value, max, unit) {
             const canvas = document.getElementById(id);
+            if (!canvas) return; 
+            
             const ctx = canvas.getContext('2d');
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
@@ -304,7 +367,7 @@
         
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-            // 🔹 Aseguramos que el valor no sobrepase el máximo
+
             const safeValue = Math.min(value, max);
         
             const isDark = document.documentElement.classList.contains('dark');
@@ -316,14 +379,14 @@
             const endAngle   = 2.25 * Math.PI;  // 1.75π + 0.5π
             const angleRange = endAngle - startAngle;
         
-            // Fondo del gauge
+
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.strokeStyle = isDark ? '#d1d5db' : '#2d2f48';
             ctx.lineWidth = 10;
             ctx.stroke();
         
-            // Relleno proporcional al valor (mantiene tamaño original)
+
             const fillAngle = startAngle + (angleRange * (safeValue / max));
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, startAngle, fillAngle);
@@ -331,7 +394,7 @@
             ctx.lineWidth = 8;
             ctx.stroke();
         
-            // Marcador
+
             const markerRadius = radius - 4;
             const markerX = centerX + markerRadius * Math.cos(fillAngle);
             const markerY = centerY + markerRadius * Math.sin(fillAngle);
@@ -349,46 +412,61 @@
             ctx.fill();
         }
 
-
-
-
         const gaugeConfigs = {
+            // Gauges desktop
             'gaugeTempAire': { value: 0, max: 50, unit: '°C' },
             'gaugeHumedad': { value: 0, max: 100, unit: '%' },
             'gaugeTempAgua': { value: 0, max: 50, unit: '°C' },
             'gaugePH': { value: 0, max: 14, unit: '' },
             'gaugeNivel': { value: 0, max: 100, unit: '' },
-            'gaugeORP': { value: 0, max: 100, unit: 'mV' }
+            'gaugeORP': { value: 0, max: 100, unit: 'mV' },
+            // Gauges móviles
+            'gaugeTempAireMobile': { value: 0, max: 50, unit: '°C' },
+            'gaugeHumedadMobile': { value: 0, max: 100, unit: '%' },
+            'gaugeTempAguaMobile': { value: 0, max: 50, unit: '°C' },
+            'gaugePHMobile': { value: 0, max: 14, unit: '' },
+            'gaugeNivelMobile': { value: 0, max: 100, unit: '' },
+            'gaugeORPMobile': { value: 0, max: 100, unit: 'mV' }
         };
 
         function initializeGauges() {
             Object.keys(gaugeConfigs).forEach(id => {
                 const config = gaugeConfigs[id];
                 const canvas = document.getElementById(id);
-                canvas.width = 100;
-                canvas.height = 100;
-                createGauge(id, config.value, config.max, config.unit);
+                if (canvas) {
+                    canvas.width = 100;
+                    canvas.height = 100;
+                    createGauge(id, config.value, config.max, config.unit);
+                }
             });
         }
 
         function updateGauge(id, value, max, unit) {
-            document.getElementById(id + 'Value').textContent = 
-                value.toFixed(1) + (unit ? unit : '');
-            createGauge(id, value, max, unit);
+
+            const valueElement = document.getElementById(id + 'Value');
+            if (valueElement) {
+                valueElement.textContent = value.toFixed(1) + (unit ? unit : '');
+            }
+            
+
+            const canvas = document.getElementById(id);
+            if (canvas) {
+                createGauge(id, value, max, unit);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeGauges();
             
-            
+
             fetchSensorData();
             fetchChartData();
             
-            
+
             setInterval(fetchSensorData, 10000);
             setInterval(fetchChartData, 30000);
             
-            
+
             const observer = new MutationObserver(() => {
                 initializeGauges();
                 fetchChartData(); 
