@@ -6,116 +6,131 @@
     </x-slot>
 
     <div class="flex flex-col w-full min-h-screen overflow-x-hidden overflow-y-auto">
-        <div class="w-full px-4 sm:px-6 lg:px-8 py-4">
+        <div class="w-full px-3 sm:px-6 lg:px-8 py-4">
             <!-- Tarjetas superiores -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mb-6">
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Temperatura del aire</h5>
-                    <h2 id="tempAireValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Temperatura del aire</h5>
+                    <h2 id="tempAireValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
                     <small id="tempAireTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Humedad del aire</h5>
-                    <h2 id="humAireValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--%</h2>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Humedad del aire</h5>
+                    <h2 id="humAireValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--%</h2>
                     <small id="humAireTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Temperatura del agua</h5>
-                    <h2 id="tempAguaValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Temperatura del agua</h5>
+                    <h2 id="tempAguaValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
                     <small id="tempAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel pH del agua</h5>
-                    <h2 id="phValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Nivel pH del agua</h5>
+                    <h2 id="phValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
                     <small id="phTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel del agua</h5>
-                    <h2 id="nivelAguaValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Nivel del agua</h5>
+                    <h2 id="nivelAguaValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
                     <small id="nivelAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 text-center transition-colors">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold">Nivel ORP</h5>
-                    <h2 id="orpValue" class="text-2xl font-bold text-gray-900 dark:text-gray-100">-- mV</h2>
+                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
+                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Nivel ORP</h5>
+                    <h2 id="orpValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">-- mV</h2>
                     <small id="orpTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
                 </div>
             </div>
 
             <!-- Sección principal -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <!-- Columna de gauges izquierda -->
-                <div class="md:col-span-3 lg:col-span-2 flex flex-col space-y-4">
+                <!-- Columna izquierda -->
+                <div class="md:col-span-3 lg:col-span-2 flex flex-col gauges-col space-y-4">
                     <div class="space-y-4">
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeTempAire" class="mb-2 w-28 sm:w-32"></canvas>
-                            <div class="text-sm font-semibold">Temp. Aire</div>
-                            <div id="gaugeTempAireValue" class="text-gray-600 text-sm">--°C</div>
+                            <canvas id="gaugeTempAire" class="mb-2 w-24 sm:w-28"></canvas>
+                            <div class="text-xs sm:text-sm font-semibold">Temp. Aire</div>
+                            <div id="gaugeTempAireValue" class="text-gray-600 text-xs sm:text-sm">--°C</div>
                         </div>
 
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeHumedad" class="mb-2 w-28 sm:w-32"></canvas>
-                            <div class="text-sm font-semibold">Humedad Aire</div>
-                            <div id="gaugeHumedadValue" class="text-gray-600 text-sm">--%</div>
+                            <canvas id="gaugeHumedad" class="mb-2 w-24 sm:w-28"></canvas>
+                            <div class="text-xs sm:text-sm font-semibold">Humedad Aire</div>
+                            <div id="gaugeHumedadValue" class="text-gray-600 text-xs sm:text-sm">--%</div>
                         </div>
 
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeTempAgua" class="mb-2 w-28 sm:w-32"></canvas>
-                            <div class="text-sm font-semibold">Temp. Agua</div>
-                            <div id="gaugeTempAguaValue" class="text-gray-600 text-sm">--°C</div>
+                            <canvas id="gaugeTempAgua" class="mb-2 w-24 sm:w-28"></canvas>
+                            <div class="text-xs sm:text-sm font-semibold">Temp. Agua</div>
+                            <div id="gaugeTempAguaValue" class="text-gray-600 text-xs sm:text-sm">--°C</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna central con gráficas -->
+                <!-- Columna central -->
                 <div class="md:col-span-6 lg:col-span-8 flex flex-col items-center justify-center space-y-6">
-                    <!-- Gráfica superior -->
-                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3 transition-colors">
-                        <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2">Promedio de Mediciones</h6>
-                        <div class="relative w-full h-56 sm:h-64 lg:h-72">
+                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3">
+                        <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2 text-sm sm:text-base">Promedio de Mediciones</h6>
+                        <div class="relative w-full h-48 sm:h-64 lg:h-72">
                             <canvas id="barChart" class="w-full h-full"></canvas>
                         </div>
                     </div>
 
-                    <!-- Gráfica inferior -->
-                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3 transition-colors">
-                        <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2">Mediciones Recientes</h6>
-                        <div class="relative w-full h-56 sm:h-64 lg:h-72">
+                    <div class="bg-white dark:bg-gray-800 shadow rounded-lg w-full p-3">
+                        <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2 text-sm sm:text-base">Mediciones Recientes</h6>
+                        <div class="relative w-full h-48 sm:h-64 lg:h-72">
                             <canvas id="lineChart" class="w-full h-full"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Columna derecha con gauges -->
-                <div class="md:col-span-3 lg:col-span-2 flex flex-col space-y-4">
+                <!-- Columna derecha -->
+                <div class="md:col-span-3 lg:col-span-2 flex flex-col gauges-col space-y-4">
                     <div class="space-y-4">
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugePH" class="mb-2 w-28 sm:w-32"></canvas>
-                            <div class="text-sm font-semibold">pH Agua</div>
-                            <div id="gaugePHValue" class="text-gray-600 text-sm">--</div>
+                            <canvas id="gaugePH" class="mb-2 w-24 sm:w-28"></canvas>
+                            <div class="text-xs sm:text-sm font-semibold">pH Agua</div>
+                            <div id="gaugePHValue" class="text-gray-600 text-xs sm:text-sm">--</div>
                         </div>
             
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeNivel" class="mb-2 w-28 sm:w-32"></canvas>
-                            <div class="text-sm font-semibold">Nivel Agua</div>
-                            <div id="gaugeNivelValue" class="text-gray-600 text-sm">-- cm</div>
+                            <canvas id="gaugeNivel" class="mb-2 w-24 sm:w-28"></canvas>
+                            <div class="text-xs sm:text-sm font-semibold">Nivel Agua</div>
+                            <div id="gaugeNivelValue" class="text-gray-600 text-xs sm:text-sm">-- cm</div>
                         </div>
             
                         <div class="flex flex-col items-center">
-                            <canvas id="gaugeORP" class="mb-2 w-28 sm:w-32"></canvas>
-                            <div class="text-sm font-semibold">ORP</div>
-                            <div id="gaugeORPValue" class="text-gray-600 text-sm">-- mV</div>
+                            <canvas id="gaugeORP" class="mb-2 w-24 sm:w-28"></canvas>
+                            <div class="text-xs sm:text-sm font-semibold">ORP</div>
+                            <div id="gaugeORPValue" class="text-gray-600 text-xs sm:text-sm">-- mV</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+    {{-- Estilos responsivos adicionales --}}
+    <style>
+        @media (max-width: 768px) {
+            /* En pantallas pequeñas, los gauges se apilan centrados */
+            .gauges-col {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            .gauges-col > div {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+        }
+    </style>
     @push('scripts')
     <script>
         
@@ -286,48 +301,56 @@
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
             const radius = Math.min(centerX, centerY) - 8;
-            
+        
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            
+        
+            // 🔹 Aseguramos que el valor no sobrepase el máximo
+            const safeValue = Math.min(value, max);
+        
             const isDark = document.documentElement.classList.contains('dark');
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
             gradient.addColorStop(0, isDark ? '#6366f1' : '#22d3ee');
             gradient.addColorStop(1, isDark ? '#22d3ee' : '#22c55e');
-            
-            
+        
+            const startAngle = 0.75 * Math.PI;  // 0.25π + 0.5π
+            const endAngle   = 2.25 * Math.PI;  // 1.75π + 0.5π
+            const angleRange = endAngle - startAngle;
+        
+            // Fondo del gauge
             ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0.25 * Math.PI, 1.75 * Math.PI);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.strokeStyle = isDark ? '#d1d5db' : '#2d2f48';
             ctx.lineWidth = 10;
             ctx.stroke();
-            
-            
+        
+            // Relleno proporcional al valor (mantiene tamaño original)
+            const fillAngle = startAngle + (angleRange * (safeValue / max));
             ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0.25 * Math.PI, 0.25 * Math.PI + (1.5 * Math.PI * (value / max)));
+            ctx.arc(centerX, centerY, radius, startAngle, fillAngle);
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 8;
             ctx.stroke();
-            
-            
-            const angle = 0.25 * Math.PI + (1.5 * Math.PI * (value / max));
+        
+            // Marcador
             const markerRadius = radius - 4;
-            const markerX = centerX + markerRadius * Math.cos(angle);
-            const markerY = centerY + markerRadius * Math.sin(angle);
-            
+            const markerX = centerX + markerRadius * Math.cos(fillAngle);
+            const markerY = centerY + markerRadius * Math.sin(fillAngle);
+        
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.lineTo(markerX, markerY);
             ctx.strokeStyle = isDark ? '#facc15' : '#000000';
             ctx.lineWidth = 2;
             ctx.stroke();
-            
-            
+        
             ctx.beginPath();
             ctx.arc(markerX, markerY, 3, 0, 2 * Math.PI);
             ctx.fillStyle = isDark ? '#facc15' : '#000000';
             ctx.fill();
         }
+
+
+
 
         const gaugeConfigs = {
             'gaugeTempAire': { value: 0, max: 50, unit: '°C' },

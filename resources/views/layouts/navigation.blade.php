@@ -68,30 +68,6 @@
                             </svg>
                             <span>Historial</span>
                         </a>
-
-                        <!-- SENSORES -->
-                        <a href="{{ route('sensores.index') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
-                                {{ $isSens
-                                    ? 'bg-white text-sky-700 shadow-sm dark:bg-gray-700 dark:text-sky-200'
-                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isSens ? 'text-sky-600 dark:text-sky-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM12 12v6m0-6l3-3m-3 3l-3-3"/>
-                            </svg>
-                            <span>Sensores</span>
-                        </a>
-
-                        <!-- ACTUADORES -->
-                        <a href="{{ route('actuadores.index') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
-                                {{ $isAct
-                                    ? 'bg-white text-orange-700 shadow-sm dark:bg-gray-700 dark:text-orange-200'
-                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isAct ? 'text-orange-600 dark:text-orange-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-width="2" d="M9 12h6M12 9v6m6 3H6a2 2 0 01-2-2V6a2 2 0 012-2h7l5 5v7a2 2 0 01-2 2z"/>
-                            </svg>
-                            <span>Actuadores</span>
-                        </a>
                     </div> <!-- Cierre de tabs -->
                 </div> <!-- Cierre sm:flex -->
                 @endauth
@@ -161,8 +137,6 @@
                 <x-responsive-nav-link :href="route('comparacion')" :active="request()->routeIs('comparacion')">Comparación</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('hortalizas')" :active="request()->routeIs('hortalizas')">Hortalizas</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">Historial</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('sensores.index')" :active="request()->routeIs('sensores.index')">Sensores</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('actuadores.index')" :active="request()->routeIs('actuadores.index')">Actuadores</x-responsive-nav-link>
             </div>
         @endauth
 
