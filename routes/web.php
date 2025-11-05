@@ -7,6 +7,7 @@ use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComparacionController;
 use App\Http\Controllers\ActuadoresController;
+use App\Http\Controllers\TranslateController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -75,3 +76,5 @@ Route::fallback(function () {
         ->route(Auth::check() ? 'dashboard' : 'landing')
         ->with('error', $msg);
 });
+
+Route::post('/traducir', [TranslateController::class, 'traducir'])->name('traducir');
