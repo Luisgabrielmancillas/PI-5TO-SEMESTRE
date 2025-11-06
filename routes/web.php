@@ -6,7 +6,7 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComparacionController;
-use App\Http\Controllers\ActuadoresController;
+use App\Http\Controllers\GestionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -45,10 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/hortalizas/cambiar', [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
 
     Route::get('/comparacion', [ComparacionController::class, 'index'])->name('comparacion');
-
-    // Dentro de middleware 'auth' y 'verified'
-    Route::get('/actuadores', [ActuadoresController::class, 'index'])->name('actuadores.index');
-    Route::get('/sensores', [App\Http\Controllers\SensoresController::class, 'index'])->name('sensores.index');
+    Route::get('/gestionusuarios', [GestionController::class, 'index'])->name('gestion');
 
 });
 
