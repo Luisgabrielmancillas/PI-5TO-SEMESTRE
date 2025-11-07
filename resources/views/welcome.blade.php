@@ -588,5 +588,6 @@
       </div>
     </div>
   </footer>
+  @include('components.alerts-component')
 </body>
 </html>

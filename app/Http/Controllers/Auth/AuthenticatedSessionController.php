@@ -24,12 +24,35 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Valida credenciales + rate limiting
         $request->authenticate();
 
+        // Usuario autenticado temporalmente
+        $user = $request->user();
+
+        // Bloquear si el estado no es "Activo"
+        if ($user->estado !== 'Activo') {
+            $msg = match ($user->estado) {
+                'Solicitado' => 'Tu solicitud sigue en proceso. No puedes iniciar sesión hasta ser aprobada.',
+                'Inactivo'   => 'Tu cuenta está Inactiva. Si crees que es un error, contáctanos.',
+                default      => 'Tu cuenta no está activa.',
+            };
+
+            \Illuminate\Support\Facades\Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->with('warning', $msg)
+                ->withInput($request->only('email'));
+        }
+
+        // Solo usuarios activos
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard', absolute: false))->with('success', 'Has iniciado sesión con éxito.');
     }
+
 
     /**
      * Destroy an authenticated session.

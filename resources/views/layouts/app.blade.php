@@ -91,5 +91,6 @@
             </main>
         </div>
         @stack('scripts')
+        @include('components.alerts-component')
     </body>
 </html>
