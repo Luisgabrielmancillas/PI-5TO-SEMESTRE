@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\RegistroMediciones;
+use App\Models\SeleccionHortalizas;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -11,7 +12,11 @@ class DashboardController extends Controller
     /** Vista principal del dashboard */
     public function index()
     {
-        return view('dashboard');
+        $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
+            ->orderByDesc('fecha')
+            ->first();
+
+        return view('dashboard', ['selectedCrop' => $selectedCrop]);
     }
 
     /** Último registro (para tarjetas y gauges) */

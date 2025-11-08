@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\RegistroMediciones;
+use App\Models\SeleccionHortalizas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -10,6 +11,10 @@ class HistoryController extends Controller
     // Página principal
     public function index(Request $request)
     {
+        $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
+            ->orderByDesc('fecha')
+            ->first();
+
         // Defaults para GRÁFICAS (sensor=all, rango=week)
         $sensor = $request->get('sensor', 'all');  // all | humedad | temp_ambiente | ph | orp | temp_agua | ultrasonico
         $range  = $request->get('range',  'week'); // all | week | month | semester | year
@@ -26,6 +31,7 @@ class HistoryController extends Controller
             'initialRange'  => $range,
             'tableRange'    => $tableRange,
             'items'         => $items,
+            'selectedCrop'  => $selectedCrop,
         ]);
     }
 
