@@ -35,7 +35,18 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::post('/hortalizas/cambiar',  [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
 
     Route::get('/comparacion',     [ComparacionController::class, 'index'])->name('comparacion');
-    Route::get('/gestionusuarios', [GestionController::class, 'index'])->name('gestion');
+    Route::prefix('gestionusuarios')
+        ->name('gestion.')
+        ->middleware(['admin'])       
+        ->group(function () {
+            Route::get('/',         [GestionController::class, 'index'])->name('index');
+            Route::get('/table',    [GestionController::class, 'table'])->name('table');
+
+            Route::put('/{user}/accept',   [GestionController::class, 'accept'])->name('accept');
+            Route::put('/{user}/activate', [GestionController::class, 'activate'])->name('activate');
+            Route::put('/{user}/suspend',  [GestionController::class, 'suspend'])->name('suspend');
+            Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
+        });
 });
 
 

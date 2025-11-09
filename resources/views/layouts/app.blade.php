@@ -6,6 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+        <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -90,6 +91,82 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <script>
+          (() => {
+            const csrf   = document.querySelector('meta[name="csrf-token"]').content;
+            const sel    = document.getElementById('estadoSelect');
+            const q      = document.getElementById('qInput');
+            const tbody  = document.getElementById('tableBody');
+            const pag    = document.getElementById('tablePagination');
+            const urlTbl = "{{ route('gestion.table') }}";
+
+            let typing, currentUrl = null;
+
+            function params() {
+              const p = new URLSearchParams();
+              p.set('estado', sel.value);
+              const term = q.value.trim();
+              if (term !== '') p.set('q', term);
+              return p;
+            }
+
+            async function refresh(url = null) {
+              const pageScroll = window.scrollY;
+              currentUrl = url ?? `${urlTbl}?${params().toString()}`;
+
+              const res  = await fetch(currentUrl, { headers: { 'X-Requested-With':'XMLHttpRequest' }});
+              const json = await res.json();
+
+              tbody.innerHTML = json.tbody;
+              pag.innerHTML   = json.pagination;
+
+              window.scrollTo({ top: pageScroll, behavior: 'instant' });
+            }
+
+            sel.addEventListener('change', () => refresh());
+            q.addEventListener('input', () => { clearTimeout(typing); typing = setTimeout(() => refresh(), 300); });
+
+            pag.addEventListener('click', (e) => {
+              const a = e.target.closest('a[href]');
+              if (!a) return;
+              e.preventDefault();
+              refresh(a.href);
+            });
+
+            // Capturamos submit de formularios AJAX de los modales
+            document.addEventListener('submit', async (e) => {
+              const form = e.target;
+              if (!form.classList.contains('ajax-form')) return;
+
+              e.preventDefault();
+              e.stopPropagation();
+
+              const method = (form.querySelector('input[name=_method]')?.value || form.method || 'POST').toUpperCase();
+
+              const res = await fetch(form.action, {
+                method,
+                headers: {
+                  'X-CSRF-TOKEN': csrf,
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'Accept': 'application/json',
+                },
+                body: new FormData(form),
+              });
+
+              if (res.ok) {
+                // Cerrar modal sin tocar propiedades internas de Alpine
+                const root = form.closest('[x-data]');
+                if (root) root.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
+
+                await refresh(currentUrl);
+              } else {
+                alert('No se pudo completar la acción.');
+              }
+            }, true); // capture=true para ganar antes que otra prevención
+          })();
+        </script>
+
         @stack('scripts')
         @include('components.alerts-component')
     </body>

@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Alias de middlewares por ruta
         $middleware->alias([
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'admin'   => \App\Http\Middleware\AdminOnly::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

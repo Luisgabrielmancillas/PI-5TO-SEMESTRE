@@ -16,7 +16,7 @@
                         $isComp = request()->routeIs('comparacion');
                         $isHort = request()->routeIs('hortalizas');
                         $isHist = request()->routeIs('history') || request()->routeIs('history.*');
-                        $isGest = request()->routeIs('gestion') || request()->routeIs('gestion.*');
+                        $isGest = request()->routeIs('gestion.index');
                     @endphp
 
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
@@ -70,7 +70,7 @@
                         </a>
 
                         <!-- GESTIÓN DE USUARIOS -->
-                        <a href="{{ route('gestion') }}"
+                        <a href="{{ route('gestion.index') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
                                   {{ $isGest
                                       ? 'bg-white text-amber-700 shadow-sm dark:bg-gray-700 dark:text-amber-200'
@@ -149,7 +149,7 @@
                 <x-responsive-nav-link :href="route('comparacion')" :active="request()->routeIs('comparacion')">Comparación</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('hortalizas')" :active="request()->routeIs('hortalizas')">Hortalizas</x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('history')" :active="request()->routeIs('history') || request()->routeIs('history.*')">Historial</x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('gestion')" :active="request()->routeIs('gestion') || request()->routeIs('gestion.*')">Gestión Usuarios</x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('gestion.index')" :active="request()->routeIs('gestion.index')">Gestión Usuarios</x-responsive-nav-link>
             </div>
         @endauth
 
