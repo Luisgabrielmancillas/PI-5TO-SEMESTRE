@@ -22,10 +22,9 @@ class UserStatusChangedMail extends Mailable
 
     public function build()
     {
-        return $this->view('emails.user-status-changed')
-                    ->with([
-                        'title' => $this->title,
-                        'lines' => $this->lines,
-                    ]);
+        return $this->subject($this->title)
+            ->from(config('mail.from.address'), config('mail.from.name'))
+            ->view('emails.user-status-changed')
+            ->with(['lines' => $this->lines]);
     }
 }

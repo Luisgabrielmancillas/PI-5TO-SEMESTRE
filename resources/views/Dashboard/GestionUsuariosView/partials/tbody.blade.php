@@ -9,10 +9,10 @@
     <td class="px-4 py-3 text-center">
         <div class="items-center h-8 justify-center inline-flex px-3
             @switch($u->estado)
-                @case('Activo') bg-green-100 rounded-full text-green-800 @break
-                @case('Inactivo') bg-gray-200 rounded-full text-gray-800 @break
-                @case('Solicitado') bg-blue-100 rounded-full text-blue-800 @break
-                @default bg-slate-100 rounded-full text-slate-800
+                @case('Activo') bg-green-200 rounded-full text-green-800 @break
+                @case('Inactivo') bg-gray-300 rounded-full text-gray-800 @break
+                @case('Solicitado') bg-blue-200 rounded-full text-blue-800 @break
+                @default bg-slate-200 rounded-full text-slate-800
             @endswitch
         "><b>{{ $u->estado }}</b></div>
     </td>

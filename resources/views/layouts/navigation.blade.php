@@ -39,8 +39,14 @@
                                     ? 'bg-white text-purple-700 shadow-sm dark:bg-gray-700 dark:text-purple-200'
                                     : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
                             <svg class="h-5 w-5 {{ $isComp ? 'text-purple-600 dark:text-purple-300' : 'text-gray-400 dark:text-gray-400' }}" 
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 20h18"/>
+                                <path d="M5 20V12h3v8z"/>
+                                <path d="M16 20V8h3v12z"/>
+                                <path d="M8 4h8"/>
+                                <path d="M10 2l-2 2 2 2"/>
+                                <path d="M14 2l2 2-2 2"/>
                             </svg>
                             <span>Comparación</span>
                         </a>
@@ -51,8 +57,13 @@
                                 {{ $isHort
                                     ? 'bg-white text-green-700 shadow-sm dark:bg-gray-700 dark:text-green-200'
                                     : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-width="2" d="M12 2a10 10 0 00-9 14h18A10 10 0 0012 2zM2 16h20M12 2v20"/>
+                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20v-7"/>
+                                <path d="M12 13C12 7 6 5 6 5s-1 6 6 8"/>
+                                <path d="M12 13c0-6 6-8 6-8s1 6-6 8"/>
+                                <path d="M3 20h18"/>
                             </svg>
                             <span>Hortalizas</span>
                         </a>
@@ -75,8 +86,13 @@
                                   {{ $isGest
                                       ? 'bg-white text-amber-700 shadow-sm dark:bg-gray-700 dark:text-amber-200'
                                       : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isGest ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
+                            <svg class="h-5 w-5 {{ $isGest ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="7" r="3"/>
+                                <path d="M4 20v-2a5 5 0 0 1 5-5h0"/>
+                                <circle cx="18" cy="13" r="2"/>
+                                <path d="M18 9v2M18 15v2M14 13h2M20 13h2M16.6 10.6l1.4 1.4M16.6 15.4l1.4-1.4M19.4 12l1.4-1.4M19.4 14l1.4 1.4"/>
                             </svg>
                             <span>Gestión Usuarios</span>
                         </a>

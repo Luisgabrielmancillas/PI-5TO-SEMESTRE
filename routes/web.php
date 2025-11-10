@@ -9,6 +9,7 @@ use App\Http\Controllers\ComparacionController;
 use App\Http\Controllers\GestionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
 
 
 Route::middleware('guest')->group(function () {
@@ -21,6 +22,12 @@ Route::middleware('guest')->group(function () {
     })->name('logout.get');
 });
 
+Route::get('/mail-test', function () {
+    Mail::raw('Prueba OK', function ($m) {
+        $m->to('pihydrobox@gmail.com')->subject('HydroBox • Prueba SMTP');
+    });
+    return 'enviado';
+});
 
 Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/dashboard',         [DashboardController::class, 'index'])->name('dashboard');

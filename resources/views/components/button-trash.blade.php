@@ -8,9 +8,9 @@
 
 <div x-data="{ open: false }" @modal:close.stop="open = false" x-id="['modal']">
     <button @click="open = true" type="button"
-            class="ml-2 text-black text-2xl bg-red-100 p-2 rounded-full transition duration-300 ease-in-out hover:bg-red-500"
+            class="ml-2 text-black text-2xl bg-red-100 p-2 rounded-full transition duration-300 ease-in-out hover:bg-red-300"
             title="Rechazar / Eliminar">
-        <i class='bx bx-trash text-red-500'></i>
+        <i class='bx bx-trash text-red-600'></i>
     </button>
 
     <div x-show="open" x-cloak x-transition
@@ -35,13 +35,13 @@
 
                 <div class="flex justify-end mt-6">
                     <button type="button" @click="open = false"
-                            class="bg-gray-300 py-2 px-4 rounded-full flex items-center mr-4">
-                        <i class='bx bx-x text-xl'></i><span>Cancelar</span>
+                            class="bg-gray-300 text-gray-700 py-2 px-4 rounded-full flex items-center mr-4 hover:bg-gray-400">
+                        <i class='bx bx-x text-xl text-gray-700'></i><span>Cancelar</span>
                     </button>
 
                     <button type="submit"
-                            class="bg-red-500 text-white py-2 px-4 rounded-full flex items-center">
-                        <i class='bx bx-trash text-xl'></i><span>&nbsp;Confirmar</span>
+                            class="bg-red-300 text-gray-700 py-2 px-4 rounded-full flex items-center hover:bg-red-400">
+                        <i class='bx bx-trash text-xl text-gray-700'></i><span>&nbsp;Confirmar</span>
                     </button>
                 </div>
             </form>

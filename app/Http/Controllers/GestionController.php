@@ -129,7 +129,7 @@ class GestionController extends Controller
 
     private function sendStatusMail(User $user, string $type): void
     {
-        $contact = config('mail.from.address', 'ejemplo@gmail.com');
+        $contact = config('mail.from.address');
         $site    = 'https://hydrobox.pi.jademajesty.com/';
 
         switch ($type) {
