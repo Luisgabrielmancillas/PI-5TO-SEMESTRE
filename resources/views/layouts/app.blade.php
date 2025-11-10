@@ -94,14 +94,15 @@
 
         <script>
           (() => {
-            const csrf   = document.querySelector('meta[name="csrf-token"]').content;
-            const sel    = document.getElementById('estadoSelect');
-            const q      = document.getElementById('qInput');
-            const tbody  = document.getElementById('tableBody');
-            const pag    = document.getElementById('tablePagination');
-            const urlTbl = "{{ route('gestion.table') }}";
+            const csrf  = document.querySelector('meta[name="csrf-token"]').content;
+            const sel   = document.getElementById('estadoSelect');
+            const q     = document.getElementById('qInput');
+            const tbody = document.getElementById('tableBody');
+            const pag   = document.getElementById('tablePagination');
+            const urlTbl= "{{ route('gestion.table') }}";
 
-            let typing, currentUrl = null;
+            let typing = null;
+            let currentUrl = null;
 
             function params() {
               const p = new URLSearchParams();
@@ -112,7 +113,7 @@
             }
 
             async function refresh(url = null) {
-              const pageScroll = window.scrollY;
+              const pageScroll = window.scrollY || document.documentElement.scrollTop || 0;
               currentUrl = url ?? `${urlTbl}?${params().toString()}`;
 
               const res  = await fetch(currentUrl, { headers: { 'X-Requested-With':'XMLHttpRequest' }});
@@ -121,12 +122,17 @@
               tbody.innerHTML = json.tbody;
               pag.innerHTML   = json.pagination;
 
-              window.scrollTo({ top: pageScroll, behavior: 'instant' });
+              window.scrollTo(0, pageScroll);
             }
 
+            // Filtros
             sel.addEventListener('change', () => refresh());
-            q.addEventListener('input', () => { clearTimeout(typing); typing = setTimeout(() => refresh(), 300); });
+            q.addEventListener('input', () => {
+              clearTimeout(typing);
+              typing = setTimeout(() => refresh(), 300);
+            });
 
+            // Paginación AJAX
             pag.addEventListener('click', (e) => {
               const a = e.target.closest('a[href]');
               if (!a) return;
@@ -134,39 +140,54 @@
               refresh(a.href);
             });
 
-            // Capturamos submit de formularios AJAX de los modales
-            document.addEventListener('submit', async (e) => {
+            // Envío de formularios (modales) con cierre INMEDIATO
+            document.addEventListener('submit', (e) => {
               const form = e.target;
               if (!form.classList.contains('ajax-form')) return;
-
               e.preventDefault();
               e.stopPropagation();
 
+              // Cierre optimista del modal sin romper Alpine
+              const root = form.closest('[x-data]');
+              try {
+                if (root && root.__x) {
+                  root.__x.$data.open = false;
+                } else if (root) {
+                  root.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
+                }
+              } catch (_) {}
+
+              // Deshabilitar botones para evitar doble envío
+              const controls = form.querySelectorAll('button, input[type=submit]');
+              controls.forEach(b => b.disabled = true);
+
               const method = (form.querySelector('input[name=_method]')?.value || form.method || 'POST').toUpperCase();
+              const fd     = new FormData(form);
 
-              const res = await fetch(form.action, {
-                method,
-                headers: {
-                  'X-CSRF-TOKEN': csrf,
-                  'X-Requested-With': 'XMLHttpRequest',
-                  'Accept': 'application/json',
-                },
-                body: new FormData(form),
-              });
-
-              if (res.ok) {
-                // Cerrar modal sin tocar propiedades internas de Alpine
-                const root = form.closest('[x-data]');
-                if (root) root.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
-
-                await refresh(currentUrl);
-              } else {
-                alert('No se pudo completar la acción.');
-              }
-            }, true); // capture=true para ganar antes que otra prevención
+              // Dejar que la animación de cierre fluya antes del fetch
+              setTimeout(async () => {
+                try {
+                  const res = await fetch(form.action, {
+                    method,
+                    headers: {
+                      'X-CSRF-TOKEN'   : csrf,
+                      'X-Requested-With': 'XMLHttpRequest',
+                      'Accept'         : 'application/json',
+                    },
+                    body: fd
+                  });
+                  if (!res.ok) throw new Error('HTTP '+res.status);
+                  await refresh(currentUrl);
+                } catch (err) {
+                  alert('No se pudo completar la acción.');
+                  console.error(err);
+                } finally {
+                  controls.forEach(b => b.disabled = false);
+                }
+              }, 0);
+            }, true); // capture=true por si otro listener hace preventDefault
           })();
         </script>
-
         @stack('scripts')
         @include('components.alerts-component')
     </body>
