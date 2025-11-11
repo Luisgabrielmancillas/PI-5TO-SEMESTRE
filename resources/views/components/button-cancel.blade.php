@@ -6,14 +6,14 @@
     'messageAlert' => '¿Confirmar suspensión?',
 ])
 
-<div x-data="{ open: false }" @modal:close.window="open = false" x-id="['modal']">
+<div x-data="{ open: false }" @modal:close.stop="open = false" x-id="['modal']">
     <button @click="open = true" type="button"
             class="ml-2 text-black text-2xl bg-red-100 p-2 rounded-full transition duration-300 ease-in-out hover:bg-red-300"
             title="Suspender">
         <i class='bx bx-x-circle text-red-600'></i>
     </button>
 
-    <div x-show="open" x-transition.duration.150ms
+    <div x-show="open" x-cloak x-transition
          class="fixed inset-0 bg-gray-800/50 flex justify-center items-center"
          @keydown.escape.window="open = false" @click.self="open = false"
          role="dialog" :aria-labelledby="$id('modal')" style="display:none;">

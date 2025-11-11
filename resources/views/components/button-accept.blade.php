@@ -6,14 +6,14 @@
     'messageAlert' => '¿Confirmar?',
 ])
 
-<div x-data="{ open: false }" @modal:close.window="open = false" x-id="['modal']">
+<div x-data="{ open: false }" @modal:close.stop="open = false" x-id="['modal']">
     <button @click="open = true"
             class="bg-green-200 p-2 ml-2 rounded-full transition duration-300 ease-in-out hover:bg-green-300"
             type="button" title="Aceptar/Activar">
         <i class='bx bx-check-circle text-2xl text-green-600'></i>
     </button>
 
-    <div x-show="open" x-transition.duration.150ms
+    <div x-show="open" x-cloak x-transition
          class="fixed inset-0 bg-gray-800/50 flex justify-center items-center"
          @keydown.escape.window="open = false" @click.self="open = false"
          role="dialog" :aria-labelledby="$id('modal')" style="display:none;">
