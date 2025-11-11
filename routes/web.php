@@ -28,6 +28,8 @@ Route::middleware('guest')->group(function () {
     });
     return 'enviado';
 }); */
+//Prueba
+
 
 Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/dashboard',         [DashboardController::class, 'index'])->name('dashboard');
