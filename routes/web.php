@@ -22,12 +22,12 @@ Route::middleware('guest')->group(function () {
     })->name('logout.get');
 });
 
-Route::get('/mail-test', function () {
+/* Route::get('/mail-test', function () {
     Mail::raw('Prueba OK', function ($m) {
         $m->to('pihydrobox@gmail.com')->subject('HydroBox • Prueba SMTP');
     });
     return 'enviado';
-});
+}); */
 
 Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/dashboard',         [DashboardController::class, 'index'])->name('dashboard');
