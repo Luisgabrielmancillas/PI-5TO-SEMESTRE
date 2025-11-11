@@ -94,76 +94,104 @@
 
         <script>
           (() => {
-            const csrf   = document.querySelector('meta[name="csrf-token"]').content;
+            const csrf   = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
             const sel    = document.getElementById('estadoSelect');
             const q      = document.getElementById('qInput');
             const tbody  = document.getElementById('tableBody');
             const pag    = document.getElementById('tablePagination');
             const urlTbl = "{{ route('gestion.table') }}";
 
-            let typing, currentUrl = null;
+            let typing;
+            window.currentUrl = null;
 
             function params() {
               const p = new URLSearchParams();
-              p.set('estado', sel.value);
-              const term = q.value.trim();
+              if (sel) p.set('estado', sel.value);
+              const term = (q?.value || '').trim();
               if (term !== '') p.set('q', term);
               return p;
             }
 
             async function refresh(url = null) {
               const pageScroll = window.scrollY;
-              currentUrl = url ?? `${urlTbl}?${params().toString()}`;
+              window.currentUrl = url ?? `${urlTbl}?${params().toString()}`;
 
-              const res  = await fetch(currentUrl, { headers: { 'X-Requested-With':'XMLHttpRequest' }});
+              const res  = await fetch(window.currentUrl, { headers: { 'X-Requested-With':'XMLHttpRequest' }});
               const json = await res.json();
 
-              tbody.innerHTML = json.tbody;
-              pag.innerHTML   = json.pagination;
+              if (tbody) tbody.innerHTML = json.tbody;
+              if (pag)   pag.innerHTML   = json.pagination;
 
               window.scrollTo({ top: pageScroll, behavior: 'instant' });
             }
+            window.refresh = refresh;
 
-            sel.addEventListener('change', () => refresh());
-            q.addEventListener('input', () => { clearTimeout(typing); typing = setTimeout(() => refresh(), 300); });
+            // Filtros
+            sel?.addEventListener('change', () => refresh());
+            q?.addEventListener('input', () => {
+              clearTimeout(typing);
+              typing = setTimeout(() => refresh(), 300);
+            });
 
-            pag.addEventListener('click', (e) => {
+            // Paginación AJAX
+            pag?.addEventListener('click', (e) => {
               const a = e.target.closest('a[href]');
               if (!a) return;
               e.preventDefault();
               refresh(a.href);
             });
 
-            // Capturamos submit de formularios AJAX de los modales
-            document.addEventListener('submit', async (e) => {
-              const form = e.target;
-              if (!form.classList.contains('ajax-form')) return;
+            // Confirmar (click en el botón) — SIN loader
+            document.addEventListener('click', async (e) => {
+              const btn  = e.target.closest('.js-confirm');
+              if (!btn) return;
 
-              e.preventDefault();
-              e.stopPropagation();
+              const form = btn.closest('form.ajax-form');
+              if (!form) return;
+
+              e.preventDefault();              // no submit tradicional
+              btn.disabled = true;             // evitar doble click
 
               const method = (form.querySelector('input[name=_method]')?.value || form.method || 'POST').toUpperCase();
+              const fd     = new FormData(form);
 
-              const res = await fetch(form.action, {
-                method,
-                headers: {
-                  'X-CSRF-TOKEN': csrf,
-                  'X-Requested-With': 'XMLHttpRequest',
-                  'Accept': 'application/json',
-                },
-                body: new FormData(form),
-              });
+              try {
+                const res = await fetch(form.action, {
+                  method,
+                  headers: {
+                    'X-CSRF-TOKEN': csrf,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                  },
+                  body: fd,
+                  credentials: 'same-origin',
+                });
 
-              if (res.ok) {
-                // Cerrar modal sin tocar propiedades internas de Alpine
-                const root = form.closest('[x-data]');
-                if (root) root.dispatchEvent(new CustomEvent('modal:close', { bubbles: true }));
+                if (res.ok) {
+                  // Cerrar modal (Alpine) + fallback
+                  const root    = form.closest('[x-data]');
+                  const overlay = form.closest('.fixed.inset-0');
+                  try { root?.dispatchEvent(new CustomEvent('modal:close', { bubbles:true })); } catch {}
+                  if (overlay) overlay.style.display = 'none';
 
-                await refresh(currentUrl);
-              } else {
-                alert('No se pudo completar la acción.');
+                  await refresh(window.currentUrl || null);
+
+                  window.dispatchEvent(new CustomEvent('flash:show', {
+                    detail:{ type:'success', text:'Operación realizada correctamente' }
+                  }));
+                } else {
+                  window.dispatchEvent(new CustomEvent('flash:show', {
+                    detail:{ type:'error', text:'No se pudo completar la acción.' }
+                  }));
+                }
+              } catch {
+                window.dispatchEvent(new CustomEvent('flash:show', {
+                  detail:{ type:'error', text:'Error de red o del servidor.' }
+                }));
+              } finally {
+                btn.disabled = false;
               }
-            }, true); // capture=true para ganar antes que otra prevención
+            });
           })();
         </script>
 
