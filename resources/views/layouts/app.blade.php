@@ -194,7 +194,9 @@
             });
           })();
         </script>
-
+        @auth
+            <a href="{{ url('/chatify') }}" class="...">Soporte / Chat</a>
+        @endauth
         @stack('scripts')
         @include('components.alerts-component')
     </body>
