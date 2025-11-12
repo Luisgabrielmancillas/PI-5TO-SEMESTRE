@@ -49,6 +49,8 @@
                 @endauth
             </div>
 
+            
+
             <!-- Right side (Desktop) -->
             <div class="hidden sm:flex sm:items-center sm:space-x-3 relative">
                 @auth
@@ -84,8 +86,25 @@
                     </div>
                 </div>
 
-                <x-theme-toggle />
+                <!-- 🔔 Botón de notificaciones -->
+                <div class="relative" id="noti-container">
+                    <button id="btn-notificaciones"
+                            class="relative flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700
+                                   text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <i class="ri-notification-3-line text-lg"></i>
+                        <span id="noti-count"
+                              class="hidden absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">0</span>
+                    </button>
+                
+                    <!-- Menú desplegable de notificaciones -->
+                    <div id="noti-menu"
+                         class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-2 z-50">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No hay notificaciones</p>
+                    </div>
+                </div>
 
+
+                <x-theme-toggle />
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -161,7 +180,6 @@
             <div class="flex items-center justify-between">
                 <div class="text-sm font-medium text-gray-700 dark:text-gray-200">Idioma</div>
                 <div class="flex items-center gap-2">
-                    <!-- mobile language buttons -->
                     <button data-lang="es" class="px-2 py-1 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700">ES 🇪🇸</button>
                     <button data-lang="en" class="px-2 py-1 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700">EN 🇬🇧</button>
                     <button data-lang="fr" class="px-2 py-1 rounded-md text-sm hover:bg-gray-100 dark:hover:bg-gray-700">FR 🇫🇷</button>
@@ -198,153 +216,5 @@
         </div>
     </div>
 
-    <!-- Script de traducción dinámica y manejo de menús -->
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        // Elements: desktop button/menu, mobile buttons
-        const boton = document.getElementById("btn-traducir");
-        const botonText = document.getElementById("btn-traducir-text");
-        const menu = document.getElementById("menu-idiomas");
-        const storageLangKey = "idiomaActual";
-        const idiomas = { es: "Español", en: "Inglés", fr: "Francés", de: "Alemán" };
-
-        // mobile language buttons (delegation)
-        const mobileLangButtonsSelector = '[data-lang]';
-
-        // Current language
-        let idiomaActual = localStorage.getItem(storageLangKey) || "es";
-        actualizarBoton();
-
-        // --- abrir/cerrar menú (desktop) ---
-        if (boton) {
-            boton.addEventListener("click", e => {
-                e.stopPropagation();
-                if (menu) menu.classList.toggle("hidden");
-            });
-        }
-
-        // Close desktop menu when clicking outside
-        document.addEventListener("click", e => {
-            if (menu && boton && !menu.contains(e.target) && !boton.contains(e.target)) menu.classList.add("hidden");
-        });
-
-        // --- aplicar traducción guardada (si existe) ---
-        const pageKey = window.location.pathname;
-        if (idiomaActual !== "es") {
-            aplicarTraduccionGuardada(pageKey, idiomaActual).then(aplico => {
-                if (!aplico) traducirPagina(idiomaActual);
-            });
-        }
-
-        // --- Desktop menu language buttons ---
-        if (menu) {
-            menu.querySelectorAll("button[data-lang]").forEach(btn => {
-                btn.addEventListener("click", async () => {
-                    const nuevo = btn.getAttribute("data-lang");
-                    if (!nuevo) return;
-                    if (menu) menu.classList.add("hidden");
-                    if (nuevo === idiomaActual) return;
-                    idiomaActual = nuevo;
-                    localStorage.setItem(storageLangKey, nuevo);
-                    actualizarBoton();
-                    await traducirPagina(nuevo);
-                });
-            });
-        }
-
-        // --- Mobile language buttons (in mobile menu) ---
-        document.querySelectorAll('.sm\\:hidden [data-lang]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const nuevo = btn.getAttribute('data-lang');
-                if (!nuevo) return;
-                if (nuevo === idiomaActual) return;
-                idiomaActual = nuevo;
-                localStorage.setItem(storageLangKey, nuevo);
-                actualizarBoton();
-                await traducirPagina(nuevo);
-            });
-        });
-
-        // --- actualizar texto del botón ---
-        function actualizarBoton() {
-            if (botonText) botonText.textContent = idiomas[idiomaActual] || idiomaActual.toUpperCase();
-        }
-
-        // --- aplicar traducción guardada (si hay) ---
-        async function aplicarTraduccionGuardada(pagePath, lang) {
-            try {
-                const key = `tr_${lang}_${pagePath}`;
-                const raw = localStorage.getItem(key);
-                if (!raw) return false;
-                const data = JSON.parse(raw);
-                if (!data.traducciones) return false;
-                const nodos = obtenerNodosTraducibles();
-                nodos.forEach((n, i) => {
-                    if (data.traducciones[i]) n.textContent = data.traducciones[i];
-                });
-                return true;
-            } catch (e) {
-                console.error("Error aplicando traducción guardada:", e);
-                return false;
-            }
-        }
-
-        // --- traducir página usando heurística ---
-        async function traducirPagina(lang) {
-            const original = botonText ? botonText.innerHTML : "";
-            if (botonText) botonText.innerHTML = "⌛ Traduciendo...";
-            const nodos = obtenerNodosTraducibles();
-            if (nodos.length === 0) {
-                if (botonText) botonText.innerHTML = original;
-                return;
-            }
-            const textos = nodos.map(n => n.textContent.trim());
-            try {
-                const resp = await fetch("/traducir", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ textos, idioma: lang })
-                });
-                const data = await resp.json();
-                if (data.traducciones) {
-                    nodos.forEach((n, i) => n.textContent = data.traducciones[i] || n.textContent);
-                    const pageKeyStorage = `tr_${lang}_${window.location.pathname}`;
-                    localStorage.setItem(pageKeyStorage, JSON.stringify({ traducciones: data.traducciones }));
-                }
-            } catch (e) {
-                console.error("Error al traducir página:", e);
-            } finally {
-                actualizarBoton();
-            }
-        }
-
-        // --- obtener nodos que contienen texto real (evitar números, fechas, etc) ---
-        function obtenerNodosTraducibles() {
-            const nodos = [];
-            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-                acceptNode: node => {
-                    if (!node.textContent) return NodeFilter.FILTER_REJECT;
-                    const text = node.textContent.trim();
-                    if (!text) return NodeFilter.FILTER_REJECT;
-                    const parent = node.parentNode;
-                    if (!parent) return NodeFilter.FILTER_REJECT;
-                    const tag = parent.nodeName.toLowerCase();
-                    const blacklist = ['script','style','noscript','svg','canvas','input','textarea','select','option'];
-                    if (blacklist.includes(tag)) return NodeFilter.FILTER_REJECT;
-                    // evitar traducir texto que sea solo números, fechas o símbolos
-                    if (/^[\d\s\.:\/\-,%°]+$/.test(text)) return NodeFilter.FILTER_REJECT;
-                    // traducir solo si hay letras
-                    if (/[A-Za-zÀ-ÖØ-öø-ÿÑñ]/.test(text)) return NodeFilter.FILTER_ACCEPT;
-                    return NodeFilter.FILTER_REJECT;
-                }
-            });
-            while (walker.nextNode()) nodos.push(walker.currentNode);
-            return nodos;
-        }
-    });
-    </script>
 
 </nav>

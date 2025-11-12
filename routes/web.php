@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComparacionController;
 use App\Http\Controllers\ActuadoresController;
 use App\Http\Controllers\TranslateController;
+use App\Http\Controllers\NotificacionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -78,3 +79,7 @@ Route::fallback(function () {
 });
 
 Route::post('/traducir', [TranslateController::class, 'traducir'])->name('traducir');
+
+Route::get('/notificaciones', [App\Http\Controllers\NotificacionController::class, 'obtenerNotificaciones'])
+    ->name('notificaciones')
+    ->middleware('auth');
