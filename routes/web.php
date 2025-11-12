@@ -7,6 +7,7 @@ use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComparacionController;
 use App\Http\Controllers\GestionController;
+use App\Http\Controllers\ChatBadgeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
@@ -63,6 +64,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile',   [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile',[ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/chat/unread-count', [ChatBadgeController::class, 'count'])->name('chat.unread');
 });
 
 

@@ -195,7 +195,65 @@
           })();
         </script>
         @auth
-            <a href="{{ url('/chatify') }}" class="...">Soporte / Chat</a>
+          @if (!request()->is('chatify*'))
+            <a href="{{ url('/chatify') }}"
+              aria-label="Abrir chat con el administrador"
+              title="Chat con administrador"
+              class="fixed bottom-4 right-4 md:bottom-6 md:right-6
+                      z-50 inline-flex items-center justify-center
+                      w-12 h-12 md:w-14 md:h-14 rounded-full
+                      bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800
+                      text-white shadow-lg shadow-indigo-600/30
+                      transition transform hover:-translate-y-0.5 active:scale-95
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
+                      dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:active:bg-indigo-700
+                      dark:focus:ring-indigo-400">
+              <i class="ri-chat-3-fill text-xl md:text-2xl leading-none"></i>
+              <span id="chat-unread-badge"
+                    class="hidden absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1
+                          rounded-full bg-red-600 text-[10px] font-semibold
+                          flex items-center justify-center">
+                0
+              </span>
+              <span class="sr-only">Abrir chat</span>
+            </a>
+          @endif
+        @endauth
+        @auth
+          <script>
+          document.addEventListener('DOMContentLoaded', () => {
+            const badge = document.getElementById('chat-unread-badge');
+            if (!badge) return;
+
+            const url = "{{ route('chat.unread') }}";
+
+            async function refreshUnread() {
+              try {
+                const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                if (!res.ok) return;
+                const data = await res.json();
+                const n = Number(data.unread || 0);
+                if (n > 0) {
+                  badge.textContent = n > 99 ? '99+' : String(n);
+                  badge.classList.remove('hidden');
+                } else {
+                  badge.classList.add('hidden');
+                }
+              } catch (e) {
+                // opcional: console.warn('unread badge error', e);
+              }
+            }
+
+            // Primera carga + polling ligero
+            refreshUnread();
+            const interval = setInterval(refreshUnread, 20000); // cada 20s
+
+            // Si la pestaña vuelve a estar visible, refresca
+            document.addEventListener('visibilitychange', () => {
+              if (!document.hidden) refreshUnread();
+            });
+          });
+          </script>
         @endauth
         @stack('scripts')
         @include('components.alerts-component')
