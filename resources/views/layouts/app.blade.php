@@ -196,7 +196,8 @@
         </script>
         @auth
           @if (!request()->is('chatify*'))
-            <a href="{{ url('/chatify') }}"
+            <a id="hb-fab"
+              href="{{ route(config('chatify.routes.prefix')) }}?back={{ urlencode(request()->fullUrl()) }}"
               aria-label="Abrir chat con el administrador"
               title="Chat con administrador"
               class="fixed bottom-4 right-4 md:bottom-6 md:right-6
@@ -207,18 +208,31 @@
                       transition transform hover:-translate-y-0.5 active:scale-95
                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500
                       dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:active:bg-indigo-700
-                      dark:focus:ring-indigo-400">
+                      dark:focus:ring-indigo-400"
+              style="right:1rem; bottom:1rem; left:auto;">
               <i class="ri-chat-3-fill text-xl md:text-2xl leading-none"></i>
+
               <span id="chat-unread-badge"
                     class="hidden absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1
                           rounded-full bg-red-600 text-[10px] font-semibold
-                          flex items-center justify-center">
-                0
-              </span>
+                          flex items-center justify-center"
+                    aria-live="polite">0</span>
+
               <span class="sr-only">Abrir chat</span>
             </a>
+
+            {{-- Si algún contenedor con transform afecta a "fixed", lo movemos al <body> --}}
+            <script>
+              document.addEventListener('DOMContentLoaded', () => {
+                const fab = document.getElementById('hb-fab');
+                if (fab && fab.parentElement !== document.body) {
+                  document.body.appendChild(fab);
+                }
+              });
+            </script>
           @endif
         @endauth
+
         @auth
           <script>
           document.addEventListener('DOMContentLoaded', () => {

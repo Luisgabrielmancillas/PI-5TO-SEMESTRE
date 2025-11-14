@@ -23,15 +23,6 @@ Route::middleware('guest')->group(function () {
     })->name('logout.get');
 });
 
-/* Route::get('/mail-test', function () {
-    Mail::raw('Prueba OK', function ($m) {
-        $m->to('pihydrobox@gmail.com')->subject('HydroBox • Prueba SMTP');
-    });
-    return 'enviado';
-}); */
-//Prueba
-
-
 Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/dashboard',         [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/latest',  [DashboardController::class, 'getLatestData'])->name('dashboard.latest');
