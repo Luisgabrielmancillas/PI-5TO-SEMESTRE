@@ -54,7 +54,7 @@
 
                         {{-- Badge para distinguir al admin cuando navega un usuario --}}
                         @if($isAdminContact && !$isAdminView)
-                            <span style="margin-left:6px;font-size:11px;background:#eef2ff;color:#3f51b5;padding:2px 6px;border-radius:10px;">
+                            <span style="margin-left:6px;font-size:11px;background:#000000;color:#3f51b5;padding:2px 6px;border-radius:10px;">
                                 Administrador
                             </span>
                         @endif

@@ -4,8 +4,12 @@
     <div class="messenger-listView {{ !!$id ? 'conversation-active' : '' }}">
         {{-- Header and search bar --}}
         <div class="m-header">
-            <nav>
-                <a href="#"><i class="fas fa-inbox"></i> <span class="messenger-headTitle">MESSAGES</span> </a>
+            <nav class="chatify-d-flex chatify-justify-content-between chatify-align-items-center">
+                {{-- header back button and title --}}
+                <a href="#" style="display: flex; align-items: center; text-decoration: none;"> 
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width:32px; height: 32px; margin-right: 8px;"> 
+                    <span class="messenger-headTitle">Hydrobox</span> 
+                </a>
                 {{-- header buttons --}}
                 <nav class="m-header-right">
                     <a href="#"><i class="fas fa-cog settings-btn"></i></a>
@@ -14,11 +18,6 @@
             </nav>
             {{-- Search input --}}
             <input type="text" class="messenger-search" placeholder="Search" />
-            {{-- Tabs --}}
-            {{-- <div class="messenger-listView-tabs">
-                <a href="#" class="active-tab" data-view="users">
-                    <span class="far fa-user"></span> Contacts</a>
-            </div> --}}
         </div>
         {{-- tabs and lists --}}
         <div class="m-body contacts-container">

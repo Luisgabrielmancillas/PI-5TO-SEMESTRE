@@ -1,118 +1,54 @@
 <?php
-/**
- * -----------------------------------------------------------------
- * NOTE : There is two routes has a name (user & group),
- * any change in these two route's name may cause an issue
- * if not modified in all places that used in (e.g Chatify class,
- * Controllers, chatify javascript file...).
- * -----------------------------------------------------------------
- */
 
 use Illuminate\Support\Facades\Route;
+use Chatify\Http\Controllers\MessagesController as ChatifyMessagesController;
+use App\Http\Controllers\ChatifyPatchController;
 
-/*
-* This is the main app route [Chatify Messenger]
-*/
-Route::get('/', 'MessagesController@index')->name(config('chatify.routes.prefix'));
+Route::prefix(config('chatify.routes.prefix', 'chatify'))
+    ->middleware(['web', 'auth', 'restrict.chatify'])
+    ->group(function () {
+        // Main app
+        Route::get('/', [ChatifyMessagesController::class, 'index'])
+            ->name(config('chatify.routes.prefix'));
 
-/**
- *  Fetch info for specific id [user/group]
- */
-Route::post('/idInfo', 'MessagesController@idFetchData');
+        // Info por id (user/group)
+        Route::post('/idInfo', [ChatifyMessagesController::class, 'idFetchData']);
 
-/**
- * Send message route
- */
-Route::post('/sendMessage', 'MessagesController@send')->name('send.message');
+        // Enviar y obtener mensajes
+        Route::post('/sendMessage',   [ChatifyMessagesController::class, 'send'])->name('send.message');
+        Route::post('/fetchMessages', [ChatifyMessagesController::class, 'fetch'])->name('fetch.messages');
 
-/**
- * Fetch messages
- */
-Route::post('/fetchMessages', 'MessagesController@fetch')->name('fetch.messages');
+        // Descargar adjuntos
+        Route::get('/download/{fileName}', [ChatifyMessagesController::class, 'download'])
+            ->name(config('chatify.attachments.download_route_name'));
 
-/**
- * Download attachments route to create a downloadable links
- */
-Route::get('/download/{fileName}', 'MessagesController@download')->name(config('chatify.attachments.download_route_name'));
+        // Auth Pusher privado
+        Route::post('/chat/auth', [ChatifyMessagesController::class, 'pusherAuth'])->name('pusher.auth');
 
-/**
- * Authentication for pusher private channels
- */
-Route::post('/chat/auth', 'MessagesController@pusherAuth')->name('pusher.auth');
+        // Vistos, contactos y favoritos
+        Route::post('/makeSeen',       [ChatifyMessagesController::class, 'seen'])->name('messages.seen');
+        Route::get('/getContacts',     [ChatifyMessagesController::class, 'getContacts'])->name('contacts.get');
+        Route::post('/updateContacts', [ChatifyMessagesController::class, 'updateContactItem'])->name('contacts.update');
+        Route::post('/star',           [ChatifyMessagesController::class, 'favorite'])->name('star');
+        Route::post('/favorites',      [ChatifyMessagesController::class, 'getFavorites'])->name('favorites');
 
-/**
- * Make messages as seen
- */
-Route::post('/makeSeen', 'MessagesController@seen')->name('messages.seen');
+        // Buscar & compartidos
+        Route::get('/search',  [ChatifyMessagesController::class, 'search'])->name('search');
+        Route::post('/shared', [ChatifyMessagesController::class, 'sharedPhotos'])->name('shared');
+        
+        // Borrar conversación (original)
+        Route::post('/deleteConversation', [ChatifyMessagesController::class, 'deleteConversation'])
+            ->name('conversation.delete');
 
-/**
- * Get contacts
- */
-Route::get('/getContacts', 'MessagesController@getContacts')->name('contacts.get');
+        // Borrar mensaje (parche estable)
+        Route::post('/deleteMessage', [\App\Http\Controllers\ChatifyPatchController::class, 'deleteMessage'])
+            ->name('message.delete');
 
-/**
- * Update contact item data
- */
-Route::post('/updateContacts', 'MessagesController@updateContactItem')->name('contacts.update');
+        // Ajustes y estado
+        Route::post('/updateSettings', [ChatifyMessagesController::class, 'updateSettings'])->name('avatar.update');
+        Route::post('/setActiveStatus', [ChatifyMessagesController::class, 'setActiveStatus'])->name('activeStatus.set');
 
-
-/**
- * Star in favorite list
- */
-Route::post('/star', 'MessagesController@favorite')->name('star');
-
-/**
- * get favorites list
- */
-Route::post('/favorites', 'MessagesController@getFavorites')->name('favorites');
-
-/**
- * Search in messenger
- */
-Route::get('/search', 'MessagesController@search')->name('search');
-
-/**
- * Get shared photos
- */
-Route::post('/shared', 'MessagesController@sharedPhotos')->name('shared');
-
-/**
- * Delete Conversation
- */
-Route::post('/deleteConversation', 'MessagesController@deleteConversation')->name('conversation.delete');
-
-/**
- * Delete Message
- */
-Route::post('/deleteMessage', 'MessagesController@deleteMessage')->name('message.delete');
-
-/**
- * Update setting
- */
-Route::post('/updateSettings', 'MessagesController@updateSettings')->name('avatar.update');
-
-/**
- * Set active status
- */
-Route::post('/setActiveStatus', 'MessagesController@setActiveStatus')->name('activeStatus.set');
-
-
-
-
-
-
-/*
-* [Group] view by id
-*/
-Route::get('/group/{id}', 'MessagesController@index')->name('group');
-
-/*
-* user view by id.
-* Note : If you added routes after the [User] which is the below one,
-* it will considered as user id.
-*
-* e.g. - The commented routes below :
-*/
-// Route::get('/route', function(){ return 'Munaf'; }); // works as a route
-Route::get('/{id}', 'MessagesController@index')->name('user');
-// Route::get('/route', function(){ return 'Munaf'; }); // works as a user id
+        // Vistas por id (group / user)
+        Route::get('/group/{id}', [ChatifyMessagesController::class, 'index'])->name('group');
+        Route::get('/{id}',       [ChatifyMessagesController::class, 'index'])->name('user');
+    });

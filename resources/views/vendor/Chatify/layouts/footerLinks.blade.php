@@ -1,18 +1,20 @@
 @php
   $admin       = \App\Models\User::where('role','admin')->first();
-  $fallbackUrl = route('dashboard');
+  $fallbackUrl = route('dashboard');        // fallback del botón Home
   $isAdmin     = auth()->check() && auth()->user()->role === 'admin';
+  $isUser      = auth()->check() && auth()->user()->role === 'usuario';
+  $myId        = auth()->id();
 @endphp
 
-{{-- Libs base --}}
+{{-- Librerías base --}}
 <script src="https://js.pusher.com/7.2.0/pusher.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@3.0.3/dist/index.min.js"></script>
 <script src="{{ asset('js/chatify/utils.js') }}"></script>
 
-{{-- IMPORTANTE: window.chatify ANTES de code.js --}}
+{{-- IMPORTANTE: define window.chatify ANTES de code.js --}}
 <script>
   window.chatify = {
-    name: "{{ config('chatify.name') }}",
+    name: "HydroBox",
     sounds: {!! json_encode(config('chatify.sounds')) !!},
     allowedImages: {!! json_encode(config('chatify.attachments.allowed_images')) !!},
     allowedFiles: {!! json_encode(config('chatify.attachments.allowed_files')) !!},
@@ -20,128 +22,114 @@
     pusher: {!! json_encode(config('chatify.pusher')) !!},
     pusherAuthEndpoint: '{{ route("pusher.auth") }}'
   };
-  window.chatify.allAllowedExtensions = (window.chatify.allowedImages || []).concat(window.chatify.allowedFiles || []);
+  window.chatify.allAllowedExtensions =
+    (window.chatify.allowedImages || []).concat(window.chatify.allowedFiles || []);
 </script>
 
-{{-- Core de Chatify (lee window.chatify) --}}
+{{-- Núcleo de Chatify (lee window.chatify) --}}
 <script src="{{ asset('js/chatify/code.js') }}"></script>
 
-{{-- ====== Auto-abrir: usuario -> ADMIN; admin -> primer contacto real ====== --}}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  try {
-    const IS_ADMIN = @json($isAdmin);
+  const LIST = document.querySelector('.messenger-listView');
+  const MESSENGER = document.querySelector('.messenger');
+  if (!LIST || !MESSENGER) return;
 
-    const LIST_SELECTOR = '.messenger-listView';
-    const list = document.querySelector(LIST_SELECTOR);
-    if (!list) return;
+  // ========== 2) Ajustes por ROL ==========
+  const IS_ADMIN = @json($isAdmin);
+  const IS_USER  = @json($isUser);
+  const MY_ID    = @json($myId);
+  const ADMIN_ID = @json(optional($admin)->id);
 
-    // --- Usuario: fijar/abrir ADMIN ---
-    if (!IS_ADMIN) {
-      const admin = {
-        id: '{{ optional($admin)->id }}',
-        name: @json(optional($admin)->name ?? 'Administrador'),
-        avatar: @json(optional($admin)->avatar ?? ''),
+  /* ---- ROL: USUARIO ---- */
+  if (IS_USER) {
+    // (a) Quitar "Saved Messages" y títulos de secciones (Your Space / All Messages)
+    // El item de Saved Messages contiene .saved-messages (en el avatar)
+    const savedAvatar = LIST.querySelector('.saved-messages');
+    if (savedAvatar) {
+      const table = savedAvatar.closest('table.messenger-list-item');
+      table?.remove();
+    }
+    // Quitar títulos de secciones si existen
+    const possibleTitles = LIST.querySelectorAll('div, p, span');
+    possibleTitles.forEach(el => {
+      const txt = (el.textContent || '').trim();
+      if (txt === 'Your Space' || txt === 'All Messages') el.remove();
+    });
+
+    // (b) Auto-abrir chat con ADMIN si está en la lista (sin "anclar")
+    if (ADMIN_ID) {
+      const tryOpenAdmin = () => {
+        const item = LIST.querySelector(`table.messenger-list-item[data-contact="${ADMIN_ID}"]`);
+        if (item) { item.querySelector('tr')?.click(); return true; }
+        return false;
       };
-      if (!admin.id) return;
-
-      const ITEM_SELECTOR = `table.messenger-list-item[data-contact="${admin.id}"]`;
-
-      function buildAdminItem(){
-        const table = document.createElement('table');
-        table.className = 'messenger-list-item pinned-admin';
-        table.setAttribute('data-contact', admin.id);
-        table.innerHTML = `
-          <tr data-action="0">
-            <td style="position: relative">
-              <div class="avatar av-m" style="background-image:url('${admin.avatar}');"></div>
-            </td>
-            <td>
-              <p data-id="${admin.id}" data-type="user">
-                ${admin.name}
-                <span class="badge-admin">Administrador</span>
-              </p>
-              <span><em>Inicia la conversación</em></span>
-            </td>
-          </tr>
-        `;
-        return table;
-      }
-
-      function ensureAdminPinned(){
-        let item = document.querySelector(ITEM_SELECTOR);
-        if (!item){
-          item = buildAdminItem();
-          list.prepend(item);
-        }else{
-          item.classList.add('pinned-admin');
-        }
-      }
-
-      ensureAdminPinned();
-
-      const mo = new MutationObserver(() => setTimeout(ensureAdminPinned, 0));
-      mo.observe(list, {childList: true, subtree: true});
-
-      // Auto-open admin
-      setTimeout(() => {
-        const pinned = document.querySelector(ITEM_SELECTOR);
-        pinned?.querySelector('tr')?.click();
-      }, 400);
-      return;
+      // intenta ya y al refrescar la lista
+      if (!tryOpenAdmin()) setTimeout(tryOpenAdmin, 400);
+      const mo = new MutationObserver(() => setTimeout(tryOpenAdmin, 0));
+      mo.observe(LIST, {childList:true, subtree:true});
     }
-
-    // --- Admin: abrir PRIMER contacto real (excluye "Saved Messages") ---
-    function firstRealContact(){
-      const items = list.querySelectorAll('table.messenger-list-item[data-contact]');
-      for (const el of items) {
-        if (!el.querySelector('.saved-messages')) return el;
-      }
-      return null;
-    }
-    setTimeout(() => {
-      const first = firstRealContact();
-      first?.querySelector('tr')?.click();
-    }, 400);
-
-  } catch (e) {
-    // console.warn('auto-open error', e);
   }
+
+  /* ---- ROL: ADMIN ---- */
+  if (IS_ADMIN) {
+    // Redirige a /chatify/1 preservando el ?back=... si viene en la URL
+    (function gotoUserOne() {
+      const TARGET_URL = @json(route('user', 1));   // genera /chatify/1 con tu prefijo actual
+      const target = new URL(TARGET_URL, location.origin);
+
+      // Si ya estamos en /chatify/1 no hagas nada
+      if (location.pathname === target.pathname) return;
+
+      // Preserva ?back=... (o usa referrer del mismo origen si no viene)
+      const params = new URLSearchParams(location.search);
+      let back = params.get('back');
+
+      if (!back && document.referrer) {
+        try {
+          const ref = new URL(document.referrer);
+          if (ref.origin === location.origin && !ref.pathname.startsWith('/chatify')) {
+            back = ref.href;
+          }
+        } catch (_) {}
+      }
+
+      if (back) target.searchParams.set('back', back);
+
+      // Navega directo al usuario 1
+      window.location.replace(target.toString());
+    })();
+
+    // No ejecutes más lógica de auto-open aquí; la vista /chatify/1 ya abre ese hilo.
+  }
+
 });
 </script>
 
-{{-- ====== Botón "Home": volver a la página de origen ====== --}}
+{{-- ===== Botón "Home": volver a la página de origen (back/referrer/history/fallback) ===== --}}
 <script>
 document.addEventListener('click', (e) => {
-  // Delegación: solo dentro del contenedor del chat
   const a = e.target.closest('.messenger a');
   if (!a) return;
 
-  const ORIGIN = location.origin;
-  const LS_KEY = 'hb_chat_back';
-
-  // ¿Es el botón home? (clase, título o href a la raíz)
   const href = a.getAttribute('href') || '';
-  const isHome = a.classList.contains('home') || a.title === 'Home' || href === '/' || href === ORIGIN + '/';
+  const isHome = a.classList.contains('home') || a.title === 'Home'
+                 || href === '/' || href === location.origin + '/';
   if (!isHome) return;
 
   e.preventDefault();
 
-  // 1) back de la query de esta página
+  const ORIGIN = location.origin;
+  const LS_KEY = 'hb_chat_back';
   const params = new URLSearchParams(location.search);
   let target = params.get('back');
 
-  // 2) localStorage de respaldo
   if (!target) {
     try { target = localStorage.getItem(LS_KEY) || ''; } catch (_) {}
   }
-
-  // 3) history.back() si no hay target
   if (!target) {
     if (history.length > 1) return history.back();
   }
-
-  // 4) validar mismo origen + fallback
   try {
     const url = new URL(target);
     if (url.origin !== ORIGIN) throw new Error('cross-origin');
@@ -151,7 +139,7 @@ document.addEventListener('click', (e) => {
   }
 }, { passive:false });
 
-// Guardar back si viene en la URL o por referrer (misma origen)
+// Guardar "back" (query o referrer del mismo origen)
 document.addEventListener('DOMContentLoaded', () => {
   const ORIGIN = location.origin;
   const LS_KEY = 'hb_chat_back';
@@ -166,4 +154,59 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (back) { try { localStorage.setItem(LS_KEY, back); } catch (_) {} }
 });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.jQuery) {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (token) $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' } });
+  }
+});
+</script>
+{{-- <script>
+document.addEventListener('click', function(e){
+  const trash = e.target.closest('.message-card .fa-trash, .message-card .ri-delete-bin-line');
+  if (!trash) return;
+
+  e.preventDefault();
+  const card = trash.closest('.message-card');
+  const id = card?.getAttribute('data-id');
+  if (!id) { console.warn('No se encontró data-id en .message-card'); return; }
+
+  $.post(@json(route('message.delete')), { id })
+    .done(() => { $(card).fadeOut(150, ()=> $(card).remove()); })
+    .fail((xhr) => { console.error('Fallo al borrar:', xhr.status, xhr.responseText); });
+});
+</script> --}}
+<script>
+// Borrar mensaje SIN modal de confirmación.
+// Evita que Chatify abra su popup (stopImmediatePropagation) y envía 1 solo POST.
+document.addEventListener('click', function (e) {
+  const trash = e.target.closest('.message-card .fa-trash, .message-card .ri-delete-bin-line');
+  if (!trash) return;
+
+  e.preventDefault();
+  e.stopImmediatePropagation(); // <-- bloquea el handler interno de Chatify
+
+  const card = trash.closest('.message-card');
+  if (!card) return;
+
+  // Chatify suele guardar el id en data-id
+  const id = card.getAttribute('data-id');
+  if (!id) { console.warn('No se encontró data-id del mensaje'); return; }
+
+  // Evitar dobles clicks
+  if (card.dataset.deleting === '1') return;
+  card.dataset.deleting = '1';
+
+  $.post(@json(route('message.delete')), { id })
+    .done(function (resp) {
+      // Chatify code.js suele mirar resp.deleted; devolvemos {deleted:true} en el controller
+      $(card).fadeOut(150, () => $(card).remove());
+    })
+    .fail(function (xhr) {
+      console.error('Error al borrar', xhr.status, xhr.responseText);
+      card.dataset.deleting = '0';
+    });
+}, { capture: true }); // capture ayuda a bloquear handlers que se subscriben en bubble
 </script>

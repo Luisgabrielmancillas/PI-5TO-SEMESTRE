@@ -15,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'admin'   => \App\Http\Middleware\AdminOnly::class,
+            'restrict.chatify'  => \App\Http\Middleware\RestrictChatifyDms::class,
         ]);
         
-        $middleware->appendToGroup('web', \App\Http\Middleware\RestrictChatifyDms::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Manejo de excepciones
