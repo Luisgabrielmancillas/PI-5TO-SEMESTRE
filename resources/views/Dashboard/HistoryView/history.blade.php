@@ -13,6 +13,23 @@
                     <b class="ml-1">No hay</b>
                 @endif
             </span>
+
+            {{-- Botón Exportar PDF --}}
+            <button
+                type="button"
+                id="hb-open-export-modal"
+                class="ml-3 inline-flex items-center px-3 py-2 rounded-full text-sm font-medium
+                    bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800
+                    shadow-sm shadow-indigo-500/40 transition"
+            >
+                {{-- Icono pequeño (opcional, puedes cambiarlo) --}}
+                <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                        d="M9 12h6m-7 4h8M5 8h14M6 4h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>
+                </svg>
+                Exportar PDF
+            </button>
         </div>
     </x-slot>
 
@@ -98,8 +115,244 @@
         </div>
     </div>
 
+
+    {{-- Modal Exportar PDF --}}
+    <div id="hb-export-modal"
+        class="fixed inset-0 z-50 hidden">
+        {{-- Fondo oscuro --}}
+        <div class="absolute inset-0 bg-slate-900/40"></div>
+
+        {{-- Contenido modal --}}
+        <div class="relative w-full h-full flex items-center justify-center">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl shadow-slate-900/20
+                        w-full max-w-md mx-4 p-5 border border-slate-200 dark:border-slate-700">
+
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-1">
+                    Exportar historial a PDF
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                    Selecciona los filtros que se usarán para generar el documento.
+                </p>
+
+                <form id="hb-export-form"
+                    method="POST"
+                    action="{{ route('history.exportPdf') }}"
+                    target="_blank">
+                    @csrf
+
+                    {{-- Hortaliza --}}
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Hortaliza
+                        </label>
+                        <select name="crop" id="hb-export-crop"
+                                class="w-full rounded-lg border-slate-300 dark:border-slate-600
+                                    bg-white dark:bg-slate-900 text-sm
+                                    focus:ring-indigo-500 focus:border-indigo-500"
+                                required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="all">Todas</option>
+                            @foreach($allCrops as $crop)
+                                <option value="{{ $crop->id_hortaliza }}"
+                                    @if(optional($selectedCrop)->id_hortaliza === $crop->id_hortaliza) selected @endif>
+                                    {{ $crop->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Sensor para gráficas --}}
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Sensor (para gráficas)
+                        </label>
+                        <select name="sensor" id="hb-export-sensor"
+                                class="w-full rounded-lg border-slate-300 dark:border-slate-600
+                                    bg-white dark:bg-slate-900 text-sm
+                                    focus:ring-indigo-500 focus:border-indigo-500"
+                                required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="all">Todos los sensores</option>
+                            <option value="humedad">Humedad</option>
+                            <option value="temp_agua">Temperatura del agua</option>
+                            <option value="temp_ambiente">Temperatura del aire</option>
+                            <option value="ph">pH</option>
+                            <option value="orp">ORP</option>
+                            <option value="ultrasonico">Ultrasónico</option>
+                        </select>
+                    </div>
+
+                    {{-- Rango de fechas para gráficas --}}
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Rango de fechas (gráficas)
+                        </label>
+                        <select name="range" id="hb-export-range"
+                                class="w-full rounded-lg border-slate-300 dark:border-slate-600
+                                    bg-white dark:bg-slate-900 text-sm
+                                    focus:ring-indigo-500 focus:border-indigo-500"
+                                required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="week">Última semana</option>
+                            <option value="month">Último mes</option>
+                            <option value="semester">Último semestre</option>
+                            <option value="year">Último año</option>
+                            {{-- SOLO válido cuando sensor = all --}}
+                            <option value="all" data-only-all-sensors="1">Todos</option>
+                        </select>
+                    </div>
+
+                    {{-- Rango de fechas para tabla --}}
+                    <div class="mb-3">
+                        <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Rango de fechas (tabla)
+                        </label>
+                        <select name="tableRange" id="hb-export-table-range"
+                                class="w-full rounded-lg border-slate-300 dark:border-slate-600
+                                    bg-white dark:bg-slate-900 text-sm
+                                    focus:ring-indigo-500 focus:border-indigo-500"
+                                required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="week">Última semana</option>
+                            <option value="month">Último mes</option>
+                            <option value="semester">Último semestre</option>
+                            <option value="year">Último año</option>
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+
+                    <p id="hb-export-error"
+                    class="hidden text-xs text-red-600 mt-1"></p>
+
+                    <div class="mt-5 flex justify-end gap-2">
+                        <button type="button"
+                                id="hb-export-cancel"
+                                class="px-3 py-1.5 rounded-full text-xs font-medium
+                                    border border-slate-300 dark:border-slate-600
+                                    text-slate-700 dark:text-slate-200
+                                    hover:bg-slate-100 dark:hover:bg-slate-800">
+                            Cancelar
+                        </button>
+
+                        <button type="submit"
+                                id="hb-export-submit"
+                                class="px-4 py-1.5 rounded-full text-xs font-semibold
+                                    bg-indigo-600 text-white hover:bg-indigo-700
+                                    active:bg-indigo-800 shadow-sm shadow-indigo-500/40
+                                    disabled:opacity-60 disabled:cursor-not-allowed">
+                            Descargar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const openBtn      = document.getElementById('hb-open-export-modal');
+                const modal        = document.getElementById('hb-export-modal');
+                const cancelBtn    = document.getElementById('hb-export-cancel');
+                const form         = document.getElementById('hb-export-form');
+                const cropSelect   = document.getElementById('hb-export-crop');
+                const sensorSelect = document.getElementById('hb-export-sensor');
+                const rangeSelect  = document.getElementById('hb-export-range');
+                const tableRange   = document.getElementById('hb-export-table-range');
+                const errorLabel   = document.getElementById('hb-export-error');
+
+                function toggleModal(show) {
+                    if (!modal) return;
+                    if (show) {
+                        modal.classList.remove('hidden');
+                        document.body.classList.add('overflow-hidden');
+                    } else {
+                        modal.classList.add('hidden');
+                        document.body.classList.remove('overflow-hidden');
+                        if (errorLabel) {
+                            errorLabel.classList.add('hidden');
+                            errorLabel.textContent = '';
+                        }
+                    }
+                }
+
+                if (openBtn) {
+                    openBtn.addEventListener('click', () => toggleModal(true));
+                }
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', () => toggleModal(false));
+                }
+                if (modal) {
+                    // Cerrar si pulsas fuera del contenido
+                    modal.addEventListener('click', function (e) {
+                        if (e.target === modal) {
+                            toggleModal(false);
+                        }
+                    });
+                }
+
+                function validateRangeRule() {
+                    const sensor = sensorSelect.value;
+                    const range  = rangeSelect.value;
+
+                    // Deshabilitar la opción "Todos" si sensor != all
+                    const allOption = rangeSelect.querySelector('option[value="all"]');
+                    if (allOption) {
+                        if (sensor === 'all') {
+                            allOption.disabled = false;
+                        } else {
+                            allOption.disabled = true;
+                            if (range === 'all') {
+                                rangeSelect.value = '';
+                            }
+                        }
+                    }
+
+                    if (sensor !== 'all' && range === 'all') {
+                        errorLabel.textContent = 'El rango "Todos" solo está permitido cuando el sensor es "Todos los sensores".';
+                        errorLabel.classList.remove('hidden');
+                        return false;
+                    }
+
+                    errorLabel.classList.add('hidden');
+                    errorLabel.textContent = '';
+                    return true;
+                }
+
+                if (sensorSelect && rangeSelect) {
+                    sensorSelect.addEventListener('change', validateRangeRule);
+                    rangeSelect.addEventListener('change', validateRangeRule);
+                }
+
+                if (form) {
+                    form.addEventListener('submit', function (e) {
+                        // No permitir continuar si hay selects vacíos
+                        let ok = true;
+                        [cropSelect, sensorSelect, rangeSelect, tableRange].forEach(function (sel) {
+                            if (sel && !sel.value) {
+                                ok = false;
+                                sel.classList.add('border-red-500');
+                            } else if (sel) {
+                                sel.classList.remove('border-red-500');
+                            }
+                        });
+
+                        if (!validateRangeRule()) {
+                            ok = false;
+                        }
+
+                        if (!ok) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+            });
+        </script>
+    @endpush
+
 
     {{-- ====== JS TABLA (paginación + filtro por rango) ====== --}}
     <script>

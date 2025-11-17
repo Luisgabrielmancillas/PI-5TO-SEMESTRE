@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\HortalizasController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComparacionController;
 use App\Http\Controllers\GestionController;
 use App\Http\Controllers\ChatBadgeController;
@@ -31,6 +31,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/history',        [HistoryController::class, 'index'])->name('history');
     Route::get('/history/data',   [HistoryController::class, 'data'])->name('history.data');
     Route::get('/history/table',  [HistoryController::class, 'table'])->name('history.table');
+    Route::post('/history/export-pdf', [HistoryController::class, 'exportPdf'])->name('history.exportPdf');
 
     Route::get('/hortalizas',           [HortalizasController::class, 'index'])->name('hortalizas');
     Route::post('/hortalizas/cambiar',  [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');

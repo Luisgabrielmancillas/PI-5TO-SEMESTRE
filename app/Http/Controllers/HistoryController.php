@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RegistroMediciones;
 use App\Models\SeleccionHortalizas;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 
 class HistoryController extends Controller
@@ -16,22 +17,23 @@ class HistoryController extends Controller
         $selectedCrop = $this->getSelectedCrop();
 
         // Defaults para GRÁFICAS (sensor=all, rango=week)
-        $sensor = $request->get('sensor', 'all');  // all | humedad | temp_ambiente | ph | orp | temp_agua | ultrasonico
-        $range  = $request->get('range',  'week'); // all | week | month | semester | year
+        $sensor = $request->get('sensor', 'all');
+        $range  = $request->get('range',  'week');
 
-        // Defaults para TABLA (independiente)
-        $tableRange = $request->get('tableRange', 'week'); // all | week | month | semester | year
+        // Defaults para TABLA
+        $tableRange = $request->get('tableRange', 'week');
+
+        // NUEVO: todas las hortalizas para el modal
+        $allCrops = SeleccionHortalizas::orderBy('nombre')->get();
 
         // Base query: solo registros de la hortaliza seleccionada
         $baseQuery = RegistroMediciones::query();
         if ($selectedCrop) {
             $baseQuery->where('id_hortaliza', $selectedCrop->id_hortaliza);
         } else {
-            // Si no hay hortaliza seleccionada, no devolvemos registros
             $baseQuery->whereRaw('1 = 0');
         }
 
-        // Datos tabla según filtro (paginado 15)
         $tableQuery = $this->applyRangeFilter($baseQuery, $tableRange);
         $items = $tableQuery->orderByDesc('fecha')->paginate(15)->withQueryString();
 
@@ -41,8 +43,228 @@ class HistoryController extends Controller
             'tableRange'    => $tableRange,
             'items'         => $items,
             'selectedCrop'  => $selectedCrop,
+            'allCrops'      => $allCrops,   // <--- importante
         ]);
     }
+
+    public function exportPdf(Request $request)
+    {
+        // Validación de filtros
+        $request->validate([
+            'crop'       => 'required', // validaremos a mano abajo
+            'sensor'     => 'required|in:all,humedad,temp_ambiente,temp_agua,ph,orp,ultrasonico',
+            'range'      => 'required|in:all,week,month,semester,year',
+            'tableRange' => 'required|in:all,week,month,semester,year',
+        ]);
+
+        // Regla: si range = all, el sensor DEBE ser all
+        if ($request->sensor !== 'all' && $request->range === 'all') {
+            return back()->withErrors([
+                'range' => 'El rango "Todos" solo se puede usar cuando el sensor es "Todos los sensores".'
+            ])->withInput();
+        }
+
+        // --- Filtro hortaliza ---
+        $cropValue = $request->crop; // 'all' o id_hortaliza
+        $idHortaliza = $cropValue === 'all' ? null : (int) $cropValue;
+
+        // Para mostrar nombre bonito en el PDF
+        $cropLabel = $this->cropLabelFromValue($cropValue);
+
+        // --- Filtros gráficos y tabla ---
+        $sensor     = $request->sensor;
+        $range      = $request->range;
+        $tableRange = $request->tableRange;
+
+        $sensorLabel     = $this->sensorLabel($sensor);
+        $rangeLabel      = $this->rangeLabel($range);
+        $tableRangeLabel = $this->rangeLabel($tableRange);
+
+        // --- Datos para GRÁFICAS (reusamos tu lógica) ---
+        $chartData = $this->buildChartDataForPdf($sensor, $range, $idHortaliza);
+
+        // --- Datos para TABLA (sin paginación, todo) ---
+        $tableQuery = RegistroMediciones::query();
+        if (!is_null($idHortaliza)) {
+            $tableQuery->where('id_hortaliza', $idHortaliza);
+        }
+        $tableItems = $this->applyRangeFilter($tableQuery, $tableRange)
+            ->orderByDesc('fecha')
+            ->get();
+
+        // --- Armar PDF ---
+        $pdf = Pdf::loadView('Dashboard.HistoryView.pdf.history-pdf', [
+            'projectName'       => 'HydroBox',
+            'cropLabel'         => $cropLabel,
+            'sensorLabel'       => $sensorLabel,
+            'rangeLabel'        => $rangeLabel,
+            'tableRangeLabel'   => $tableRangeLabel,
+            'chartData'         => $chartData,
+            'tableItems'        => $tableItems,
+            'generatedAt'       => now(),
+        ])->setPaper('a4', 'portrait');
+
+        $fileName = 'HydroBox_Historial_' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($fileName);
+    }
+
+    // ===== Helpers para etiquetas legibles =====
+
+    private function cropLabelFromValue(string $value): string
+    {
+        if ($value === 'all') {
+            return 'Todas las hortalizas';
+        }
+
+        $crop = SeleccionHortalizas::where('id_hortaliza', (int) $value)->first();
+        return $crop ? $crop->nombre : 'Desconocida';
+    }
+
+    private function sensorLabel(string $sensor): string
+    {
+        return [
+            'all'           => 'Todos los sensores',
+            'humedad'       => 'Humedad',
+            'temp_ambiente' => 'Temperatura del aire',
+            'temp_agua'     => 'Temperatura del agua',
+            'ph'            => 'pH',
+            'orp'           => 'ORP',
+            'ultrasonico'   => 'Ultrasónico',
+        ][$sensor] ?? 'Sensor';
+    }
+
+    private function rangeLabel(string $range): string
+    {
+        return [
+            'all'      => 'Todos',
+            'week'     => 'Última semana',
+            'month'    => 'Último mes',
+            'semester' => 'Último semestre',
+            'year'     => 'Último año',
+        ][$range] ?? 'Todos';
+    }
+
+    private function buildChartDataForPdf(string $sensor, string $range, ?int $idHortaliza = null): array
+    {
+        // Caso 1: sensor=all y range=all => barras con promedios
+        if ($sensor === 'all' && $range === 'all') {
+            $avg = RegistroMediciones::avgAllSensors($idHortaliza);
+
+            if (!$avg) {
+                return [
+                    'mode'   => 'bar',
+                    'labels' => ['Humedad','Temp. ambiente','pH','ORP','Temp. agua','Ultrasónico'],
+                    'series' => [0,0,0,0,0,0],
+                ];
+            }
+
+            return [
+                'mode'   => 'bar',
+                'labels' => ['Humedad','Temp. ambiente','pH','ORP','Temp. agua','Ultrasónico'],
+                'series' => [
+                    (float) $avg->humedad,
+                    (float) $avg->temp_ambiente,
+                    (float) $avg->ph,
+                    (float) $avg->orp,
+                    (float) $avg->temp_agua,
+                    (float) $avg->ultrasonico,
+                ],
+            ];
+        }
+
+        // Caso 2: sensor=all y range≠all => varias series (una por sensor)
+        if ($sensor === 'all' && $range !== 'all') {
+            $sensors = [
+                'humedad'       => 'Humedad',
+                'temp_ambiente' => 'Temp. ambiente',
+                'ph'            => 'pH',
+                'orp'           => 'ORP',
+                'temp_agua'     => 'Temp. agua',
+                'ultrasonico'   => 'Ultrasónico',
+            ];
+
+            $charts = [];
+
+            foreach ($sensors as $key => $label) {
+                $seriesInfo = $this->seriesForSensorAndRange($key, $range, $label, $idHortaliza);
+
+                // === NORMALIZAR labels / series A ARRAY ===
+                $labels = $seriesInfo['labels'];
+                $series = $seriesInfo['series'];
+
+                if ($labels instanceof \Illuminate\Support\Collection) {
+                    $labels = $labels->values()->all();
+                } elseif (is_array($labels)) {
+                    $labels = array_values($labels);
+                } else {
+                    $labels = [];
+                }
+
+                if ($series instanceof \Illuminate\Support\Collection) {
+                    $series = $series->values()->all();
+                } elseif (is_array($series)) {
+                    $series = array_values($series);
+                } else {
+                    $series = [];
+                }
+
+                $seriesInfo['labels'] = $labels;
+                $seriesInfo['series'] = $series;
+                // ==========================================
+
+                $charts[] = $seriesInfo;
+            }
+
+            return [
+                'mode'   => 'multi-line',
+                'charts' => $charts,
+            ];
+        }
+
+        // Caso 3: un solo sensor
+        $labelMap = [
+            'humedad'       => 'Humedad',
+            'temp_ambiente' => 'Temp. ambiente',
+            'ph'            => 'pH',
+            'orp'           => 'ORP',
+            'temp_agua'     => 'Temp. agua',
+            'ultrasonico'   => 'Ultrasónico',
+        ];
+        $niceLabel = $labelMap[$sensor] ?? 'Sensor';
+
+        $seriesInfo = $this->seriesForSensorAndRange($sensor, $range, $niceLabel, $idHortaliza);
+
+        // === NORMALIZAR labels / series A ARRAY ===
+        $labels = $seriesInfo['labels'];
+        $series = $seriesInfo['series'];
+
+        if ($labels instanceof \Illuminate\Support\Collection) {
+            $labels = $labels->values()->all();
+        } elseif (is_array($labels)) {
+            $labels = array_values($labels);
+        } else {
+            $labels = [];
+        }
+
+        if ($series instanceof \Illuminate\Support\Collection) {
+            $series = $series->values()->all();
+        } elseif (is_array($series)) {
+            $series = array_values($series);
+        } else {
+            $series = [];
+        }
+
+        $seriesInfo['labels'] = $labels;
+        $seriesInfo['series'] = $series;
+        // ==========================================
+
+        return [
+            'mode'  => 'single-line',
+            'chart' => $seriesInfo,
+        ];
+    }
+
 
     // Endpoint JSON para GRÁFICAS
     public function data(Request $request)
