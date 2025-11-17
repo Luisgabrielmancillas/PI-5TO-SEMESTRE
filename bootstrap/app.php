@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'admin'   => \App\Http\Middleware\AdminOnly::class,
             'restrict.chatify'  => \App\Http\Middleware\RestrictChatifyDms::class,
+            'chat.desktop'     => \App\Http\Middleware\ChatDesktopOnly::class,
         ]);
         
     })

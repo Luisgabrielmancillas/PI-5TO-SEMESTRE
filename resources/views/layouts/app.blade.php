@@ -200,9 +200,9 @@
               href="{{ route(config('chatify.routes.prefix')) }}?back={{ urlencode(request()->fullUrl()) }}"
               aria-label="Abrir chat con el administrador"
               title="Chat con administrador"
-              class="fixed bottom-4 right-4 md:bottom-6 md:right-6
-                      z-50 inline-flex items-center justify-center
-                      w-12 h-12 md:w-14 md:h-14 rounded-full
+              class="hidden lg:inline-flex fixed bottom-4 right-4 lg:bottom-6 lg:right-6
+                      z-50 items-center justify-center
+                      w-12 h-12 lg:w-14 lg:h-14 rounded-full
                       bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800
                       text-white shadow-lg shadow-indigo-600/30
                       transition transform hover:-translate-y-0.5 active:scale-95
@@ -210,7 +210,7 @@
                       dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:active:bg-indigo-700
                       dark:focus:ring-indigo-400"
               style="right:1rem; bottom:1rem; left:auto;">
-              <i class="ri-chat-3-fill text-xl md:text-2xl leading-none"></i>
+              <i class="ri-chat-3-fill text-xl lg:text-2xl leading-none"></i>
 
               <span id="chat-unread-badge"
                     class="hidden absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1
@@ -232,7 +232,7 @@
             </script>
           @endif
         @endauth
-
+        
         @auth
           <script>
           document.addEventListener('DOMContentLoaded', () => {

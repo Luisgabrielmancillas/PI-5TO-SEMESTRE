@@ -5,7 +5,7 @@ use Chatify\Http\Controllers\MessagesController as ChatifyMessagesController;
 use App\Http\Controllers\ChatifyPatchController;
 
 Route::prefix(config('chatify.routes.prefix', 'chatify'))
-    ->middleware(['web', 'auth', 'restrict.chatify'])
+    ->middleware(['web', 'auth', 'restrict.chatify', 'chat.desktop'])
     ->group(function () {
         // Main app
         Route::get('/', [ChatifyMessagesController::class, 'index'])
