@@ -50,7 +50,6 @@ class DashboardController extends Controller
             ->when($selectedCrop, function ($q) use ($selectedCrop) {
                 $q->where('id_hortaliza', $selectedCrop->id_hortaliza);
             }, function ($q) {
-                // Sin hortaliza seleccionada => no hay datos
                 $q->whereRaw('1 = 0');
             })
             ->orderBy('fecha', 'desc')
@@ -58,8 +57,11 @@ class DashboardController extends Controller
             ->get()
             ->reverse();
 
+        // Si no hay registros para esa hortaliza, devolvemos empty: true
         if ($records->isEmpty()) {
-            return response()->json(['error' => 'No data found'], 404);
+            return response()->json([
+                'empty' => true,
+            ]);
         }
 
         $labels = $records->pluck('fecha')->map(function ($f) {
@@ -77,6 +79,7 @@ class DashboardController extends Controller
         $avgNivel     = round($records->pluck('us_value')->avg(), 2);
 
         return response()->json([
+            'empty'    => false,
             'labels'   => $labels,
             'datasets' => [
                 'ph'       => $ph,

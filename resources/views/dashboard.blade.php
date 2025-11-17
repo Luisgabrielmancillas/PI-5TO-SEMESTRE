@@ -88,6 +88,9 @@
                         <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2 text-sm sm:text-base">Promedio de Mediciones</h6>
                         <div class="relative w-full h-48 sm:h-64 lg:h-72">
                             <canvas id="barChart" class="w-full h-full"></canvas>
+                            <div id="barChartEmpty" class="hidden absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center px-4">
+                                No se encontraron registros para la hortaliza seleccionada.
+                            </div>
                         </div>
                     </div>
 
@@ -95,6 +98,9 @@
                         <h6 class="text-center text-gray-700 dark:text-gray-200 font-semibold mb-2 text-sm sm:text-base">Mediciones Recientes</h6>
                         <div class="relative w-full h-48 sm:h-64 lg:h-72">
                             <canvas id="lineChart" class="w-full h-full"></canvas>
+                            <div id="lineChartEmpty" class="hidden absolute inset-0 flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm text-center px-4">
+                                No se encontraron registros para la hortaliza seleccionada.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -191,13 +197,8 @@
     }
     </style>
 
-
-
-
-
     @push('scripts')
     <script>
-        
         let barChartInstance = null;
         let lineChartInstance = null;
 
@@ -209,7 +210,6 @@
                 }
                 const data = await response.json();
                 
-
                 document.getElementById('tempAireValue').textContent = data.tempAire.toFixed(1) + '°C';
                 document.getElementById('humAireValue').textContent = data.humAire.toFixed(1) + '%';
                 document.getElementById('tempAguaValue').textContent = data.tempAgua.toFixed(1) + '°C';
@@ -217,12 +217,10 @@
                 document.getElementById('orpValue').textContent = data.orp.toFixed(1) + ' mV';
                 document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1) + ' cm';
                 
-
                 const timeElements = document.querySelectorAll('[id$="Time"]');
                 timeElements.forEach(element => {
                     element.textContent = data.timestamp;
                 });
-
 
                 updateGauge('gaugeTempAire', data.tempAire, 50, '°C');
                 updateGauge('gaugeHumedad', data.humAire, 100, '%');
@@ -231,7 +229,6 @@
                 updateGauge('gaugeNivel', data.nivelAgua, 100, ' cm');
                 updateGauge('gaugeORP', data.orp, 100, 'mV');
                 
-
                 updateGauge('gaugeTempAireMobile', data.tempAire, 50, '°C');
                 updateGauge('gaugeHumedadMobile', data.humAire, 100, '%');
                 updateGauge('gaugeTempAguaMobile', data.tempAgua, 50, '°C');
@@ -250,12 +247,51 @@
                     throw new Error('Error al obtener datos de gráficas');
                 }
                 const data = await response.json();
-                
-                updateCharts(data);
+
+                if (data.empty) {
+                    showChartsEmptyState();
+                } else {
+                    hideChartsEmptyState();
+                    updateCharts(data);
+                }
                 
             } catch (error) {
                 console.error('Error fetching chart data:', error);
+                showChartsEmptyState();
             }
+        }
+
+        function showChartsEmptyState() {
+            const barCanvas   = document.getElementById('barChart');
+            const lineCanvas  = document.getElementById('lineChart');
+            const barEmpty    = document.getElementById('barChartEmpty');
+            const lineEmpty   = document.getElementById('lineChartEmpty');
+
+            if (barChartInstance) {
+                barChartInstance.destroy();
+                barChartInstance = null;
+            }
+            if (lineChartInstance) {
+                lineChartInstance.destroy();
+                lineChartInstance = null;
+            }
+
+            if (barCanvas)  barCanvas.classList.add('hidden');
+            if (lineCanvas) lineCanvas.classList.add('hidden');
+            if (barEmpty)   barEmpty.classList.remove('hidden');
+            if (lineEmpty)  lineEmpty.classList.remove('hidden');
+        }
+
+        function hideChartsEmptyState() {
+            const barCanvas   = document.getElementById('barChart');
+            const lineCanvas  = document.getElementById('lineChart');
+            const barEmpty    = document.getElementById('barChartEmpty');
+            const lineEmpty   = document.getElementById('lineChartEmpty');
+
+            if (barCanvas)  barCanvas.classList.remove('hidden');
+            if (lineCanvas) lineCanvas.classList.remove('hidden');
+            if (barEmpty)   barEmpty.classList.add('hidden');
+            if (lineEmpty)  lineEmpty.classList.add('hidden');
         }
 
         function updateCharts(chartData) {
@@ -263,7 +299,6 @@
             const axisColor = isDark ? '#d1d5db' : '#a0aec0';
             const gridColor = isDark ? '#374151' : '#2d3748';
             const legendColor = isDark ? '#d1d5db' : '#a0aec0';
-
 
             if (barChartInstance) {
                 barChartInstance.destroy();
@@ -307,7 +342,6 @@
                     }
                 }
             });
-
 
             if (lineChartInstance) {
                 lineChartInstance.destroy();
@@ -377,7 +411,6 @@
             const radius = Math.min(centerX, centerY) - 8;
         
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
 
             const safeValue = Math.min(value, max);
         
@@ -386,17 +419,15 @@
             gradient.addColorStop(0, isDark ? '#6366f1' : '#22d3ee');
             gradient.addColorStop(1, isDark ? '#22d3ee' : '#22c55e');
         
-            const startAngle = 0.75 * Math.PI;  // 0.25π + 0.5π
-            const endAngle   = 2.25 * Math.PI;  // 1.75π + 0.5π
+            const startAngle = 0.75 * Math.PI;
+            const endAngle   = 2.25 * Math.PI;
             const angleRange = endAngle - startAngle;
-        
 
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, startAngle, endAngle);
             ctx.strokeStyle = isDark ? '#d1d5db' : '#2d2f48';
             ctx.lineWidth = 10;
             ctx.stroke();
-        
 
             const fillAngle = startAngle + (angleRange * (safeValue / max));
             ctx.beginPath();
@@ -404,7 +435,6 @@
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 8;
             ctx.stroke();
-        
 
             const markerRadius = radius - 4;
             const markerX = centerX + markerRadius * Math.cos(fillAngle);
@@ -424,14 +454,12 @@
         }
 
         const gaugeConfigs = {
-            // Gauges desktop
             'gaugeTempAire': { value: 0, max: 50, unit: '°C' },
             'gaugeHumedad': { value: 0, max: 100, unit: '%' },
             'gaugeTempAgua': { value: 0, max: 50, unit: '°C' },
             'gaugePH': { value: 0, max: 14, unit: '' },
             'gaugeNivel': { value: 0, max: 100, unit: '' },
             'gaugeORP': { value: 0, max: 100, unit: 'mV' },
-            // Gauges móviles
             'gaugeTempAireMobile': { value: 0, max: 50, unit: '°C' },
             'gaugeHumedadMobile': { value: 0, max: 100, unit: '%' },
             'gaugeTempAguaMobile': { value: 0, max: 50, unit: '°C' },
@@ -453,13 +481,11 @@
         }
 
         function updateGauge(id, value, max, unit) {
-
             const valueElement = document.getElementById(id + 'Value');
             if (valueElement) {
                 valueElement.textContent = value.toFixed(1) + (unit ? unit : '');
             }
             
-
             const canvas = document.getElementById(id);
             if (canvas) {
                 createGauge(id, value, max, unit);
@@ -469,15 +495,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeGauges();
             
-
             fetchSensorData();
             fetchChartData();
             
-
             setInterval(fetchSensorData, 10000);
             setInterval(fetchChartData, 30000);
             
-
             const observer = new MutationObserver(() => {
                 initializeGauges();
                 fetchChartData(); 
