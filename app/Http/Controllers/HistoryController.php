@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\RegistroMediciones;
@@ -11,9 +12,8 @@ class HistoryController extends Controller
     // Página principal
     public function index(Request $request)
     {
-        $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
-            ->orderByDesc('fecha')
-            ->first();
+        // Hortaliza seleccionada (seleccion = 1)
+        $selectedCrop = $this->getSelectedCrop();
 
         // Defaults para GRÁFICAS (sensor=all, rango=week)
         $sensor = $request->get('sensor', 'all');  // all | humedad | temp_ambiente | ph | orp | temp_agua | ultrasonico
@@ -22,8 +22,17 @@ class HistoryController extends Controller
         // Defaults para TABLA (independiente)
         $tableRange = $request->get('tableRange', 'week'); // all | week | month | semester | year
 
+        // Base query: solo registros de la hortaliza seleccionada
+        $baseQuery = RegistroMediciones::query();
+        if ($selectedCrop) {
+            $baseQuery->where('id_hortaliza', $selectedCrop->id_hortaliza);
+        } else {
+            // Si no hay hortaliza seleccionada, no devolvemos registros
+            $baseQuery->whereRaw('1 = 0');
+        }
+
         // Datos tabla según filtro (paginado 15)
-        $tableQuery = $this->applyRangeFilter(RegistroMediciones::query(), $tableRange);
+        $tableQuery = $this->applyRangeFilter($baseQuery, $tableRange);
         $items = $tableQuery->orderByDesc('fecha')->paginate(15)->withQueryString();
 
         return view('Dashboard.HistoryView.history', [
@@ -41,9 +50,23 @@ class HistoryController extends Controller
         $sensor = $request->get('sensor', 'all');
         $range  = $request->get('range', 'week');
 
+        // Hortaliza seleccionada
+        $selectedCrop = $this->getSelectedCrop();
+        $idHortaliza  = $selectedCrop?->id_hortaliza;
+
         // Caso 1: sensor=all && range=all => barras con promedios por sensor
         if ($sensor === 'all' && $range === 'all') {
-            $avg = RegistroMediciones::avgAllSensors();
+            $avg = RegistroMediciones::avgAllSensors($idHortaliza);
+
+            if (!$avg) {
+                // Sin datos para esa hortaliza: devolvemos barras vacías (0)
+                return response()->json([
+                    'type'   => 'bar',
+                    'labels' => ['Humedad','Temp. ambiente','pH','ORP','Temp. agua','Ultrasónico'],
+                    'series' => [0, 0, 0, 0, 0, 0],
+                ]);
+            }
+
             return response()->json([
                 'type'   => 'bar',
                 'labels' => ['Humedad','Temp. ambiente','pH','ORP','Temp. agua','Ultrasónico'],
@@ -71,7 +94,7 @@ class HistoryController extends Controller
 
             $payload = [];
             foreach ($sensors as $key => $label) {
-                $payload[] = $this->seriesForSensorAndRange($key, $range, $label);
+                $payload[] = $this->seriesForSensorAndRange($key, $range, $label, $idHortaliza);
             }
             return response()->json([
                 'type'    => 'multi-line', // cliente renderea 6 charts verticales
@@ -89,14 +112,26 @@ class HistoryController extends Controller
             'ultrasonico'   => 'Ultrasónico',
         ][$sensor] ?? 'Sensor';
 
-        return response()->json($this->seriesForSensorAndRange($sensor, $range, $label));
+        return response()->json(
+            $this->seriesForSensorAndRange($sensor, $range, $label, $idHortaliza)
+        );
     }
 
     public function table(Request $request)
     {
         $tableRange = $request->get('tableRange', 'week');
 
-        $query = $this->applyRangeFilter(RegistroMediciones::query(), $tableRange)
+        // Hortaliza seleccionada
+        $selectedCrop = $this->getSelectedCrop();
+
+        $baseQuery = RegistroMediciones::query();
+        if ($selectedCrop) {
+            $baseQuery->where('id_hortaliza', $selectedCrop->id_hortaliza);
+        } else {
+            $baseQuery->whereRaw('1 = 0');
+        }
+
+        $query = $this->applyRangeFilter($baseQuery, $tableRange)
             ->orderByDesc('fecha');
 
         $items = $query->paginate(15)->withQueryString();
@@ -110,20 +145,23 @@ class HistoryController extends Controller
 
     // Helpers
 
-    private function seriesForSensorAndRange(string $sensor, string $range, string $niceLabel)
+    /**
+     * Series para un sensor y rango concretos, filtradas por hortaliza.
+     */
+    private function seriesForSensorAndRange(string $sensor, string $range, string $niceLabel, ?int $idHortaliza = null)
     {
         $col = RegistroMediciones::sensorColumn($sensor);
         abort_if(!$col, 400, 'Sensor inválido');
 
         switch ($range) {
             case 'week':     // últimos 7 días (promedios por día)
-                $rows = RegistroMediciones::avgByDayLast7($col);
+                $rows = RegistroMediciones::avgByDayLast7($col, $idHortaliza);
                 $labels = $rows->pluck('x')->map(fn($d) => Carbon::parse($d)->format('d M'));
                 $series = $rows->pluck('y')->map(fn($v) => $v === null ? null : round($v, 2));
                 return ['type'=>'line','label'=>$niceLabel,'labels'=>$labels,'series'=>$series];
 
             case 'month':    // 4 semanas
-                $rows = RegistroMediciones::avgByWeeksLast4($col);
+                $rows = RegistroMediciones::avgByWeeksLast4($col, $idHortaliza);
                 $labels = $rows->map(function($r){
                     $a = Carbon::parse($r->x_start)->format('M d');
                     $b = Carbon::parse($r->x_end)->format('M d');
@@ -133,13 +171,13 @@ class HistoryController extends Controller
                 return ['type'=>'line','label'=>$niceLabel,'labels'=>$labels,'series'=>$series];
 
             case 'semester': // 6 meses
-                $rows = RegistroMediciones::avgByMonthsLast6($col);
+                $rows = RegistroMediciones::avgByMonthsLast6($col, $idHortaliza);
                 $labels = $rows->pluck('x')->map(fn($m) => Carbon::parse($m.'-01')->isoFormat('MMM YYYY'));
                 $series = $rows->pluck('y')->map(fn($v) => $v === null ? null : round($v, 2));
                 return ['type'=>'line','label'=>$niceLabel,'labels'=>$labels,'series'=>$series];
 
             case 'year':     // 6 bimestres
-                $rows = RegistroMediciones::avgByBiMonthsLast6($col);
+                $rows = RegistroMediciones::avgByBiMonthsLast6($col, $idHortaliza);
                 $labels = $rows->map(function($r){
                     $a = Carbon::parse($r->x_start_key.'-01')->isoFormat('MMM');
                     $b = Carbon::parse($r->x_end_key.'-01')->isoFormat('MMM');
@@ -173,5 +211,14 @@ class HistoryController extends Controller
                 return $query;
         }
     }
-}
 
+    /**
+     * Devuelve la hortaliza que está marcada como seleccionada.
+     */
+    private function getSelectedCrop(): ?SeleccionHortalizas
+    {
+        return SeleccionHortalizas::where('seleccion', 1)
+            ->orderByDesc('fecha')
+            ->first();
+    }
+}
