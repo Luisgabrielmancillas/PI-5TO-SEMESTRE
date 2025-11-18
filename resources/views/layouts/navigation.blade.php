@@ -19,7 +19,11 @@
                         $isHort = request()->routeIs('hortalizas');
                         $isHist = request()->routeIs('history') || request()->routeIs('history.*');
                         $isGest = request()->routeIs('gestion.index');
-                    @endphp
+                        $user = auth()->user();
+                        $isAdmin = method_exists($user, 'hasRole')
+                            ? $user->hasRole('admin')
+                            : (($user->role ?? null) === 'admin');
+                    @endphp 
 
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
                         <a href="{{ route('dashboard') }}"
@@ -80,21 +84,23 @@
                         </a>
 
                         <!-- GESTIÓN DE USUARIOS -->
-                        <a href="{{ route('gestion.index') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
-                                  {{ $isGest
-                                      ? 'bg-white text-amber-700 shadow-sm dark:bg-gray-700 dark:text-amber-200'
-                                      : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
-                            <svg class="h-5 w-5 {{ $isGest ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-gray-400' }}" 
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="9" cy="7" r="3"/>
-                                <path d="M4 20v-2a5 5 0 0 1 5-5h0"/>
-                                <circle cx="18" cy="13" r="2"/>
-                                <path d="M18 9v2M18 15v2M14 13h2M20 13h2M16.6 10.6l1.4 1.4M16.6 15.4l1.4-1.4M19.4 12l1.4-1.4M19.4 14l1.4 1.4"/>
-                            </svg>
-                            <span>Gestión Usuarios</span>
-                        </a>
+                        @if($isAdmin)
+                            <a href="{{ route('gestion.index') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                    {{ $isGest
+                                        ? 'bg-white text-amber-700 shadow-sm dark:bg-gray-700 dark:text-amber-200'
+                                        : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                                <svg class="h-5 w-5 {{ $isGest ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="7" r="3"/>
+                                    <path d="M4 20v-2a5 5 0 0 1 5-5h0"/>
+                                    <circle cx="18" cy="13" r="2"/>
+                                    <path d="M18 9v2M18 15v2M14 13h2M20 13h2M16.6 10.6l1.4 1.4M16.6 15.4l1.4-1.4M19.4 12l1.4-1.4M19.4 14l1.4 1.4"/>
+                                </svg>
+                                <span>Gestión Usuarios</span>
+                            </a>
+                        @endif
                     </div> <!-- Cierre de tabs -->
                 </div> <!-- Cierre sm:flex -->
                 @endauth
@@ -224,11 +230,13 @@
                {{ request()->routeIs('history') ? 'bg-pink-50 border-pink-500 text-pink-700 dark:bg-gray-700 dark:text-pink-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                 Historial
             </a>
-            <a href="{{ route('gestion.index') }}"
-               class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
-               {{ request()->routeIs('gestion.index') ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-gray-700 dark:text-amber-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
-                Gestión Usuarios
-            </a>
+            @if($isAdmin)('admin')
+                <a href="{{ route('gestion.index') }}"
+                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
+                {{ request()->routeIs('gestion.index') ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-gray-700 dark:text-amber-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Gestión Usuarios
+                </a>
+            @endif
         </div>
 
         <!-- Selector de idioma en móvil -->

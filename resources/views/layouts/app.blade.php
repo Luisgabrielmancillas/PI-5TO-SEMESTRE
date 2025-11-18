@@ -243,483 +243,625 @@
 
         <!-- Script de traducción sin toast y con indicador solo primera vez -->
         <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const storageLangKey = "idiomaActual";
-            const cacheKey = "traduccionesCache";
-            const seccionesTraducidasKey = "seccionesTraducidas";
-            const idiomas = { 
-                es: "Español", 
-                en: "English", 
-                fr: "Français", 
-                de: "Deutsch" 
-            };
-            
-            let idiomaActual = localStorage.getItem(storageLangKey) || "es";
-            let traduccionesCache = JSON.parse(localStorage.getItem(cacheKey)) || {};
-            let seccionesTraducidas = JSON.parse(localStorage.getItem(seccionesTraducidasKey)) || {};
+            document.addEventListener("DOMContentLoaded", () => {
+                const storageLangKey = "idiomaActual";
+                const cacheKey = "traduccionesCache";
+                const seccionesTraducidasKey = "seccionesTraducidas";
+                const idiomas = { 
+                    es: "Español", 
+                    en: "English", 
+                    fr: "Français", 
+                    de: "Deutsch" 
+                };
+                
+                let idiomaActual = localStorage.getItem(storageLangKey) || "es";
+                let traduccionesCache = JSON.parse(localStorage.getItem(cacheKey)) || {};
+                let seccionesTraducidas = JSON.parse(localStorage.getItem(seccionesTraducidasKey)) || {};
 
-            // Inicializar sistema inmediatamente
-            initializeLanguageSystem();
-            aplicarTraduccionInicial();
+                // Inicializar sistema inmediatamente
+                initializeLanguageSystem();
+                aplicarTraduccionInicial();
 
-            function initializeLanguageSystem() {
-                const boton = document.getElementById("btn-traducir");
-                const menu = document.getElementById("menu-idiomas");
+                function initializeLanguageSystem() {
+                    const boton = document.getElementById("btn-traducir");
+                    const menu = document.getElementById("menu-idiomas");
 
-                if (boton && menu) {
-                    boton.addEventListener("click", e => {
-                        e.stopPropagation();
-                        menu.classList.toggle("hidden");
+                    if (boton && menu) {
+                        boton.addEventListener("click", e => {
+                            e.stopPropagation();
+                            menu.classList.toggle("hidden");
+                        });
+
+                        document.addEventListener("click", e => {
+                            if (menu && !menu.contains(e.target) && boton && !boton.contains(e.target)) {
+                                menu.classList.add("hidden");
+                            }
+                        });
+                    }
+
+                    // Botones de idioma
+                    document.querySelectorAll("button[data-lang]").forEach(btn => {
+                        btn.addEventListener("click", async () => {
+                            const nuevo = btn.getAttribute("data-lang");
+                            if (!nuevo || nuevo === idiomaActual) return;
+                            
+                            if (menu) menu.classList.add("hidden");
+                            await cambiarIdioma(nuevo);
+                        });
                     });
 
-                    document.addEventListener("click", e => {
-                        if (menu && !menu.contains(e.target) && boton && !boton.contains(e.target)) {
-                            menu.classList.add("hidden");
-                        }
-                    });
+                    // Observar cambios en la página para detectar cambios de sección
+                    observarCambiosPagina();
                 }
 
-                // Botones de idioma
-                document.querySelectorAll("button[data-lang]").forEach(btn => {
-                    btn.addEventListener("click", async () => {
-                        const nuevo = btn.getAttribute("data-lang");
-                        if (!nuevo || nuevo === idiomaActual) return;
-                        
-                        if (menu) menu.classList.add("hidden");
-                        await cambiarIdioma(nuevo);
-                    });
-                });
-
-                // Observar cambios en la página para detectar cambios de sección
-                observarCambiosPagina();
-            }
-
-            function observarCambiosPagina() {
-                let ultimaURL = window.location.href;
-                
-                const observer = new MutationObserver((mutations) => {
-                    const urlActual = window.location.href;
+                function observarCambiosPagina() {
+                    let ultimaURL = window.location.href;
                     
-                    // Detectar cambio de URL (navegación SPA)
-                    if (urlActual !== ultimaURL) {
-                        ultimaURL = urlActual;
-                        console.log("🔄 Cambio de sección detectado:", urlActual);
+                    const observer = new MutationObserver((mutations) => {
+                        const urlActual = window.location.href;
                         
-                        if (idiomaActual !== "es") {
-                            manejarCambioSeccion();
-                        }
-                    }
-                });
-
-                observer.observe(document.body, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                    attributeFilter: ['class', 'id']
-                });
-
-                // También observar cambios en history para SPAs
-                if (window.history && window.history.pushState) {
-                    const originalPushState = history.pushState;
-                    const originalReplaceState = history.replaceState;
-                    
-                    history.pushState = function() {
-                        originalPushState.apply(this, arguments);
-                        setTimeout(() => {
+                        // Detectar cambio de URL (navegación SPA)
+                        if (urlActual !== ultimaURL) {
+                            ultimaURL = urlActual;
+                            console.log("🔄 Cambio de sección detectado:", urlActual);
+                            
                             if (idiomaActual !== "es") {
-                                console.log("🔄 Navegación SPA (pushState) detectada");
                                 manejarCambioSeccion();
                             }
-                        }, 50);
-                    };
-                    
-                    history.replaceState = function() {
-                        originalReplaceState.apply(this, arguments);
-                        setTimeout(() => {
-                            if (idiomaActual !== "es") {
-                                console.log("🔄 Navegación SPA (replaceState) detectada");
-                                manejarCambioSeccion();
-                            }
-                        }, 50);
-                    };
-                }
-            }
+                        }
+                    });
 
-            function manejarCambioSeccion() {
-                const seccionActual = obtenerIdentificadorSeccion();
-                const claveSeccion = `${idiomaActual}_${seccionActual}`;
-                
-                // Verificar si es la primera vez en esta sección con este idioma
-                if (!seccionesTraducidas[claveSeccion]) {
-                    console.log(`🔄 Primera vez en sección ${seccionActual} con idioma ${idiomaActual}`);
-                    mostrarIndicadorTraduccion();
-                    seccionesTraducidas[claveSeccion] = true;
-                    localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
-                    
-                    // Aplicar traducción para esta sección
-                    aplicarTraduccionSeccion();
-                } else {
-                    console.log(`✅ Sección ${seccionActual} ya traducida anteriormente`);
-                    aplicarTraduccionCache(idiomaActual);
-                }
-            }
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ['class', 'id']
+                    });
 
-            function obtenerIdentificadorSeccion() {
-                // Intentar obtener identificador de la sección actual
-                const path = window.location.pathname;
-                const hash = window.location.hash;
-                
-                if (hash && hash !== '#') {
-                    return hash;
-                }
-                
-                if (path && path !== '/') {
-                    return path.split('/').pop() || 'inicio';
-                }
-                
-                return 'inicio';
-            }
-
-            function mostrarIndicadorTraduccion() {
-                const botonText = document.getElementById("btn-traducir-text");
-                if (botonText) {
-                    // Guardar el texto original temporalmente
-                    if (!botonText.dataset.originalText) {
-                        botonText.dataset.originalText = botonText.textContent;
+                    // También observar cambios en history para SPAs
+                    if (window.history && window.history.pushState) {
+                        const originalPushState = history.pushState;
+                        const originalReplaceState = history.replaceState;
+                        
+                        history.pushState = function() {
+                            originalPushState.apply(this, arguments);
+                            setTimeout(() => {
+                                if (idiomaActual !== "es") {
+                                    console.log("🔄 Navegación SPA (pushState) detectada");
+                                    manejarCambioSeccion();
+                                }
+                            }, 50);
+                        };
+                        
+                        history.replaceState = function() {
+                            originalReplaceState.apply(this, arguments);
+                            setTimeout(() => {
+                                if (idiomaActual !== "es") {
+                                    console.log("🔄 Navegación SPA (replaceState) detectada");
+                                    manejarCambioSeccion();
+                                }
+                            }, 50);
+                        };
                     }
-                    
-                    // Mostrar "Traduciendo..." en el idioma correspondiente
-                    if (idiomaActual === 'es') {
-                        botonText.textContent = "⌛ Traduciendo...";
-                    } else if (idiomaActual === 'en') {
-                        botonText.textContent = "⌛ Translating...";
-                    } else if (idiomaActual === 'fr') {
-                        botonText.textContent = "⌛ Traduction...";
-                    } else if (idiomaActual === 'de') {
-                        botonText.textContent = "⌛ Übersetzung...";
-                    }
-                    
-
-                    setTimeout(() => {
-                        actualizarBotonIdioma();
-                    }, 1500);
                 }
-            }
 
-            function aplicarTraduccionSeccion() {
-
-                aplicarTraduccionCache(idiomaActual);
-                
-        
-                traducirPagina(idiomaActual);
-            }
-
-            function aplicarTraduccionInicial() {
-                actualizarBotonIdioma();
-                
-                if (idiomaActual !== "es") {
+                function manejarCambioSeccion() {
                     const seccionActual = obtenerIdentificadorSeccion();
                     const claveSeccion = `${idiomaActual}_${seccionActual}`;
                     
-
+                    // Verificar si es la primera vez en esta sección con este idioma
                     if (!seccionesTraducidas[claveSeccion]) {
+                        console.log(`🔄 Primera vez en sección ${seccionActual} con idioma ${idiomaActual}`);
+                        mostrarIndicadorTraduccion();
                         seccionesTraducidas[claveSeccion] = true;
                         localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
-                        mostrarIndicadorTraduccion();
+                        
+                        // Aplicar traducción para esta sección
+                        aplicarTraduccionSeccion();
+                    } else {
+                        console.log(`✅ Sección ${seccionActual} ya traducida anteriormente`);
+                        aplicarTraduccionCache(idiomaActual);
+                    }
+                }
+
+                function obtenerIdentificadorSeccion() {
+                    // Intentar obtener identificador de la sección actual
+                    const path = window.location.pathname;
+                    const hash = window.location.hash;
+                    
+                    if (hash && hash !== '#') {
+                        return hash;
                     }
                     
+                    if (path && path !== '/') {
+                        return path.split('/').pop() || 'inicio';
+                    }
+                    
+                    return 'inicio';
+                }
+
+                function mostrarIndicadorTraduccion() {
+                    const botonText = document.getElementById("btn-traducir-text");
+                    if (botonText) {
+                        // Guardar el texto original temporalmente
+                        if (!botonText.dataset.originalText) {
+                            botonText.dataset.originalText = botonText.textContent;
+                        }
+                        
+                        // Mostrar "Traduciendo..." en el idioma correspondiente
+                        if (idiomaActual === 'es') {
+                            botonText.textContent = "⌛ Traduciendo...";
+                        } else if (idiomaActual === 'en') {
+                            botonText.textContent = "⌛ Translating...";
+                        } else if (idiomaActual === 'fr') {
+                            botonText.textContent = "⌛ Traduction...";
+                        } else if (idiomaActual === 'de') {
+                            botonText.textContent = "⌛ Übersetzung...";
+                        }
+                        
+
+                        setTimeout(() => {
+                            actualizarBotonIdioma();
+                        }, 1500);
+                    }
+                }
+
+                function aplicarTraduccionSeccion() {
 
                     aplicarTraduccionCache(idiomaActual);
                     
-
-                    if (verificarContenidoSinTraducir()) {
-                        traducirPagina(idiomaActual);
-                    }
+            
+                    traducirPagina(idiomaActual);
                 }
-            }
 
-            function verificarContenidoSinTraducir() {
-                const textosEs = ['Resumen', 'Historial', 'Configuración', 'Perfil', 'Salir', 'Inicio'];
-                return textosEs.some(texto => 
-                    document.body.textContent.includes(texto) && idiomaActual !== "es"
-                );
-            }
-
-            async function cambiarIdioma(nuevoIdioma) {
-
-                resetearSeccionesParaIdioma(nuevoIdioma);
-                
-
-                const botonText = document.getElementById("btn-traducir-text");
-                if (botonText) {
-                    if (nuevoIdioma === 'es') {
-                        botonText.textContent = "⌛ Traduciendo...";
-                    } else if (nuevoIdioma === 'en') {
-                        botonText.textContent = "⌛ Translating...";
-                    } else if (nuevoIdioma === 'fr') {
-                        botonText.textContent = "⌛ Traduction...";
-                    } else if (nuevoIdioma === 'de') {
-                        botonText.textContent = "⌛ Übersetzung...";
-                    }
-                }
-                
-                idiomaActual = nuevoIdioma;
-                localStorage.setItem(storageLangKey, nuevoIdioma);
-                
-                if (nuevoIdioma === "es") {
-                    restaurarTextoOriginal();
-                } else {
-
-                    aplicarTraduccionCache(nuevoIdioma);
-                    await traducirPagina(nuevoIdioma);
-                    
-
-                    const seccionActual = obtenerIdentificadorSeccion();
-                    const claveSeccion = `${nuevoIdioma}_${seccionActual}`;
-                    seccionesTraducidas[claveSeccion] = true;
-                    localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
-                    
+                function aplicarTraduccionInicial() {
                     actualizarBotonIdioma();
-                }
-            }
-
-            function resetearSeccionesParaIdioma(idioma) {
-
-                Object.keys(seccionesTraducidas).forEach(clave => {
-                    if (clave.startsWith(idioma + '_')) {
-                        delete seccionesTraducidas[clave];
-                    }
-                });
-                localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
-                console.log(`🔄 Estado de secciones reiniciado para: ${idioma}`);
-            }
-
-            function restaurarTextoOriginal() {
-                window.location.reload();
-            }
-
-            function actualizarBotonIdioma() {
-                const botonText = document.getElementById("btn-traducir-text");
-                if (botonText) {
-                    botonText.textContent = idiomas[idiomaActual] || idiomaActual.toUpperCase();
-                }
-            }
-
-            function aplicarTraduccionCache(lang) {
-                if (lang === "es") return true;
-                
-                const cache = traduccionesCache[lang];
-                if (!cache || Object.keys(cache).length === 0) {
-                    return false;
-                }
-                
-                const nodos = obtenerNodosTraducibles();
-                let contador = 0;
-                
-                nodos.forEach(n => {
-                    const original = n.textContent.trim();
-                    if (cache[original]) {
-                        n.textContent = cache[original];
-                        contador++;
-                    }
-                });
-                
-                console.log(`✅ Aplicadas ${contador} traducciones desde cache`);
-                return contador > 0;
-            }
-
-            async function traducirPagina(lang) {
-                if (lang === "es") return;
-                
-                const nodos = obtenerNodosTraducibles();
-                const textos = Array.from(new Set(nodos.map(n => n.textContent.trim())))
-                                    .filter(texto => 
-                                        texto.length > 0 && 
-                                        !/^[\d\s\.:\/\-,]+$/.test(texto) &&
-                                        !traduccionesCache[lang]?.[texto]
-                                    );
-                
-                if (textos.length === 0) return;
-                
-                try {
-                    const resp = await fetch("/traducir", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || ''
-                        },
-                        body: JSON.stringify({ textos, idioma: lang })
-                    });
                     
-                    if (!resp.ok) throw new Error(`Error HTTP: ${resp.status}`);
-                    
-                    const data = await resp.json();
-                    if (data.traducciones) {
-                        const nuevosMappings = {};
-                        textos.forEach((t, i) => {
-                            const traducido = data.traducciones[i];
-                            if (traducido && traducido !== t) {
-                                nuevosMappings[t] = traducido;
-                            }
-                        });
+                    if (idiomaActual !== "es") {
+                        const seccionActual = obtenerIdentificadorSeccion();
+                        const claveSeccion = `${idiomaActual}_${seccionActual}`;
                         
-                        traduccionesCache[lang] = { ...traduccionesCache[lang], ...nuevosMappings };
-                        localStorage.setItem(cacheKey, JSON.stringify(traduccionesCache));
-                        aplicarTraducciones(nuevosMappings);
+
+                        if (!seccionesTraducidas[claveSeccion]) {
+                            seccionesTraducidas[claveSeccion] = true;
+                            localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
+                            mostrarIndicadorTraduccion();
+                        }
                         
-                        console.log(`💾 Cache actualizado con ${Object.keys(nuevosMappings).length} nuevas traducciones`);
-                    }
-                } catch (error) {
-                    console.error("⚠️ Error en traducción:", error);
-                }
-            }
 
-            function aplicarTraducciones(traducciones) {
-                const nodos = obtenerNodosTraducibles();
-                let contador = 0;
-                
-                nodos.forEach(n => {
-                    const original = n.textContent.trim();
-                    if (traducciones[original]) {
-                        n.textContent = traducciones[original];
-                        contador++;
-                    }
-                });
-                
-                console.log(`🔄 Aplicadas ${contador} nuevas traducciones`);
-            }
+                        aplicarTraduccionCache(idiomaActual);
+                        
 
-            function obtenerNodosTraducibles() {
-                const nodos = [];
-                const elementosIgnorados = ['script', 'style', 'noscript', 'svg', 'canvas', 'code', 'pre'];
-                
-                const walker = document.createTreeWalker(
-                    document.body, 
-                    NodeFilter.SHOW_TEXT, 
-                    {
-                        acceptNode: function(node) {
-                            if (!node.textContent || node.textContent.trim().length === 0) return NodeFilter.FILTER_REJECT;
-                            const parent = node.parentElement;
-                            if (!parent) return NodeFilter.FILTER_REJECT;
-                            const tagName = parent.tagName.toLowerCase();
-                            if (elementosIgnorados.includes(tagName)) return NodeFilter.FILTER_REJECT;
-                            if (parent.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
-                            const texto = node.textContent.trim();
-                            if (/^[\d\s\.:\/\-,%°°#@!$&*()+=\[\]{}|\\:;"'<>\?]+$/.test(texto)) return NodeFilter.FILTER_REJECT;
-                            if (/[A-Za-zÀ-ÖØ-öø-ÿÑñ]/.test(texto)) return NodeFilter.FILTER_ACCEPT;
-                            return NodeFilter.FILTER_REJECT;
+                        if (verificarContenidoSinTraducir()) {
+                            traducirPagina(idiomaActual);
                         }
                     }
-                );
-                
-                let currentNode;
-                while (currentNode = walker.nextNode()) {
-                    nodos.push(currentNode);
                 }
-                
-                return nodos;
-            }
 
-            // Funciones globales
-            window.recargarTraduccion = () => aplicarTraduccionCache(idiomaActual);
-            window.cambiarIdiomaGlobal = cambiarIdioma;
-            window.getIdiomaActual = () => idiomaActual;
-            window.reiniciarTraduccionesSecciones = () => {
-                seccionesTraducidas = {};
-                localStorage.removeItem(seccionesTraducidasKey);
-                console.log("🔄 Estado de secciones reiniciado completamente");
-            };
-            
-            console.log("🌐 Sistema de traducción optimizado - Idioma:", idiomaActual);
-        });
+                function verificarContenidoSinTraducir() {
+                    const textosEs = ['Resumen', 'Historial', 'Configuración', 'Perfil', 'Salir', 'Inicio'];
+                    return textosEs.some(texto => 
+                        document.body.textContent.includes(texto) && idiomaActual !== "es"
+                    );
+                }
+
+                async function cambiarIdioma(nuevoIdioma) {
+
+                    resetearSeccionesParaIdioma(nuevoIdioma);
+                    
+
+                    const botonText = document.getElementById("btn-traducir-text");
+                    if (botonText) {
+                        if (nuevoIdioma === 'es') {
+                            botonText.textContent = "⌛ Traduciendo...";
+                        } else if (nuevoIdioma === 'en') {
+                            botonText.textContent = "⌛ Translating...";
+                        } else if (nuevoIdioma === 'fr') {
+                            botonText.textContent = "⌛ Traduction...";
+                        } else if (nuevoIdioma === 'de') {
+                            botonText.textContent = "⌛ Übersetzung...";
+                        }
+                    }
+                    
+                    idiomaActual = nuevoIdioma;
+                    localStorage.setItem(storageLangKey, nuevoIdioma);
+                    
+                    if (nuevoIdioma === "es") {
+                        restaurarTextoOriginal();
+                    } else {
+
+                        aplicarTraduccionCache(nuevoIdioma);
+                        await traducirPagina(nuevoIdioma);
+                        
+
+                        const seccionActual = obtenerIdentificadorSeccion();
+                        const claveSeccion = `${nuevoIdioma}_${seccionActual}`;
+                        seccionesTraducidas[claveSeccion] = true;
+                        localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
+                        
+                        actualizarBotonIdioma();
+                    }
+                }
+
+                function resetearSeccionesParaIdioma(idioma) {
+
+                    Object.keys(seccionesTraducidas).forEach(clave => {
+                        if (clave.startsWith(idioma + '_')) {
+                            delete seccionesTraducidas[clave];
+                        }
+                    });
+                    localStorage.setItem(seccionesTraducidasKey, JSON.stringify(seccionesTraducidas));
+                    console.log(`🔄 Estado de secciones reiniciado para: ${idioma}`);
+                }
+
+                function restaurarTextoOriginal() {
+                    window.location.reload();
+                }
+
+                function actualizarBotonIdioma() {
+                    const botonText = document.getElementById("btn-traducir-text");
+                    if (botonText) {
+                        botonText.textContent = idiomas[idiomaActual] || idiomaActual.toUpperCase();
+                    }
+                }
+
+                function aplicarTraduccionCache(lang) {
+                    if (lang === "es") return true;
+                    
+                    const cache = traduccionesCache[lang];
+                    if (!cache || Object.keys(cache).length === 0) {
+                        return false;
+                    }
+                    
+                    const nodos = obtenerNodosTraducibles();
+                    let contador = 0;
+                    
+                    nodos.forEach(n => {
+                        const original = n.textContent.trim();
+                        if (cache[original]) {
+                            n.textContent = cache[original];
+                            contador++;
+                        }
+                    });
+                    
+                    console.log(`✅ Aplicadas ${contador} traducciones desde cache`);
+                    return contador > 0;
+                }
+
+                async function traducirPagina(lang) {
+                    if (lang === "es") return;
+                    
+                    const nodos = obtenerNodosTraducibles();
+                    const textos = Array.from(new Set(nodos.map(n => n.textContent.trim())))
+                                        .filter(texto => 
+                                            texto.length > 0 && 
+                                            !/^[\d\s\.:\/\-,]+$/.test(texto) &&
+                                            !traduccionesCache[lang]?.[texto]
+                                        );
+                    
+                    if (textos.length === 0) return;
+                    
+                    try {
+                        const resp = await fetch("/traducir", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            },
+                            body: JSON.stringify({ textos, idioma: lang })
+                        });
+                        
+                        if (!resp.ok) throw new Error(`Error HTTP: ${resp.status}`);
+                        
+                        const data = await resp.json();
+                        if (data.traducciones) {
+                            const nuevosMappings = {};
+                            textos.forEach((t, i) => {
+                                const traducido = data.traducciones[i];
+                                if (traducido && traducido !== t) {
+                                    nuevosMappings[t] = traducido;
+                                }
+                            });
+                            
+                            traduccionesCache[lang] = { ...traduccionesCache[lang], ...nuevosMappings };
+                            localStorage.setItem(cacheKey, JSON.stringify(traduccionesCache));
+                            aplicarTraducciones(nuevosMappings);
+                            
+                            console.log(`💾 Cache actualizado con ${Object.keys(nuevosMappings).length} nuevas traducciones`);
+                        }
+                    } catch (error) {
+                        console.error("⚠️ Error en traducción:", error);
+                    }
+                }
+
+                function aplicarTraducciones(traducciones) {
+                    const nodos = obtenerNodosTraducibles();
+                    let contador = 0;
+                    
+                    nodos.forEach(n => {
+                        const original = n.textContent.trim();
+                        if (traducciones[original]) {
+                            n.textContent = traducciones[original];
+                            contador++;
+                        }
+                    });
+                    
+                    console.log(`🔄 Aplicadas ${contador} nuevas traducciones`);
+                }
+
+                function obtenerNodosTraducibles() {
+                    const nodos = [];
+                    const elementosIgnorados = ['script', 'style', 'noscript', 'svg', 'canvas', 'code', 'pre'];
+                    
+                    const walker = document.createTreeWalker(
+                        document.body, 
+                        NodeFilter.SHOW_TEXT, 
+                        {
+                            acceptNode: function(node) {
+                                if (!node.textContent || node.textContent.trim().length === 0) return NodeFilter.FILTER_REJECT;
+                                const parent = node.parentElement;
+                                if (!parent) return NodeFilter.FILTER_REJECT;
+                                const tagName = parent.tagName.toLowerCase();
+                                if (elementosIgnorados.includes(tagName)) return NodeFilter.FILTER_REJECT;
+                                if (parent.isContentEditable || ['INPUT','TEXTAREA','SELECT'].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+                                const texto = node.textContent.trim();
+                                if (/^[\d\s\.:\/\-,%°°#@!$&*()+=\[\]{}|\\:;"'<>\?]+$/.test(texto)) return NodeFilter.FILTER_REJECT;
+                                if (/[A-Za-zÀ-ÖØ-öø-ÿÑñ]/.test(texto)) return NodeFilter.FILTER_ACCEPT;
+                                return NodeFilter.FILTER_REJECT;
+                            }
+                        }
+                    );
+                    
+                    let currentNode;
+                    while (currentNode = walker.nextNode()) {
+                        nodos.push(currentNode);
+                    }
+                    
+                    return nodos;
+                }
+                // Funciones globales
+                window.recargarTraduccion = () => aplicarTraduccionCache(idiomaActual);
+                window.cambiarIdiomaGlobal = cambiarIdioma;
+                window.getIdiomaActual = () => idiomaActual;
+                window.reiniciarTraduccionesSecciones = () => {
+                    seccionesTraducidas = {};
+                    localStorage.removeItem(seccionesTraducidasKey);
+                    console.log("🔄 Estado de secciones reiniciado completamente");
+                };
+                
+                console.log("🌐 Sistema de traducción optimizado - Idioma:", idiomaActual);
+            });
         </script>
 
 
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
+            document.addEventListener("DOMContentLoaded", function() {
                 const btn = document.getElementById('btn-notificaciones');
                 const menu = document.getElementById('noti-menu');
                 const badge = document.getElementById('noti-count');
 
-                let ultimaCantidad = 0;        
-                let ultimaMedicionId = null;  
-                const audio = new Audio("{{ asset('sounds/alert.wav') }}");
+                let notificacionesActuales = [];
+                let ultimaMedicionId = null; 
+                let audioCargado = false;
+                let audio = null;
 
 
-                if (btn && menu) {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        menu.classList.toggle('hidden');
+                function cargarAudio() {
+                    if (!audioCargado) {
+                        audio = new Audio("{{ asset('sounds/alert.wav') }}");
+                        audio.volume = 0.7;
+                        audio.preload = 'auto';
+                        audioCargado = true;
+                        audio.load();
+                    }
+                    return audio;
+                }
 
-
-                        if (!menu.classList.contains('hidden')) {
-                            badge.classList.add('hidden');
-                            badge.textContent = '0';
-                            ultimaCantidad = 0;
-
-                            localStorage.setItem('ultimaMedicionVista', ultimaMedicionId ?? '');
+                function reproducirSonido() {
+                    try {
+                        const audio = cargarAudio();
+                        if (audio) {
+                            const audioClone = audio.cloneNode();
+                            audioClone.volume = 0.7;
+                            audioClone.play().catch(e => {
+                                console.log("🔇 Sonido bloqueado (interacción requerida):", e);
+                                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                            });
                         }
-                    });
+                    } catch (error) {
+                        console.log("🔇 Error reproduciendo sonido:", error);
+                    }
+                }
 
 
-                    document.addEventListener('click', (e) => {
-                        if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                            menu.classList.add('hidden');
-                        }
-                    });
+                function actualizarBadge(cantidad) {
+                    if (!badge) return;
+                    
+                    if (cantidad > 0) {
+                        badge.textContent = cantidad > 99 ? '99+' : cantidad.toString();
+                        badge.classList.remove('hidden');
+                        badge.classList.add('animate-pulse');
+                        setTimeout(() => {
+                            if (badge) badge.classList.remove('animate-pulse');
+                        }, 2000);
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+
+                function resetearContador() {
+                    if (badge) {
+                        badge.classList.add('hidden');
+                        badge.textContent = '0';
+                    }
+                }
+
+                function marcarComoLeidas() {
+                    if (ultimaMedicionId) {
+
+                        localStorage.setItem('ultimaMedicionVista', ultimaMedicionId);
+                        console.log('✅ Notificaciones marcadas como leídas para ID:', ultimaMedicionId);
+                    }
+                    
+
+                    localStorage.setItem('ultimoConteoNotificaciones', notificacionesActuales.length.toString());
+                    
+                    actualizarBadge(0); 
+                }
+
+
+                function hayNotificacionesNuevas(idMedicionActual) {
+                    const ultimaVista = localStorage.getItem('ultimaMedicionVista');
+                    
+
+                    if (!ultimaVista) return true;
+
+
+                    if (idMedicionActual !== ultimaVista) return true;
+                    
+
+                    return false;
                 }
 
 
                 async function cargarNotificaciones() {
                     try {
-                        const resp = await fetch('/notificaciones');
+
+                        
+                        const resp = await fetch('{{ route("notificaciones.obtener") }}', {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Cache-Control': 'no-cache'
+                            }
+                        });
+                        
+                        if (!resp.ok) throw new Error(`Error HTTP: ${resp.status}`);
+                        
                         const data = await resp.json();
 
                         if (!data || !Array.isArray(data.notificaciones)) return;
 
                         const notis = data.notificaciones;
-                        const idMedicion = data.id_medicion ?? null;
+
+                        const idMedicion = data.id_medicion || `medicion_${Date.now()}`;
+                        const cantidadNotis = notis.length;
 
 
-                        const html = notis.length > 0
-                            ? notis.map(n => `
-                                <div class="flex items-start gap-2 p-2 border-b border-gray-200 dark:border-gray-700">
-                                    <i class="ri-error-warning-line ${n.tipo === 'alto' ? 'text-red-500' : 'text-blue-500'} mt-0.5"></i>
-                                    <p class="text-sm ${n.tipo === 'alto' ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}">
-                                        ${n.mensaje}
-                                    </p>
-                                </div>
-                            `).join('')
-                            : '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No hay notificaciones</p>';
-
-                        menu.innerHTML = html;
+                        notificacionesActuales = notis;
+                        ultimaMedicionId = idMedicion;
 
 
-                        const ultimaVista = localStorage.getItem('ultimaMedicionVista');
-
-                        if (notis.length > 0 && idMedicion && idMedicion !== ultimaVista) {
-
-                            badge.textContent = notis.length;
-                            badge.classList.remove('hidden');
-                            audio.play().catch(() => {
-                                console.log("🔇 Sonido bloqueado hasta interacción del usuario");
-                            });
-                            ultimaCantidad = notis.length;
-                            ultimaMedicionId = idMedicion;
-                        } else if (notis.length === 0) {
-                            badge.classList.add('hidden');
-                            badge.textContent = '0';
+                        if (menu) {
+                            const html = cantidadNotis > 0
+                                ? notis.map(n => `
+                                    <div class="flex items-start gap-3 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <i class="ri-error-warning-line text-lg ${n.tipo === 'alto' ? 'text-red-500' : 'text-blue-500'} mt-0.5 flex-shrink-0"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium ${n.tipo === 'alto' ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}">
+                                                ${n.mensaje}
+                                            </p>
+                                            ${n.fecha ? `<span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">${n.fecha}</span>` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')
+                                : '<div class="p-4 text-center"><p class="text-sm text-gray-500 dark:text-gray-400">No hay notificaciones nuevas</p></div>';
+                            
+                            menu.innerHTML = html;
                         }
+
+                        const esNuevaMedicion = hayNotificacionesNuevas(idMedicion);
+                        const ultimoConteo = parseInt(localStorage.getItem('ultimoConteoNotificaciones') || '0');
+
+
+
+                        if (cantidadNotis === 0) {
+
+                            resetearContador();
+                        } 
+                        else if (esNuevaMedicion) {
+
+                            actualizarBadge(cantidadNotis);
+                            
+
+                            if (ultimoConteo === 0 && cantidadNotis > 0) {
+
+                            } else if (cantidadNotis >= ultimoConteo) {
+
+                                reproducirSonido();
+                            }
+                        } 
+                        else {
+            
+                            resetearContador();
+                        }
+
                     } catch (err) {
-                        console.error("Error al obtener notificaciones:", err);
+                        console.error("❌ Error al obtener notificaciones:", err);
+                        if (menu) {
+                            menu.innerHTML = '<div class="p-4 text-center"><p class="text-sm text-red-500 dark:text-red-400">Error de conexión</p></div>';
+                        }
                     }
                 }
 
 
-                cargarNotificaciones();
-                setInterval(cargarNotificaciones, 60000);
+                function mostrarNotificaciones() {
+                    if (menu) {
+                        menu.classList.remove('hidden');
+
+                        marcarComoLeidas();
+                    }
+                }
+
+                function ocultarNotificaciones() {
+                    if (menu) menu.classList.add('hidden');
+                }
+
+                if (btn && menu) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        
+
+                        document.querySelectorAll('[id$="-menu"]').forEach(m => {
+                            if (m !== menu) m.classList.add('hidden');
+                        });
+                        
+                        const isHidden = menu.classList.contains('hidden');
+                        if (isHidden) {
+                            mostrarNotificaciones();
+                        } else {
+                            ocultarNotificaciones();
+                        }
+                    });
+
+
+                    document.addEventListener('click', function(e) {
+                        if (menu && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+                            ocultarNotificaciones();
+                        }
+                    });
+                }
+
+
+                function inicializarNotificaciones() {
+
+                    setTimeout(() => {
+                        cargarNotificaciones();
+                    }, 1000);
+
+
+                    setInterval(cargarNotificaciones, 45000);
+
+
+                    document.addEventListener('visibilitychange', function() {
+                        if (!document.hidden) setTimeout(cargarNotificaciones, 1000);
+                    });
+                }
+
+                inicializarNotificaciones();
             });
         </script>
+
         @stack('scripts')
         @include('components.alerts-component')
     </body>
