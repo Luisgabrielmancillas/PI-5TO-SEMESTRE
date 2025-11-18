@@ -8,6 +8,9 @@ use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\ComparacionController;
 use App\Http\Controllers\GestionController;
 use App\Http\Controllers\ChatBadgeController;
+use App\Http\Controllers\ActuadoresController;
+use App\Http\Controllers\TranslateController;
+use App\Http\Controllers\NotificacionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
@@ -70,5 +73,11 @@ Route::fallback(function () {
         ->route(Auth::check() ? 'dashboard' : 'landing')
         ->with('error', $msg);
 });
+
+Route::post('/traducir', [TranslateController::class, 'traducir'])->name('traducir');
+
+Route::get('/notificaciones', [App\Http\Controllers\NotificacionController::class, 'obtenerNotificaciones'])
+    ->name('notificaciones')
+    ->middleware('auth');
 
 require __DIR__ . '/auth.php';
