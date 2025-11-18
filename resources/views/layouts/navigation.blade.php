@@ -230,7 +230,7 @@
                {{ request()->routeIs('history') ? 'bg-pink-50 border-pink-500 text-pink-700 dark:bg-gray-700 dark:text-pink-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                 Historial
             </a>
-            @if($isAdmin)('admin')
+            @if($isAdmin)
                 <a href="{{ route('gestion.index') }}"
                 class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
                 {{ request()->routeIs('gestion.index') ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-gray-700 dark:text-amber-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
