@@ -43,4 +43,14 @@ class SeleccionHortalizas extends Model
 	{
 		return $this->hasMany(ConfigSensores::class, 'id_hortaliza');
 	}
+
+	public function scopeSeleccionada($query)
+    {
+        return $query->where('seleccion', 1);
+    }
+
+    public function mediciones()
+    {
+        return $this->hasMany(RegistroMediciones::class, 'id_hortaliza', 'id_hortaliza');
+    }
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HydroBox — Grow Tent Hidropónico</title>
+  <title>HydroBox</title>
   <meta name="description" content="Grow tent hidropónico con depósito de 10 L recirculado, nutrientes FloraMicro/FloraGrow/FloraBloom semanales, ventilación, luz 07:00–19:00, y sensores de ambiente y agua.">
 
   {{-- Anti-FOUC: fija el tema antes de pintar --}}
@@ -26,7 +26,15 @@
 
   {{-- Iconos --}}
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
+  <!-- Favicons PNG -->
+  <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
+  <link rel="icon" href="{{ asset('favicon-16.png') }}" sizes="16x16" type="image/png">
 
+  <!-- iOS -->
+  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
+
+  <!-- (Opcional) Compatibilidad extra -->
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
   <style>
     /* Glow del hero + evitar overflow horizontal */
     .halo{position:relative; overflow:hidden;}
@@ -71,6 +79,40 @@
       </div>
     </div>
   </header>
+  {{-- Flash messages con autocierre --}}
+  @if (session('error') || session('status'))
+    <div x-data="{ show: true }"
+        x-init="setTimeout(() => show = false, 5000)"
+        x-show="show"
+        x-transition.opacity.duration.300ms
+        class="border-b border-gray-200 dark:border-white/5 bg-white/70 dark:bg-gray-900/60 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+        @if (session('error'))
+          <div class="relative rounded-lg px-4 py-2 text-sm font-medium
+                      bg-rose-50 text-rose-700 ring-1 ring-rose-200
+                      dark:bg-rose-900/20 dark:text-rose-200 dark:ring-rose-800">
+            {{ session('error') }}
+            <button type="button" @click="show=false"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-rose-500 hover:text-rose-700">
+              &times;
+            </button>
+          </div>
+        @endif
+
+        @if (session('status'))
+          <div class="relative mt-2 rounded-lg px-4 py-2 text-sm font-medium
+                      bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
+                      dark:bg-emerald-900/20 dark:text-emerald-200 dark:ring-emerald-800">
+            {{ session('status') }}
+            <button type="button" @click="show=false"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-600 hover:text-emerald-800">
+              &times;
+            </button>
+          </div>
+        @endif
+      </div>
+    </div>
+  @endif
 
   <!-- Hero -->
   <section id="home" class="halo">
@@ -546,5 +588,6 @@
       </div>
     </div>
   </footer>
+  @include('components.alerts-component')
 </body>
 </html>
