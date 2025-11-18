@@ -147,15 +147,40 @@ class HistoryController extends Controller
 
     private function buildChartDataForPdf(string $sensor, string $range, ?int $idHortaliza = null): array
     {
-        // Caso 1: sensor=all y range=all => barras con promedios
-        if ($sensor === 'all' && $range === 'all') {
-            $avg = RegistroMediciones::avgAllSensors($idHortaliza);
+        // Query base filtrada por hortaliza (si aplica)
+        $query = RegistroMediciones::query();
+        if (!is_null($idHortaliza)) {
+            $query->where('id_hortaliza', $idHortaliza);
+        }
 
-            if (!$avg) {
+        // Aplicar rango de fechas (week, month, semester, year, all)
+        $query = $this->applyRangeFilter($query, $range);
+
+        // === Caso A: TODOS LOS SENSORES ===
+        if ($sensor === 'all') {
+            $avg = $query->selectRaw("
+                    AVG(hum_value)   as humedad,
+                    AVG(tam_value)   as temp_ambiente,
+                    AVG(ph_value)    as ph,
+                    AVG(ce_value)    as orp,
+                    AVG(tagua_value) as temp_agua,
+                    AVG(us_value)    as ultrasonico
+                ")->first();
+
+            if (!$avg || (
+                is_null($avg->humedad) &&
+                is_null($avg->temp_ambiente) &&
+                is_null($avg->ph) &&
+                is_null($avg->orp) &&
+                is_null($avg->temp_agua) &&
+                is_null($avg->ultrasonico)
+            )) {
+                // No hay datos en ese rango
                 return [
-                    'mode'   => 'bar',
-                    'labels' => ['Humedad','Temp. ambiente','pH','ORP','Temp. agua','Ultrasónico'],
-                    'series' => [0,0,0,0,0,0],
+                    'mode'    => 'bar',
+                    'labels'  => [],
+                    'series'  => [],
+                    'hasData' => false,
                 ];
             }
 
@@ -170,100 +195,50 @@ class HistoryController extends Controller
                     (float) $avg->temp_agua,
                     (float) $avg->ultrasonico,
                 ],
+                'hasData' => true,
             ];
         }
 
-        // Caso 2: sensor=all y range≠all => varias series (una por sensor)
-        if ($sensor === 'all' && $range !== 'all') {
-            $sensors = [
-                'humedad'       => 'Humedad',
-                'temp_ambiente' => 'Temp. ambiente',
-                'ph'            => 'pH',
-                'orp'           => 'ORP',
-                'temp_agua'     => 'Temp. agua',
-                'ultrasonico'   => 'Ultrasónico',
-            ];
-
-            $charts = [];
-
-            foreach ($sensors as $key => $label) {
-                $seriesInfo = $this->seriesForSensorAndRange($key, $range, $label, $idHortaliza);
-
-                // === NORMALIZAR labels / series A ARRAY ===
-                $labels = $seriesInfo['labels'];
-                $series = $seriesInfo['series'];
-
-                if ($labels instanceof \Illuminate\Support\Collection) {
-                    $labels = $labels->values()->all();
-                } elseif (is_array($labels)) {
-                    $labels = array_values($labels);
-                } else {
-                    $labels = [];
-                }
-
-                if ($series instanceof \Illuminate\Support\Collection) {
-                    $series = $series->values()->all();
-                } elseif (is_array($series)) {
-                    $series = array_values($series);
-                } else {
-                    $series = [];
-                }
-
-                $seriesInfo['labels'] = $labels;
-                $seriesInfo['series'] = $series;
-                // ==========================================
-
-                $charts[] = $seriesInfo;
-            }
-
+        // === Caso B: UN SENSOR ESPECÍFICO ===
+        $col = RegistroMediciones::sensorColumn($sensor);
+        if (!$col) {
             return [
-                'mode'   => 'multi-line',
-                'charts' => $charts,
+                'mode'    => 'bar',
+                'labels'  => [],
+                'series'  => [],
+                'hasData' => false,
             ];
         }
 
-        // Caso 3: un solo sensor
+        $avgValue = $query->avg($col);
+
         $labelMap = [
             'humedad'       => 'Humedad',
-            'temp_ambiente' => 'Temp. ambiente',
+            'temp_ambiente' => 'Temperatura del aire',
+            'temp_agua'     => 'Temperatura del agua',
             'ph'            => 'pH',
             'orp'           => 'ORP',
-            'temp_agua'     => 'Temp. agua',
             'ultrasonico'   => 'Ultrasónico',
         ];
         $niceLabel = $labelMap[$sensor] ?? 'Sensor';
 
-        $seriesInfo = $this->seriesForSensorAndRange($sensor, $range, $niceLabel, $idHortaliza);
-
-        // === NORMALIZAR labels / series A ARRAY ===
-        $labels = $seriesInfo['labels'];
-        $series = $seriesInfo['series'];
-
-        if ($labels instanceof \Illuminate\Support\Collection) {
-            $labels = $labels->values()->all();
-        } elseif (is_array($labels)) {
-            $labels = array_values($labels);
-        } else {
-            $labels = [];
+        if ($avgValue === null) {
+            return [
+                'mode'    => 'bar',
+                'labels'  => [],
+                'series'  => [],
+                'hasData' => false,
+            ];
         }
-
-        if ($series instanceof \Illuminate\Support\Collection) {
-            $series = $series->values()->all();
-        } elseif (is_array($series)) {
-            $series = array_values($series);
-        } else {
-            $series = [];
-        }
-
-        $seriesInfo['labels'] = $labels;
-        $seriesInfo['series'] = $series;
-        // ==========================================
 
         return [
-            'mode'  => 'single-line',
-            'chart' => $seriesInfo,
+            'mode'    => 'bar',
+            'labels'  => [$niceLabel],
+            'series'  => [(float) $avgValue],
+            'hasData' => true,
         ];
     }
+
 
 
     // Endpoint JSON para GRÁFICAS

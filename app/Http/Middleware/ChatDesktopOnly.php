@@ -19,10 +19,10 @@ class ChatDesktopOnly
 
         if ($isMobile) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'El chat solo está disponible en escritorio.'], 403);
+                return response()->json(['message' => 'El chat y la descarga de pdf solo están disponibles en escritorio.'], 403);
             }
             return redirect()->route('dashboard')
-                ->with('error', 'El chat solo está disponible en escritorio.');
+                ->with('error', 'El chat y la descarga de pdf solo están disponibles en escritorio.');
         }
 
         return $next($request);

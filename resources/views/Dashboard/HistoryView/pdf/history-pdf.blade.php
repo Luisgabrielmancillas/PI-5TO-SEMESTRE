@@ -9,21 +9,36 @@
             font-size: 11px;
             color:#1f2933;
         }
-        .header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
+
+        /* ===== HEADER (logo + nombre + QR) ===== */
+        .header-table{
+            width:100%;
             border-bottom:1px solid #d0d7e2;
-            padding-bottom:8px;
             margin-bottom:12px;
+            padding-bottom:8px;
+            border-collapse:collapse;
         }
-        .brand{
-            display:flex;
-            align-items:center;
+        .header-table td{
+            vertical-align:top;
+        }
+        .header-left{
+            width:70%;
+        }
+        .header-right{
+            width:30%;
+            text-align:right;
+        }
+        .brand-table{
+            border-collapse:collapse;
+        }
+        .brand-logo-cell{
+            width:55px;
         }
         .brand-logo{
             height:48px;
-            margin-right:8px;
+        }
+        .brand-text-cell{
+            padding-left:6px;
         }
         .project-title{
             font-size:18px;
@@ -35,18 +50,10 @@
             color:#6b7280;
             margin-top:2px;
         }
-        .qr img{
-            height:64px;
+        .qr-img{
+            height:70px;
         }
-        .pill{
-            display:inline-block;
-            padding:2px 8px;
-            border-radius:9999px;
-            background:#e0f2fe;
-            color:#0369a1;
-            font-size:9px;
-            font-weight:600;
-        }
+
         .section-title{
             font-size:13px;
             font-weight:bold;
@@ -54,6 +61,7 @@
             padding-bottom:2px;
             border-bottom:1px solid #e5e7eb;
         }
+
         .filters-table{
             width:100%;
             border-collapse:collapse;
@@ -68,51 +76,40 @@
             font-weight:bold;
             color:#4b5563;
         }
-        .chart-table{
+
+        /* ===== GRÁFICA BARRAS VERTICALES ===== */
+        .bar-chart{
             width:100%;
-            border-collapse:collapse;
-            margin-top:4px;
-            margin-bottom:8px;
+            height:170px;
+            display:table;
+            table-layout:fixed;
+            margin:8px 0 12px;
         }
-        .chart-table th,
-        .chart-table td{
-            padding:4px 5px;
+        .bar-column{
+            display:table-cell;
+            vertical-align:bottom;
+            text-align:center;
+            padding:0 4px;
+        }
+        .bar-inner{
+            height:120px;
             border:1px solid #e5e7eb;
-            font-size:9px;
-        }
-        .chart-table th{
             background:#f9fafb;
-            font-weight:600;
-        }
-        .bar-row{
-            display:flex;
-            align-items:center;
-            margin-bottom:4px;
-        }
-        .bar-label{
-            width:110px;
-            font-size:9px;
-        }
-        .bar-track{
-            flex:1;
-            height:8px;
-            background:#e5e7eb;
-            border-radius:9999px;
+            border-radius:6px;
+            padding:4px;              /* pequeño margen interno */
+            position:relative;        /* para anclar la barra adentro */
             overflow:hidden;
-            margin:0 6px;
         }
-        .bar-fill{
-            height:8px;
-            border-radius:9999px;
-            background:#4f46e5;
-        }
-        .bar-value{
-            width:40px;
-            font-size:9px;
-            text-align:right;
+        .bar-rect{
+            width:60%;
+            position:absolute;
+            left:50%;
+            transform:translateX(-50%);
+            bottom:4px;               /* la barra se “apoya” abajo */
+            border-radius:4px 4px 0 0;
         }
 
-        /* Tabla de mediciones */
+        /* ===== TABLA MEDICIONES ===== */
         .data-table{
             width:100%;
             border-collapse:collapse;
@@ -128,6 +125,7 @@
             background:#f3f4f6;
             font-weight:600;
         }
+
         .footer{
             margin-top:10px;
             font-size:8px;
@@ -138,23 +136,35 @@
 </head>
 <body>
     {{-- HEADER --}}
-    <div class="header">
-        <div class="brand">
-            @if(file_exists(public_path('images/logo.png')))
-                <img src="{{ public_path('images/logo.png') }}" class="brand-logo" alt="Logo">
-            @endif
-            <div>
-                <p class="project-title">{{ $projectName }}</p>
-                <p class="project-sub">Reporte histórico de sensores · {{ $generatedAt->format('d/m/Y H:i') }}</p>
-                <span class="pill">Documento generado automáticamente</span>
-            </div>
-        </div>
-        <div class="qr">
-            @if(file_exists(public_path('images/qr.png')))
-                <img src="{{ public_path('images/qr.png') }}" alt="QR HydroBox">
-            @endif
-        </div>
-    </div>
+    <table class="header-table">
+        <tr>
+            {{-- Columna izquierda: logo + nombre --}}
+            <td class="header-left">
+                <table class="brand-table">
+                    <tr>
+                        <td class="brand-logo-cell">
+                            @if(file_exists(public_path('images/logo.png')))
+                                <img src="{{ public_path('images/logo.png') }}" class="brand-logo" alt="Logo">
+                            @endif
+                        </td>
+                        <td class="brand-text-cell">
+                            <p class="project-title">{{ $projectName }}</p>
+                            <p class="project-sub">
+                                Reporte histórico de sensores · {{ $generatedAt->format('d/m/Y H:i') }}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+
+            {{-- Columna derecha: QR --}}
+            <td class="header-right">
+                @if(file_exists(public_path('images/qr.png')))
+                    <img src="{{ public_path('images/qr.png') }}" class="qr-img" alt="QR HydroBox">
+                @endif
+            </td>
+        </tr>
+    </table>
 
     {{-- FILTROS UTILIZADOS --}}
     <h3 class="section-title">Filtros utilizados</h3>
@@ -177,77 +187,73 @@
         </tr>
     </table>
 
-    {{-- GRÁFICAS (representación estática) --}}
+    {{-- RESUMEN GRÁFICO --}}
     <h3 class="section-title">Resumen gráfico</h3>
 
-    @if($chartData['mode'] === 'bar')
-        {{-- Barras horizontales con promedios --}}
+    @php
+        $labels  = $chartData['labels']  ?? [];
+        $series  = $chartData['series']  ?? [];
+        $hasData = $chartData['hasData'] ?? false;
+    @endphp
+
+    @if(!$hasData || empty($labels) || empty($series))
+        <p style="font-size:10px; color:#6b7280;">
+            No se encontraron datos para las gráficas con los filtros seleccionados.
+        </p>
+    @else
         @php
-            $max = max($chartData['series']) ?: 1;
+            $maxVal = max($series);
+            if ($maxVal <= 0) {
+                $maxVal = 1;
+            }
+
+            if (!function_exists('hb_sensor_color')) {
+                function hb_sensor_color(string $label): string {
+                    $key = mb_strtolower(trim($label), 'UTF-8');
+
+                    switch ($key) {
+                        case 'humedad':
+                            // mismo color que sensorColor() en modo claro
+                            return '#0ea5e9';
+                        case 'temp. ambiente':
+                        case 'temperatura del aire':
+                            return '#f59e0b';
+                        case 'ph':
+                            return '#6366f1';
+                        case 'orp':
+                            return '#10b981';
+                        case 'temp. agua':
+                        case 'temperatura del agua':
+                            return '#ec4899';
+                        case 'ultrasónico':
+                        case 'ultrasonico':
+                            return '#ef4444';
+                        default:
+                            // fallback parecido a tu azul por defecto
+                            return '#2563eb';
+                    }
+                }
+            }
         @endphp
-        @foreach($chartData['labels'] as $i => $label)
-            @php
-                $value = $chartData['series'][$i];
-                $percent = $value <= 0 ? 0 : ($value / $max) * 100;
-            @endphp
-            <div class="bar-row">
-                <div class="bar-label">{{ $label }}</div>
-                <div class="bar-track">
-                    <div class="bar-fill" style="width: {{ $percent }}%;"></div>
+
+        <div class="bar-chart">
+            @foreach($labels as $i => $label)
+                @php
+                    $value  = $series[$i] ?? 0;
+                    $height = $value <= 0 ? 0 : ($value / $maxVal) * 100;
+                    $height = max(5, $height); // altura mínima
+                    $color  = hb_sensor_color($label);
+                @endphp
+                <div class="bar-column">
+                    <div class="bar-inner">
+                        <div class="bar-rect"
+                             style="height: {{ $height }}%; background: {{ $color }};"></div>
+                    </div>
+                    <div class="bar-value">{{ number_format($value,2) }}</div>
+                    <div class="bar-label">{{ $label }}</div>
                 </div>
-                <div class="bar-value">{{ number_format($value, 2) }}</div>
-            </div>
-        @endforeach
-
-    @elseif($chartData['mode'] === 'single-line')
-        {{-- Tabla simple con la serie temporal --}}
-        @php $c = $chartData['chart']; @endphp
-        <table class="chart-table">
-            <thead>
-                <tr>
-                    <th>Fecha / Intervalo</th>
-                    <th>{{ $c['label'] }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($c['labels'] as $idx => $lbl)
-                    <tr>
-                        <td>{{ $lbl }}</td>
-                        <td>
-                            @php $val = $c['series'][$idx]; @endphp
-                            {{ $val !== null ? number_format($val,2) : '—' }}
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-    @elseif($chartData['mode'] === 'multi-line')
-        {{-- Varias tablas, una por sensor --}}
-        @foreach($chartData['charts'] as $c)
-            <p style="font-size:10px; font-weight:bold; margin-top:6px; margin-bottom:2px;">
-                {{ $c['label'] }}
-            </p>
-            <table class="chart-table">
-                <thead>
-                    <tr>
-                        <th>Fecha / Intervalo</th>
-                        <th>Valor promedio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($c['labels'] as $idx => $lbl)
-                        <tr>
-                            <td>{{ $lbl }}</td>
-                            <td>
-                                @php $val = $c['series'][$idx]; @endphp
-                                {{ $val !== null ? number_format($val,2) : '—' }}
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endforeach
+            @endforeach
+        </div>
     @endif
 
     {{-- TABLA DE MEDICIONES --}}

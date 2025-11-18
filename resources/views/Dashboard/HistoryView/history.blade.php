@@ -5,33 +5,36 @@
                 {{ __('Gestión de usuarios') }}
             </h2>
 
-            <span class="pill pill-emerald ml-auto inline-flex items-center">
-                Hortaliza seleccionada:
-                @if(!empty($selectedCrop))
-                    <b class="ml-1">{{ $selectedCrop->nombre }}</b>
-                @else
-                    <b class="ml-1">No hay</b>
-                @endif
-            </span>
+            {{-- Grupo derecho: botón PDF + pill de hortaliza --}}
+            <div class="ml-auto flex items-center gap-3">
+                {{-- Botón solo en desktop --}}
+                <button
+                    type="button"
+                    id="hb-open-export-modal"
+                    class="hidden lg:inline-flex items-center px-3 py-2 rounded-full text-sm font-medium
+                        bg-red-600 text-white hover:bg-red-700 active:bg-red-800
+                        shadow-sm shadow-red-500/40 transition"
+                >
+                    <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M9 12h6m-7 4h8M5 8h14M6 4h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>
+                    </svg>
+                    Exportar PDF
+                </button>
 
-            {{-- Botón Exportar PDF --}}
-            <button
-                type="button"
-                id="hb-open-export-modal"
-                class="ml-3 inline-flex items-center px-3 py-2 rounded-full text-sm font-medium
-                    bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800
-                    shadow-sm shadow-indigo-500/40 transition"
-            >
-                {{-- Icono pequeño (opcional, puedes cambiarlo) --}}
-                <svg class="w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
-                        d="M9 12h6m-7 4h8M5 8h14M6 4h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/>
-                </svg>
-                Exportar PDF
-            </button>
+                <span class="pill pill-emerald inline-flex items-center">
+                    Hortaliza seleccionada:
+                    @if(!empty($selectedCrop))
+                        <b class="ml-1">{{ $selectedCrop->nombre }}</b>
+                    @else
+                        <b class="ml-1">No hay</b>
+                    @endif
+                </span>
+            </div>
         </div>
     </x-slot>
+
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
@@ -153,8 +156,7 @@
                             <option value="">Selecciona una opción</option>
                             <option value="all">Todas</option>
                             @foreach($allCrops as $crop)
-                                <option value="{{ $crop->id_hortaliza }}"
-                                    @if(optional($selectedCrop)->id_hortaliza === $crop->id_hortaliza) selected @endif>
+                                <option value="{{ $crop->id_hortaliza }}">
                                     {{ $crop->nombre }}
                                 </option>
                             @endforeach
@@ -197,7 +199,6 @@
                             <option value="month">Último mes</option>
                             <option value="semester">Último semestre</option>
                             <option value="year">Último año</option>
-                            {{-- SOLO válido cuando sensor = all --}}
                             <option value="all" data-only-all-sensors="1">Todos</option>
                         </select>
                     </div>
@@ -237,8 +238,8 @@
                         <button type="submit"
                                 id="hb-export-submit"
                                 class="px-4 py-1.5 rounded-full text-xs font-semibold
-                                    bg-indigo-600 text-white hover:bg-indigo-700
-                                    active:bg-indigo-800 shadow-sm shadow-indigo-500/40
+                                    bg-red-600 text-white hover:bg-red-700
+                                    active:bg-red-800 shadow-sm shadow-red-500/40
                                     disabled:opacity-60 disabled:cursor-not-allowed">
                             Descargar PDF
                         </button>
@@ -253,106 +254,140 @@
 
     @push('scripts')
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                const openBtn      = document.getElementById('hb-open-export-modal');
-                const modal        = document.getElementById('hb-export-modal');
-                const cancelBtn    = document.getElementById('hb-export-cancel');
-                const form         = document.getElementById('hb-export-form');
-                const cropSelect   = document.getElementById('hb-export-crop');
-                const sensorSelect = document.getElementById('hb-export-sensor');
-                const rangeSelect  = document.getElementById('hb-export-range');
-                const tableRange   = document.getElementById('hb-export-table-range');
-                const errorLabel   = document.getElementById('hb-export-error');
+        document.addEventListener('DOMContentLoaded', function () {
+            const openBtn      = document.getElementById('hb-open-export-modal');
+            const modal        = document.getElementById('hb-export-modal');
+            const cancelBtn    = document.getElementById('hb-export-cancel');
+            const form         = document.getElementById('hb-export-form');
+            const cropSelect   = document.getElementById('hb-export-crop');
+            const sensorSelect = document.getElementById('hb-export-sensor');
+            const rangeSelect  = document.getElementById('hb-export-range');
+            const tableRange   = document.getElementById('hb-export-table-range');
+            const errorLabel   = document.getElementById('hb-export-error');
 
-                function toggleModal(show) {
-                    if (!modal) return;
-                    if (show) {
-                        modal.classList.remove('hidden');
-                        document.body.classList.add('overflow-hidden');
-                    } else {
-                        modal.classList.add('hidden');
-                        document.body.classList.remove('overflow-hidden');
-                        if (errorLabel) {
-                            errorLabel.classList.add('hidden');
-                            errorLabel.textContent = '';
-                        }
+            function resetExportForm() {
+                [cropSelect, sensorSelect, rangeSelect, tableRange].forEach(function(sel){
+                    if (!sel) return;
+                    const placeholder = sel.querySelector('option[value=""]');
+                    if (placeholder) {
+                        placeholder.disabled = false;
+                        placeholder.selected = true;
                     }
-                }
+                    sel.value = '';
+                    sel.classList.remove('border-red-500');
+                });
 
-                if (openBtn) {
-                    openBtn.addEventListener('click', () => toggleModal(true));
-                }
-                if (cancelBtn) {
-                    cancelBtn.addEventListener('click', () => toggleModal(false));
-                }
-                if (modal) {
-                    // Cerrar si pulsas fuera del contenido
-                    modal.addEventListener('click', function (e) {
-                        if (e.target === modal) {
-                            toggleModal(false);
-                        }
-                    });
-                }
-
-                function validateRangeRule() {
-                    const sensor = sensorSelect.value;
-                    const range  = rangeSelect.value;
-
-                    // Deshabilitar la opción "Todos" si sensor != all
-                    const allOption = rangeSelect.querySelector('option[value="all"]');
-                    if (allOption) {
-                        if (sensor === 'all') {
-                            allOption.disabled = false;
-                        } else {
-                            allOption.disabled = true;
-                            if (range === 'all') {
-                                rangeSelect.value = '';
-                            }
-                        }
-                    }
-
-                    if (sensor !== 'all' && range === 'all') {
-                        errorLabel.textContent = 'El rango "Todos" solo está permitido cuando el sensor es "Todos los sensores".';
-                        errorLabel.classList.remove('hidden');
-                        return false;
-                    }
-
+                if (errorLabel) {
                     errorLabel.classList.add('hidden');
                     errorLabel.textContent = '';
-                    return true;
                 }
+            }
 
-                if (sensorSelect && rangeSelect) {
-                    sensorSelect.addEventListener('change', validateRangeRule);
-                    rangeSelect.addEventListener('change', validateRangeRule);
+            function toggleModal(show) {
+                if (!modal) return;
+                if (show) {
+                    resetExportForm();
+                    modal.classList.remove('hidden');
+                    document.body.classList.add('overflow-hidden');
+                } else {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
                 }
+            }
 
-                if (form) {
-                    form.addEventListener('submit', function (e) {
-                        // No permitir continuar si hay selects vacíos
-                        let ok = true;
-                        [cropSelect, sensorSelect, rangeSelect, tableRange].forEach(function (sel) {
-                            if (sel && !sel.value) {
-                                ok = false;
-                                sel.classList.add('border-red-500');
-                            } else if (sel) {
-                                sel.classList.remove('border-red-500');
-                            }
-                        });
+            if (openBtn) {
+                openBtn.addEventListener('click', () => toggleModal(true));
+            }
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => toggleModal(false));
+            }
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        toggleModal(false);
+                    }
+                });
+            }
 
-                        if (!validateRangeRule()) {
-                            ok = false;
+            // Regla: "Todos" en rango (gráficas) solo si sensor = all
+            function validateRangeRule() {
+                const sensor = sensorSelect.value;
+                const range  = rangeSelect.value;
+
+                const allOption = rangeSelect.querySelector('option[value="all"]');
+                if (allOption) {
+                    if (sensor === 'all') {
+                        allOption.disabled = false;
+                    } else {
+                        allOption.disabled = true;
+                        if (range === 'all') {
+                            rangeSelect.value = '';
                         }
+                    }
+                }
 
-                        if (!ok) {
-                            e.preventDefault();
+                if (sensor !== 'all' && range === 'all') {
+                    errorLabel.textContent = 'El rango "Todos" solo está permitido cuando el sensor es "Todos los sensores".';
+                    errorLabel.classList.remove('hidden');
+                    return false;
+                }
+
+                errorLabel.classList.add('hidden');
+                errorLabel.textContent = '';
+                return true;
+            }
+
+            if (sensorSelect && rangeSelect) {
+                sensorSelect.addEventListener('change', validateRangeRule);
+                rangeSelect.addEventListener('change', validateRangeRule);
+            }
+
+            // Una vez que se elige una opción distinta de vacío,
+            // ya no se puede volver a "Selecciona una opción"
+            function lockPlaceholderOnChange(selectEl) {
+                if (!selectEl) return;
+                selectEl.addEventListener('change', function () {
+                    const placeholder = selectEl.querySelector('option[value=""]');
+                    if (placeholder && selectEl.value !== '') {
+                        placeholder.disabled = true;
+                    }
+                });
+            }
+
+            lockPlaceholderOnChange(cropSelect);
+            lockPlaceholderOnChange(sensorSelect);
+            lockPlaceholderOnChange(rangeSelect);
+            lockPlaceholderOnChange(tableRange);
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    let ok = true;
+
+                    [cropSelect, sensorSelect, rangeSelect, tableRange].forEach(function (sel) {
+                        if (sel && !sel.value) {
+                            ok = false;
+                            sel.classList.add('border-red-500');
+                        } else if (sel) {
+                            sel.classList.remove('border-red-500');
                         }
                     });
-                }
-            });
+
+                    if (!validateRangeRule()) {
+                        ok = false;
+                    }
+
+                    if (!ok) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Si todo está bien: permitir el submit y cerrar el modal
+                    toggleModal(false);
+                });
+            }
+        });
         </script>
     @endpush
-
 
     {{-- ====== JS TABLA (paginación + filtro por rango) ====== --}}
     <script>

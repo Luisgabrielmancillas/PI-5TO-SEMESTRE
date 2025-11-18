@@ -51,6 +51,9 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         });
 });
 
+Route::middleware(['auth', 'active', 'verified', 'chat.desktop'])->group(function () {
+    Route::post('/history/export-pdf', [HistoryController::class, 'exportPdf'])->name('history.exportPdf');
+});
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile',   [ProfileController::class, 'edit'])->name('profile.edit');
