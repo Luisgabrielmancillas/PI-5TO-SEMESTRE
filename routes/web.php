@@ -80,6 +80,5 @@ Route::fallback(function () {
 
 Route::post('/traducir', [TranslateController::class, 'traducir'])->name('traducir');
 
-Route::get('/notificaciones', [App\Http\Controllers\NotificacionController::class, 'obtenerNotificaciones'])
-    ->name('notificaciones')
-    ->middleware('auth');
+// Añade esta ruta
+Route::get('/notificaciones', [NotificacionController::class, 'obtenerNotificaciones'])->name('notificaciones.obtener');

@@ -458,93 +458,232 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function() {
     const btn = document.getElementById('btn-notificaciones');
     const menu = document.getElementById('noti-menu');
     const badge = document.getElementById('noti-count');
 
-    let ultimaCantidad = 0;        
-    let ultimaMedicionId = null;  
-    const audio = new Audio("{{ asset('sounds/alert.wav') }}");
+    let notificacionesActuales = [];
+    let ultimaMedicionId = null; 
+    let audioCargado = false;
+    let audio = null;
 
 
-    if (btn && menu) {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            menu.classList.toggle('hidden');
+    function cargarAudio() {
+        if (!audioCargado) {
+            audio = new Audio("{{ asset('sounds/alert.wav') }}");
+            audio.volume = 0.7;
+            audio.preload = 'auto';
+            audioCargado = true;
+            audio.load();
+        }
+        return audio;
+    }
 
-
-            if (!menu.classList.contains('hidden')) {
-                badge.classList.add('hidden');
-                badge.textContent = '0';
-                ultimaCantidad = 0;
-
-                localStorage.setItem('ultimaMedicionVista', ultimaMedicionId ?? '');
+    function reproducirSonido() {
+        try {
+            const audio = cargarAudio();
+            if (audio) {
+                const audioClone = audio.cloneNode();
+                audioClone.volume = 0.7;
+                audioClone.play().catch(e => {
+                    console.log("🔇 Sonido bloqueado (interacción requerida):", e);
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                });
             }
-        });
+        } catch (error) {
+            console.log("🔇 Error reproduciendo sonido:", error);
+        }
+    }
 
 
-        document.addEventListener('click', (e) => {
-            if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
+    function actualizarBadge(cantidad) {
+        if (!badge) return;
+        
+        if (cantidad > 0) {
+            badge.textContent = cantidad > 99 ? '99+' : cantidad.toString();
+            badge.classList.remove('hidden');
+            badge.classList.add('animate-pulse');
+            setTimeout(() => {
+                if (badge) badge.classList.remove('animate-pulse');
+            }, 2000);
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function resetearContador() {
+        if (badge) {
+            badge.classList.add('hidden');
+            badge.textContent = '0';
+        }
+    }
+
+    function marcarComoLeidas() {
+        if (ultimaMedicionId) {
+
+            localStorage.setItem('ultimaMedicionVista', ultimaMedicionId);
+            console.log('✅ Notificaciones marcadas como leídas para ID:', ultimaMedicionId);
+        }
+        
+
+        localStorage.setItem('ultimoConteoNotificaciones', notificacionesActuales.length.toString());
+        
+        actualizarBadge(0); 
+    }
+
+
+    function hayNotificacionesNuevas(idMedicionActual) {
+        const ultimaVista = localStorage.getItem('ultimaMedicionVista');
+        
+
+        if (!ultimaVista) return true;
+
+
+        if (idMedicionActual !== ultimaVista) return true;
+        
+
+        return false;
     }
 
 
     async function cargarNotificaciones() {
         try {
-            const resp = await fetch('/notificaciones');
+
+            
+            const resp = await fetch('{{ route("notificaciones.obtener") }}', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            if (!resp.ok) throw new Error(`Error HTTP: ${resp.status}`);
+            
             const data = await resp.json();
 
             if (!data || !Array.isArray(data.notificaciones)) return;
 
             const notis = data.notificaciones;
-            const idMedicion = data.id_medicion ?? null;
+
+            const idMedicion = data.id_medicion || `medicion_${Date.now()}`;
+            const cantidadNotis = notis.length;
 
 
-            const html = notis.length > 0
-                ? notis.map(n => `
-                    <div class="flex items-start gap-2 p-2 border-b border-gray-200 dark:border-gray-700">
-                        <i class="ri-error-warning-line ${n.tipo === 'alto' ? 'text-red-500' : 'text-blue-500'} mt-0.5"></i>
-                        <p class="text-sm ${n.tipo === 'alto' ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}">
-                            ${n.mensaje}
-                        </p>
-                    </div>
-                `).join('')
-                : '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No hay notificaciones</p>';
-
-            menu.innerHTML = html;
+            notificacionesActuales = notis;
+            ultimaMedicionId = idMedicion;
 
 
-            const ultimaVista = localStorage.getItem('ultimaMedicionVista');
-
-            if (notis.length > 0 && idMedicion && idMedicion !== ultimaVista) {
-
-                badge.textContent = notis.length;
-                badge.classList.remove('hidden');
-                audio.play().catch(() => {
-                    console.log("🔇 Sonido bloqueado hasta interacción del usuario");
-                });
-                ultimaCantidad = notis.length;
-                ultimaMedicionId = idMedicion;
-            } else if (notis.length === 0) {
-
-                badge.classList.add('hidden');
-                badge.textContent = '0';
+            if (menu) {
+                const html = cantidadNotis > 0
+                    ? notis.map(n => `
+                        <div class="flex items-start gap-3 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <i class="ri-error-warning-line text-lg ${n.tipo === 'alto' ? 'text-red-500' : 'text-blue-500'} mt-0.5 flex-shrink-0"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium ${n.tipo === 'alto' ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}">
+                                    ${n.mensaje}
+                                </p>
+                                ${n.fecha ? `<span class="text-xs text-gray-500 dark:text-gray-400 mt-1 block">${n.fecha}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<div class="p-4 text-center"><p class="text-sm text-gray-500 dark:text-gray-400">No hay notificaciones nuevas</p></div>';
+                
+                menu.innerHTML = html;
             }
+
+            const esNuevaMedicion = hayNotificacionesNuevas(idMedicion);
+            const ultimoConteo = parseInt(localStorage.getItem('ultimoConteoNotificaciones') || '0');
+
+
+
+            if (cantidadNotis === 0) {
+
+                resetearContador();
+            } 
+            else if (esNuevaMedicion) {
+
+                actualizarBadge(cantidadNotis);
+                
+
+                if (ultimoConteo === 0 && cantidadNotis > 0) {
+
+                } else if (cantidadNotis >= ultimoConteo) {
+
+                    reproducirSonido();
+                }
+            } 
+            else {
+   
+                resetearContador();
+            }
+
         } catch (err) {
-            console.error("Error al obtener notificaciones:", err);
+            console.error("❌ Error al obtener notificaciones:", err);
+            if (menu) {
+                menu.innerHTML = '<div class="p-4 text-center"><p class="text-sm text-red-500 dark:text-red-400">Error de conexión</p></div>';
+            }
         }
     }
 
 
-    cargarNotificaciones();
-    setInterval(cargarNotificaciones, 60000);
+    function mostrarNotificaciones() {
+        if (menu) {
+            menu.classList.remove('hidden');
+
+            marcarComoLeidas();
+        }
+    }
+
+    function ocultarNotificaciones() {
+        if (menu) menu.classList.add('hidden');
+    }
+
+    if (btn && menu) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+
+            document.querySelectorAll('[id$="-menu"]').forEach(m => {
+                if (m !== menu) m.classList.add('hidden');
+            });
+            
+            const isHidden = menu.classList.contains('hidden');
+            if (isHidden) {
+                mostrarNotificaciones();
+            } else {
+                ocultarNotificaciones();
+            }
+        });
+
+
+        document.addEventListener('click', function(e) {
+            if (menu && !menu.contains(e.target) && btn && !btn.contains(e.target)) {
+                ocultarNotificaciones();
+            }
+        });
+    }
+
+
+    function inicializarNotificaciones() {
+
+        setTimeout(() => {
+            cargarNotificaciones();
+        }, 1000);
+
+
+        setInterval(cargarNotificaciones, 45000);
+
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) setTimeout(cargarNotificaciones, 1000);
+        });
+    }
+
+    inicializarNotificaciones();
 });
 </script>
-
-
 
         @stack('scripts')
     </body>
