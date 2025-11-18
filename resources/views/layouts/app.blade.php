@@ -636,90 +636,89 @@
 
 
         <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const btn = document.getElementById('btn-notificaciones');
-            const menu = document.getElementById('noti-menu');
-            const badge = document.getElementById('noti-count');
+            document.addEventListener("DOMContentLoaded", () => {
+                const btn = document.getElementById('btn-notificaciones');
+                const menu = document.getElementById('noti-menu');
+                const badge = document.getElementById('noti-count');
 
-            let ultimaCantidad = 0;        
-            let ultimaMedicionId = null;  
-            const audio = new Audio("{{ asset('sounds/alert.wav') }}");
-
-
-            if (btn && menu) {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    menu.classList.toggle('hidden');
+                let ultimaCantidad = 0;        
+                let ultimaMedicionId = null;  
+                const audio = new Audio("{{ asset('sounds/alert.wav') }}");
 
 
-                    if (!menu.classList.contains('hidden')) {
-                        badge.classList.add('hidden');
-                        badge.textContent = '0';
-                        ultimaCantidad = 0;
-
-                        localStorage.setItem('ultimaMedicionVista', ultimaMedicionId ?? '');
-                    }
-                });
+                if (btn && menu) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        menu.classList.toggle('hidden');
 
 
-                document.addEventListener('click', (e) => {
-                    if (!menu.contains(e.target) && !btn.contains(e.target)) {
-                        menu.classList.add('hidden');
-                    }
-                });
-            }
+                        if (!menu.classList.contains('hidden')) {
+                            badge.classList.add('hidden');
+                            badge.textContent = '0';
+                            ultimaCantidad = 0;
+
+                            localStorage.setItem('ultimaMedicionVista', ultimaMedicionId ?? '');
+                        }
+                    });
 
 
-            async function cargarNotificaciones() {
-                try {
-                    const resp = await fetch('/notificaciones');
-                    const data = await resp.json();
-
-                    if (!data || !Array.isArray(data.notificaciones)) return;
-
-                    const notis = data.notificaciones;
-                    const idMedicion = data.id_medicion ?? null;
-
-
-                    const html = notis.length > 0
-                        ? notis.map(n => `
-                            <div class="flex items-start gap-2 p-2 border-b border-gray-200 dark:border-gray-700">
-                                <i class="ri-error-warning-line ${n.tipo === 'alto' ? 'text-red-500' : 'text-blue-500'} mt-0.5"></i>
-                                <p class="text-sm ${n.tipo === 'alto' ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}">
-                                    ${n.mensaje}
-                                </p>
-                            </div>
-                        `).join('')
-                        : '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No hay notificaciones</p>';
-
-                    menu.innerHTML = html;
-
-
-                    const ultimaVista = localStorage.getItem('ultimaMedicionVista');
-
-                    if (notis.length > 0 && idMedicion && idMedicion !== ultimaVista) {
-
-                        badge.textContent = notis.length;
-                        badge.classList.remove('hidden');
-                        audio.play().catch(() => {
-                            console.log("🔇 Sonido bloqueado hasta interacción del usuario");
-                        });
-                        ultimaCantidad = notis.length;
-                        ultimaMedicionId = idMedicion;
-                    } else if (notis.length === 0) {
-
-                        badge.classList.add('hidden');
-                        badge.textContent = '0';
-                    }
-                } catch (err) {
-                    console.error("Error al obtener notificaciones:", err);
+                    document.addEventListener('click', (e) => {
+                        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                            menu.classList.add('hidden');
+                        }
+                    });
                 }
-            }
 
 
-            cargarNotificaciones();
-            setInterval(cargarNotificaciones, 60000);
-        });
+                async function cargarNotificaciones() {
+                    try {
+                        const resp = await fetch('/notificaciones');
+                        const data = await resp.json();
+
+                        if (!data || !Array.isArray(data.notificaciones)) return;
+
+                        const notis = data.notificaciones;
+                        const idMedicion = data.id_medicion ?? null;
+
+
+                        const html = notis.length > 0
+                            ? notis.map(n => `
+                                <div class="flex items-start gap-2 p-2 border-b border-gray-200 dark:border-gray-700">
+                                    <i class="ri-error-warning-line ${n.tipo === 'alto' ? 'text-red-500' : 'text-blue-500'} mt-0.5"></i>
+                                    <p class="text-sm ${n.tipo === 'alto' ? 'text-red-700 dark:text-red-400' : 'text-blue-700 dark:text-blue-400'}">
+                                        ${n.mensaje}
+                                    </p>
+                                </div>
+                            `).join('')
+                            : '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No hay notificaciones</p>';
+
+                        menu.innerHTML = html;
+
+
+                        const ultimaVista = localStorage.getItem('ultimaMedicionVista');
+
+                        if (notis.length > 0 && idMedicion && idMedicion !== ultimaVista) {
+
+                            badge.textContent = notis.length;
+                            badge.classList.remove('hidden');
+                            audio.play().catch(() => {
+                                console.log("🔇 Sonido bloqueado hasta interacción del usuario");
+                            });
+                            ultimaCantidad = notis.length;
+                            ultimaMedicionId = idMedicion;
+                        } else if (notis.length === 0) {
+                            badge.classList.add('hidden');
+                            badge.textContent = '0';
+                        }
+                    } catch (err) {
+                        console.error("Error al obtener notificaciones:", err);
+                    }
+                }
+
+
+                cargarNotificaciones();
+                setInterval(cargarNotificaciones, 60000);
+            });
         </script>
         @stack('scripts')
         @include('components.alerts-component')

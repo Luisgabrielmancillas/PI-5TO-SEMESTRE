@@ -67,8 +67,15 @@
                             <span>Hortalizas</span>
                         </a>
 
+                        <!-- HISTORIAL -->
                         <a href="{{ route('history') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition {{ $isHist ? 'bg-white text-pink-700 shadow-sm dark:bg-gray-700 dark:text-pink-200' : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                  {{ $isHist
+                                      ? 'bg-white text-pink-700 shadow-sm dark:bg-gray-700 dark:text-pink-200'
+                                      : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHist ? 'text-pink-600 dark:text-pink-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
+                            </svg>
                             <span>Historial</span>
                         </a>
 
