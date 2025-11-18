@@ -11,8 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Alias de middlewares por ruta
+        $middleware->alias([
+            'active' => \App\Http\Middleware\EnsureUserIsActive::class,
+            'admin'   => \App\Http\Middleware\AdminOnly::class,
+            'restrict.chatify'  => \App\Http\Middleware\RestrictChatifyDms::class,
+            'chat.desktop'     => \App\Http\Middleware\ChatDesktopOnly::class,
+        ]);
+        
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Manejo de excepciones
     })->create();

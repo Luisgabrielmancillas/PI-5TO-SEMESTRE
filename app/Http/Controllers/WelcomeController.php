@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\SeleccionHortalizas;
 use App\Models\ConfigSensores;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; 
 
 class WelcomeController extends Controller
 {
     public function index()
     {
+        // Si ya hay sesión iniciada, manda directo al dashboard (mejor UX)
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
         // ===== Ya lo tenías (rangos para la hortaliza seleccionada, "Monitoreo") =====
         $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
             ->orderByDesc('fecha')
@@ -61,7 +68,7 @@ class WelcomeController extends Controller
             ->whereIn('id_sensor', array_values($sensorIds))
             ->get();
 
-        // Helper para formatear min–max (recorta ceros y añade unidades) 
+        // Helper para formatear min–max (recorta ceros y añade unidades)
         $fmt = function ($min, $max, $unit = '') {
             $f = function ($v) {
                 $s = number_format((float)$v, 2, '.', '');
@@ -86,9 +93,9 @@ class WelcomeController extends Controller
 
         return view('welcome', [
             'selectedCrop' => $selectedCrop,
-            'ranges'       => $ranges, 
-            'crops'        => $crops,  // Monitoreo
-            'guide'        => $guide,    // Guía de cultivo (NUEVO)
+            'ranges'       => $ranges,
+            'crops'        => $crops,   // Monitoreo
+            'guide'        => $guide,   // Guía de cultivo (NUEVO)
         ]);
     }
 }
