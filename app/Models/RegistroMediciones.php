@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Carbon\Carbon;
@@ -8,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 class RegistroMediciones extends Model
 {
     protected $table = 'registro_mediciones';
+    protected $primaryKey = 'id_regis_med';
+    public $timestamps = false;
 
     protected $casts = [
         'ph_value'    => 'float',   // pH
@@ -32,6 +35,11 @@ class RegistroMediciones extends Model
         ][$sensor] ?? null;
     }
 
+    public function hortaliza()
+    {
+        return $this->belongsTo(SeleccionHortalizas::class, 'id_hortaliza', 'id_hortaliza');
+    }
+
     public function scopeBetween($q, Carbon $from, Carbon $to)
     {
         return $q->whereBetween('fecha', [$from, $to]);
@@ -40,13 +48,19 @@ class RegistroMediciones extends Model
     // --- Promedios por agrupación temporal --- //
 
     // Última semana (7 días): promedio por día (eje X = días)
-    public static function avgByDayLast7(string $column)
+    public static function avgByDayLast7(string $column, ?int $idHortaliza = null)
     {
-        $to = now();
+        $to   = now();
         $from = $to->copy()->subDays(6)->startOfDay();
 
-        return static::query()
-            ->between($from, $to)
+        $query = static::query()
+            ->between($from, $to);
+
+        if (!is_null($idHortaliza)) {
+            $query->where('id_hortaliza', $idHortaliza);
+        }
+
+        return $query
             ->selectRaw("DATE(fecha) as x, AVG($column) as y")
             ->groupBy('x')
             ->orderBy('x')
@@ -54,14 +68,20 @@ class RegistroMediciones extends Model
     }
 
     // Último mes: 4 semanas (agrupación por semana calendario relativa al rango)
-    public static function avgByWeeksLast4(string $column)
+    public static function avgByWeeksLast4(string $column, ?int $idHortaliza = null)
     {
-        $to = now()->endOfDay();
+        $to   = now()->endOfDay();
         $from = now()->copy()->subWeeks(3)->startOfDay();
 
+        $query = static::query()
+            ->between($from, $to);
+
+        if (!is_null($idHortaliza)) {
+            $query->where('id_hortaliza', $idHortaliza);
+        }
+
         // agrupamos por año+semana ISO para orden estable
-        return static::query()
-            ->between($from, $to)
+        return $query
             ->selectRaw("YEARWEEK(fecha, 3) as grp, MIN(DATE(fecha)) as x_start, MAX(DATE(fecha)) as x_end, AVG($column) as y")
             ->groupBy('grp')
             ->orderBy('x_start')
@@ -69,13 +89,19 @@ class RegistroMediciones extends Model
     }
 
     // Último semestre: 6 meses
-    public static function avgByMonthsLast6(string $column)
+    public static function avgByMonthsLast6(string $column, ?int $idHortaliza = null)
     {
-        $to = now()->endOfMonth();
+        $to   = now()->endOfMonth();
         $from = now()->copy()->subMonths(5)->startOfMonth();
 
-        return static::query()
-            ->between($from, $to)
+        $query = static::query()
+            ->between($from, $to);
+
+        if (!is_null($idHortaliza)) {
+            $query->where('id_hortaliza', $idHortaliza);
+        }
+
+        return $query
             ->selectRaw("DATE_FORMAT(fecha, '%Y-%m') as x, AVG($column) as y")
             ->groupBy('x')
             ->orderBy('x')
@@ -83,14 +109,20 @@ class RegistroMediciones extends Model
     }
 
     // Último año: 6 bimestres (promedio cada 2 meses)
-    public static function avgByBiMonthsLast6(string $column)
+    public static function avgByBiMonthsLast6(string $column, ?int $idHortaliza = null)
     {
-        $to = now()->endOfMonth();
+        $to   = now()->endOfMonth();
         $from = now()->copy()->subMonths(11)->startOfMonth();
 
+        $query = static::query()
+            ->between($from, $to);
+
+        if (!is_null($idHortaliza)) {
+            $query->where('id_hortaliza', $idHortaliza);
+        }
+
         // Agrupar por año y paridad de mes (bimestres)
-        return static::query()
-            ->between($from, $to)
+        return $query
             ->selectRaw("
                 CONCAT(YEAR(fecha), '-', LPAD( (FLOOR((MONTH(fecha)-1)/2)*2)+1 ,2,'0')) as x_start_key,
                 CONCAT(YEAR(fecha), '-', LPAD( (FLOOR((MONTH(fecha)-1)/2)*2)+2 ,2,'0')) as x_end_key,
@@ -104,19 +136,23 @@ class RegistroMediciones extends Model
     }
 
     // “Todos” (solo válido cuando sensor = todos): promedio de cada sensor
-    public static function avgAllSensors()
+    public static function avgAllSensors(?int $idHortaliza = null)
     {
-        return static::query()
+        $query = static::query();
+
+        if (!is_null($idHortaliza)) {
+            $query->where('id_hortaliza', $idHortaliza);
+        }
+
+        return $query
             ->selectRaw("
-                AVG(hum_value)  as humedad,
-                AVG(tam_value)  as temp_ambiente,
-                AVG(ph_value)   as ph,
-                AVG(ce_value)   as orp,
+                AVG(hum_value)   as humedad,
+                AVG(tam_value)   as temp_ambiente,
+                AVG(ph_value)    as ph,
+                AVG(ce_value)    as orp,
                 AVG(tagua_value) as temp_agua,
                 AVG(us_value)    as ultrasonico
             ")
             ->first();
     }
 }
-
-

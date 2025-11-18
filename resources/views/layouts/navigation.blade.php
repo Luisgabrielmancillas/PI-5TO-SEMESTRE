@@ -18,7 +18,12 @@
                         $isComp = request()->routeIs('comparacion');
                         $isHort = request()->routeIs('hortalizas');
                         $isHist = request()->routeIs('history') || request()->routeIs('history.*');
-                    @endphp
+                        $isGest = request()->routeIs('gestion.index');
+                        $user = auth()->user();
+                        $isAdmin = method_exists($user, 'hasRole')
+                            ? $user->hasRole('admin')
+                            : (($user->role ?? null) === 'admin');
+                    @endphp 
 
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
                         <a href="{{ route('dashboard') }}"
@@ -30,22 +35,74 @@
                             <span>Resumen</span>
                         </a>
 
+                        <!-- Comparación -->
                         <a href="{{ route('comparacion') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition {{ $isComp ? 'bg-white text-purple-700 shadow-sm dark:bg-gray-700 dark:text-purple-200' : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isComp
+                                    ? 'bg-white text-purple-700 shadow-sm dark:bg-gray-700 dark:text-purple-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isComp ? 'text-purple-600 dark:text-purple-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 20h18"/>
+                                <path d="M5 20V12h3v8z"/>
+                                <path d="M16 20V8h3v12z"/>
+                                <path d="M8 4h8"/>
+                                <path d="M10 2l-2 2 2 2"/>
+                                <path d="M14 2l2 2-2 2"/>
+                            </svg>
                             <span>Comparación</span>
                         </a>
-
+                        
+                        <!-- HORTALIZAS -->
                         <a href="{{ route('hortalizas') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition {{ $isHort ? 'bg-white text-green-700 shadow-sm dark:bg-gray-700 dark:text-green-200' : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isHort
+                                    ? 'bg-white text-green-700 shadow-sm dark:bg-gray-700 dark:text-green-200'
+                                    : 'text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHort ? 'text-green-600 dark:text-green-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20v-7"/>
+                                <path d="M12 13C12 7 6 5 6 5s-1 6 6 8"/>
+                                <path d="M12 13c0-6 6-8 6-8s1 6-6 8"/>
+                                <path d="M3 20h18"/>
+                            </svg>
                             <span>Hortalizas</span>
                         </a>
 
+                        <!-- HISTORIAL -->
                         <a href="{{ route('history') }}"
-                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition {{ $isHist ? 'bg-white text-pink-700 shadow-sm dark:bg-gray-700 dark:text-pink-200' : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                  {{ $isHist
+                                      ? 'bg-white text-pink-700 shadow-sm dark:bg-gray-700 dark:text-pink-200'
+                                      : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isHist ? 'text-pink-600 dark:text-pink-300' : 'text-gray-400 dark:text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-width="2" d="M12 8v5l3 3M12 22a10 10 0 110-20 10 10 0 010 20z"/>
+                            </svg>
                             <span>Historial</span>
                         </a>
-                    </div>
-                </div>
+
+                        <!-- GESTIÓN DE USUARIOS -->
+                        @if($isAdmin)
+                            <a href="{{ route('gestion.index') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                    {{ $isGest
+                                        ? 'bg-white text-amber-700 shadow-sm dark:bg-gray-700 dark:text-amber-200'
+                                        : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                                <svg class="h-5 w-5 {{ $isGest ? 'text-amber-600 dark:text-amber-300' : 'text-gray-400 dark:text-gray-400' }}" 
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="7" r="3"/>
+                                    <path d="M4 20v-2a5 5 0 0 1 5-5h0"/>
+                                    <circle cx="18" cy="13" r="2"/>
+                                    <path d="M18 9v2M18 15v2M14 13h2M20 13h2M16.6 10.6l1.4 1.4M16.6 15.4l1.4-1.4M19.4 12l1.4-1.4M19.4 14l1.4 1.4"/>
+                                </svg>
+                                <span>Gestión Usuarios</span>
+                            </a>
+                        @endif
+                    </div> <!-- Cierre de tabs -->
+                </div> <!-- Cierre sm:flex -->
                 @endauth
             </div>
 
@@ -160,19 +217,26 @@
             </a>
             <a href="{{ route('comparacion') }}"
                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
-               {{ request()->routeIs('comparacion') ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+               {{ request()->routeIs('comparacion') ? 'bg-purple-50 border-purple-500 text-purple-700 dark:bg-gray-700 dark:text-purple-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                 Comparación
             </a>
             <a href="{{ route('hortalizas') }}"
-               class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
-               {{ request()->routeIs('hortalizas') ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
+            {{ request()->routeIs('hortalizas') ? 'bg-green-50 border-green-500 text-green-700 dark:bg-gray-700 dark:text-green-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                 Hortalizas
             </a>
             <a href="{{ route('history') }}"
                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
-               {{ request()->routeIs('history') ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+               {{ request()->routeIs('history') ? 'bg-pink-50 border-pink-500 text-pink-700 dark:bg-gray-700 dark:text-pink-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
                 Historial
             </a>
+            @if($isAdmin)('admin')
+                <a href="{{ route('gestion.index') }}"
+                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
+                {{ request()->routeIs('gestion.index') ? 'bg-amber-50 border-amber-500 text-amber-700 dark:bg-gray-700 dark:text-amber-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Gestión Usuarios
+                </a>
+            @endif
         </div>
 
         <!-- Selector de idioma en móvil -->

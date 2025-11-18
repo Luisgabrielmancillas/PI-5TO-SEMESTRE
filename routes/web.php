@@ -1,73 +1,69 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\HortalizasController;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ComparacionController;
+use App\Http\Controllers\GestionController;
+use App\Http\Controllers\ChatBadgeController;
 use App\Http\Controllers\ActuadoresController;
 use App\Http\Controllers\TranslateController;
 use App\Http\Controllers\NotificacionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+
 
 Route::middleware('guest')->group(function () {
     // Landing
     Route::get('/', [WelcomeController::class, 'index'])->name('landing');
 
+    // Si alguien intenta /logout sin sesión
     Route::get('/logout', function () {
         return redirect()->route('login')->with('error', 'No tienes una sesión activa.');
     })->name('logout.get');
 });
 
-
-/* if (app()->environment('local')) {
-    Route::get('/forzar-404', fn() => abort(404))->name('test.404');
-    Route::get('/forzar-403', fn() => abort(403))->name('test.403');
-    Route::get('/forzar-419', fn() => abort(419))->name('test.419');
-    Route::get('/forzar-500', fn() => abort(500))->name('test.500');
-    Route::get('/forzar-503', fn() => abort(503))->name('test.503');
-} */
-
-
-/*
-| Rutas autenticadas y (cuando procede) verificadas
-*/
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/latest', [DashboardController::class, 'getLatestData'])->name('dashboard.latest');
+Route::middleware(['auth', 'active', 'verified'])->group(function () {
+    Route::get('/dashboard',         [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/latest',  [DashboardController::class, 'getLatestData'])->name('dashboard.latest');
     Route::get('/dashboard/chart-data', [DashboardController::class, 'getChartData'])->name('dashboard.chart');
 
-    Route::get('/history', [HistoryController::class, 'index'])->name('history');
-    Route::get('/history/data', [HistoryController::class, 'data'])->name('history.data');
-    Route::get('/history/table', [HistoryController::class, 'table'])->name('history.table');
+    Route::get('/history',        [HistoryController::class, 'index'])->name('history');
+    Route::get('/history/data',   [HistoryController::class, 'data'])->name('history.data');
+    Route::get('/history/table',  [HistoryController::class, 'table'])->name('history.table');
+    Route::post('/history/export-pdf', [HistoryController::class, 'exportPdf'])->name('history.exportPdf');
 
-    Route::get('/hortalizas', [HortalizasController::class, 'index'])->name('hortalizas');
-    Route::post('/hortalizas/cambiar', [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
+    Route::get('/hortalizas',           [HortalizasController::class, 'index'])->name('hortalizas');
+    Route::post('/hortalizas/cambiar',  [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
 
-    Route::get('/comparacion', [ComparacionController::class, 'index'])->name('comparacion');
+    Route::get('/comparacion',     [ComparacionController::class, 'index'])->name('comparacion');
+    Route::prefix('gestionusuarios')
+        ->name('gestion.')
+        ->middleware(['admin'])       
+        ->group(function () {
+            Route::get('/',         [GestionController::class, 'index'])->name('index');
+            Route::get('/table',    [GestionController::class, 'table'])->name('table');
 
-    // Dentro de middleware 'auth' y 'verified'
-    Route::get('/actuadores', [ActuadoresController::class, 'index'])->name('actuadores.index');
-    Route::get('/sensores', [App\Http\Controllers\SensoresController::class, 'index'])->name('sensores.index');
-
+            Route::put('/{user}/accept',   [GestionController::class, 'accept'])->name('accept');
+            Route::put('/{user}/activate', [GestionController::class, 'activate'])->name('activate');
+            Route::put('/{user}/suspend',  [GestionController::class, 'suspend'])->name('suspend');
+            Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
+        });
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::middleware(['auth', 'active', 'verified', 'chat.desktop'])->group(function () {
+    Route::post('/history/export-pdf', [HistoryController::class, 'exportPdf'])->name('history.exportPdf');
+});
+
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/profile',   [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile',[ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/chat/unread-count', [ChatBadgeController::class, 'count'])->name('chat.unread');
 });
-
-/*
-| Fallback para rutas inexistentes: devuelve a la landing con aviso
-*/
-Route::fallback(function () {
-    return redirect()->route('landing')->with('error', 'La ruta solicitada no está disponible.');
-});
-
-require __DIR__ . '/auth.php';
 
 
 Route::fallback(function () {
@@ -79,6 +75,7 @@ Route::fallback(function () {
 });
 
 Route::post('/traducir', [TranslateController::class, 'traducir'])->name('traducir');
-
 // Añade esta ruta
 Route::get('/notificaciones', [NotificacionController::class, 'obtenerNotificaciones'])->name('notificaciones.obtener');
+
+require __DIR__ . '/auth.php';

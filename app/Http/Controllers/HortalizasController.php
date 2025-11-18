@@ -13,6 +13,11 @@ class HortalizasController extends Controller
     // Mostrar la vista con todas las hortalizas y sus rangos óptimos
     public function index()
     {
+
+        $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
+            ->orderByDesc('fecha')
+            ->first();
+
         // Cargar todas las hortalizas con sus configuraciones y sensores relacionados
         $hortalizas = SeleccionHortalizas::with(['config_sensores.sensore'])->get();
         $seleccionada = SeleccionHortalizas::where('seleccion', 1)->first();
@@ -27,7 +32,7 @@ class HortalizasController extends Controller
             'mostaza' => 'mostaza.png',
         ];
 
-        return view('Dashboard.HortalizasView.hortalizas', compact('hortalizas', 'seleccionada', 'icons'));
+        return view('Dashboard.HortalizasView.hortalizas', compact('hortalizas', 'seleccionada', 'icons', 'selectedCrop'));
     }
 
     // Cambiar hortaliza activa

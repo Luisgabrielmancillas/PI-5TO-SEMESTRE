@@ -1,8 +1,19 @@
 <x-app-layout title="Comparación | HydroBox">
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Comparación de valores') }}
-        </h2>
+        <div class="flex items-center gap-3">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Gestión de usuarios') }}
+            </h2>
+
+            <span class="pill pill-emerald ml-auto inline-flex items-center">
+                Hortaliza seleccionada:
+                @if(!empty($selectedCrop))
+                    <b class="ml-1">{{ $selectedCrop->nombre }}</b>
+                @else
+                    <b class="ml-1">No hay</b>
+                @endif
+            </span>
+        </div>
     </x-slot>
 
     <section class="py-8">
@@ -17,14 +28,14 @@
                         <span class="text-rose-600 font-semibold">rojo</span> los fuera de rango.
                     </p>
                 </div>
-                <span class="pill pill-emerald">
+{{--                 <span class="pill pill-emerald">
                     Hortaliza seleccionada:
                     @if(!empty($selectedCrop))
                         <b>{{ $selectedCrop->nombre }}</b>
                     @else
                         <b>No hay</b>
                     @endif
-                </span>
+                </span> --}}
             </div>
 
             @php

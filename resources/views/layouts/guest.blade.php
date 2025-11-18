@@ -99,5 +99,6 @@
           document.addEventListener('DOMContentLoaded', hookPasswordToggles);
         })();
         </script>
+        @include('components.alerts-component')
     </body>
 </html>
