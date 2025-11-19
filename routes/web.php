@@ -6,6 +6,7 @@ use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\HortalizasController;
 use App\Http\Controllers\ComparacionController;
+use App\Http\Controllers\ScadaController;
 use App\Http\Controllers\GestionController;
 use App\Http\Controllers\ChatBadgeController;
 use App\Http\Controllers\ActuadoresController;
@@ -51,6 +52,12 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
             Route::put('/{user}/activate', [GestionController::class, 'activate'])->name('activate');
             Route::put('/{user}/suspend',  [GestionController::class, 'suspend'])->name('suspend');
             Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
+        });
+    Route::prefix('interfazscada')
+        ->name('scada.')
+        ->middleware(['admin'])       
+        ->group(function () {
+            Route::get('/', [ScadaController::class, 'index'])->name('index');
         });
 });
 
