@@ -329,26 +329,23 @@
     @endpush
     @push('styles')
         <style>
-            /* Define el desplazamiento vertical de la barra */
             :root {
                 --top-offset: 0px; 
-                --image-lift: 20px;
+                --image-lift: 35px;
+                --image-shift-x: 5px; 
             }
 
             .bg-container {
-                background-image: url('{{ asset('images/fondo.png') }}');
-
+                background-image: url('{{ asset('images/Fondo_B.png') }}');
                 margin-top: 0;
                 min-height: calc(100vh + 100px);
-
                 position: relative;
                 width: 100%;
                 background-size: 100% auto;
-                background-position: center calc(50% - var(--image-lift));
+                background-position: calc(50% - var(--image-shift-x)) calc(50% - var(--image-lift));
                 background-repeat: no-repeat;
                 overflow: hidden;
             }
-            
             .lamp-container { top: 0px; } 
             .lighting-image { 
                 width: 320px; 
