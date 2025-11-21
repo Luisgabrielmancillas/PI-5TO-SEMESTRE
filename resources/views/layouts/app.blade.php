@@ -8,6 +8,20 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+                <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
+        <!-- Favicons PNG -->
+        <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
+        <link rel="icon" href="{{ asset('favicon-16.png') }}" sizes="16x16" type="image/png">
+
+        <!-- iOS -->
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
+
+        <!-- (Opcional) Compatibilidad extra -->
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <title>{{ $title }}</title>
@@ -26,20 +40,8 @@
           } catch (e) {}
         })();
         </script>
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
-        <!-- Favicons PNG -->
-        <link rel="icon" href="{{ asset('favicon-32.png') }}" sizes="32x32" type="image/png">
-        <link rel="icon" href="{{ asset('favicon-16.png') }}" sizes="16x16" type="image/png">
-
-        <!-- iOS -->
-        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}" sizes="180x180">
-
-        <!-- (Opcional) Compatibilidad extra -->
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+        
+        @stack('styles')
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -248,10 +250,10 @@
                 const cacheKey = "traduccionesCache";
                 const seccionesTraducidasKey = "seccionesTraducidas";
                 const idiomas = { 
-                    es: "Español", 
-                    en: "English", 
-                    fr: "Français", 
-                    de: "Deutsch" 
+                    es: "ES", 
+                    en: "EN", 
+                    fr: "FR", 
+                    de: "DE" 
                 };
                 
                 let idiomaActual = localStorage.getItem(storageLangKey) || "es";

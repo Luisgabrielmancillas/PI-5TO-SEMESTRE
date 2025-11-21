@@ -5,27 +5,55 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
             <div class="flex items-center gap-6">
+                @php
+                    $homeRoute = route('landing');
+                    $isScad = request()->routeIs('scada.index');
+                    $isDash = request()->routeIs('dashboard');
+                    $isComp = request()->routeIs('comparacion');
+                    $isHort = request()->routeIs('hortalizas');
+                    $isHist = request()->routeIs('history') || request()->routeIs('history.*');
+                    $isGest = request()->routeIs('gestion.index');
+                    $user = auth()->user();
+                    $isAdmin = method_exists($user, 'hasRole')
+                        ? $user->hasRole('admin')
+                        : (($user->role ?? null) === 'admin');
+
+                    if ($isAdmin) {
+                        $homeRoute = route('scada.index');
+                    } else {
+                        $homeRoute = route('dashboard');
+                    }
+                @endphp
                 <!-- Logo -->
-                <a href="{{ auth()->check() ? route('dashboard') : route('landing') }}" class="shrink-0">
+                <a href="{{ $homeRoute }}" class="shrink-0">
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="h-10 w-10 rounded-xl shadow-sm">
                 </a>
 
                 <!-- Tabs (Desktop) -->
                 @auth
                 <div class="hidden sm:flex items-center">
-                    @php
-                        $isDash = request()->routeIs('dashboard');
-                        $isComp = request()->routeIs('comparacion');
-                        $isHort = request()->routeIs('hortalizas');
-                        $isHist = request()->routeIs('history') || request()->routeIs('history.*');
-                        $isGest = request()->routeIs('gestion.index');
-                        $user = auth()->user();
-                        $isAdmin = method_exists($user, 'hasRole')
-                            ? $user->hasRole('admin')
-                            : (($user->role ?? null) === 'admin');
-                    @endphp 
-
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
+                        @if($isAdmin)
+                            <a href="{{ route('scada.index') }}"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                    {{ $isScad
+                                        ? 'bg-white text-slate-700 shadow-sm dark:bg-gray-700 dark:text-slate-200'
+                                        : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                                <svg class="h-5 w-5 {{ $isScad ? 'text-slate-600 dark:text-slate-300' : 'text-gray-400 dark:text-gray-400' }}"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+                                    <path d="M6.5 10h5.5"/>
+                                    <path d="M6.5 13h4"/>
+                                    <path d="M6.5 16h3"/>
+                                    <circle cx="18.5" cy="9" r="2"/>
+                                    <path d="M16 14h1.5a2 2 0 0 0 2-2v-1"/>
+                                </svg>
+                                <span>Scada</span>
+                            </a>
+                        @endif
+
+
                         <a href="{{ route('dashboard') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition {{ $isDash ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200' : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
                             <svg class="h-5 w-5 {{ $isDash ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-400' }}"
@@ -98,7 +126,7 @@
                                     <circle cx="18" cy="13" r="2"/>
                                     <path d="M18 9v2M18 15v2M14 13h2M20 13h2M16.6 10.6l1.4 1.4M16.6 15.4l1.4-1.4M19.4 12l1.4-1.4M19.4 14l1.4 1.4"/>
                                 </svg>
-                                <span>Gestión Usuarios</span>
+                                <span>Usuarios</span>
                             </a>
                         @endif
                     </div> <!-- Cierre de tabs -->
@@ -115,7 +143,7 @@
                 <div class="relative">
                     <button id="btn-traducir"
                             class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                        🌐 <span id="btn-traducir-text" class="text-sm">Idioma</span>
+                        🌐 <span id="btn-traducir-text" class="text-sm"></span>
                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                         </svg>
@@ -210,6 +238,14 @@
     <!-- Menú móvil -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div class="pt-2 pb-3 space-y-1">
+            @if($isAdmin)
+                <a href="{{ route('scada.index') }}"
+                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
+                {{ request()->routeIs('scada.index') ? 'bg-slate-50 border-slate-500 text-slate-700 dark:bg-gray-700 dark:text-slate-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Interfaz Scada
+                </a>
+            @endif
+
             <a href="{{ route('dashboard') }}"
                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
                {{ request()->routeIs('dashboard') ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
@@ -221,9 +257,9 @@
                 Comparación
             </a>
             <a href="{{ route('hortalizas') }}"
-            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
-            {{ request()->routeIs('hortalizas') ? 'bg-green-50 border-green-500 text-green-700 dark:bg-gray-700 dark:text-green-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
-                Hortalizas
+                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
+                {{ request()->routeIs('hortalizas') ? 'bg-green-50 border-green-500 text-green-700 dark:bg-gray-700 dark:text-green-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+                    Hortalizas
             </a>
             <a href="{{ route('history') }}"
                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
