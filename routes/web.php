@@ -41,6 +41,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::post('/hortalizas/cambiar',  [HortalizasController::class, 'cambiar'])->name('hortalizas.cambiar');
 
     Route::get('/comparacion',     [ComparacionController::class, 'index'])->name('comparacion');
+    Route::get('/comparacion/block', [ComparacionController::class, 'block'])->name('comparacion.block');
     Route::prefix('gestionusuarios')
         ->name('gestion.')
         ->middleware(['admin'])       

@@ -56,11 +56,7 @@ return [
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
-
-            // Déjalo estricto…
             'strict' => true,
-
-            // …pero sobrescribe los modos (sin ONLY_FULL_GROUP_BY)
             'modes' => [
                 'STRICT_TRANS_TABLES',
                 'ERROR_FOR_DIVISION_BY_ZERO',
