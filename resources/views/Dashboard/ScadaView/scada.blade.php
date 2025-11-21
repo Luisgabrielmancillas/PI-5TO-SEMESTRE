@@ -336,7 +336,7 @@
             }
 
             .bg-container {
-                background-image: url('{{ asset('images/fondo.png') }}');
+                background-image: url('{{ asset('images/Fondo.png') }}');
 
                 margin-top: 0;
                 min-height: calc(100vh + 100px);
