@@ -11,7 +11,32 @@ class ComparacionController extends Controller
 {
     public function index()
     {
-        // 1) Hortaliza seleccionada (igual que en Welcome)
+        // Usamos el mismo método para no duplicar lógica
+        [$selectedCrop, $ranges, $measurements, $latest] = $this->buildComparisonData();
+
+        return view('Dashboard.ComparacionView.comparacion', [
+            'selectedCrop' => $selectedCrop,
+            'ranges'       => $ranges,
+            'measurements' => $measurements,
+            'latest'       => $latest,
+        ]);
+    }
+
+
+    public function block()
+    {
+        [$selectedCrop, $ranges, $measurements, $latest] = $this->buildComparisonData();
+
+        return view('Dashboard.ComparacionView._cards-block', [
+            'ranges'       => $ranges,
+            'measurements' => $measurements,
+            'latest'       => $latest,
+        ]);
+    }
+
+    protected function buildComparisonData()
+    {
+        // 1) Hortaliza seleccionada
         $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
             ->orderByDesc('fecha')
             ->first();
@@ -20,10 +45,10 @@ class ComparacionController extends Controller
         $sensorMap = [
             2 => ['key' => 'temp_ambiente', 'label' => 'Temperatura ambiente', 'unit' => ' °C', 'icon' => 'ri-temp-hot-line'],
             4 => ['key' => 'humedad',       'label' => 'Humedad ambiente',     'unit' => ' %',  'icon' => 'ri-water-percent-line'],
-            1 => ['key' => 'ph',            'label' => 'pH del agua',           'unit' => '',    'icon' => 'ri-test-tube-line'],
-            3 => ['key' => 'temp_agua',     'label' => 'Temperatura del agua',  'unit' => ' °C', 'icon' => 'ri-temp-cold-line'],
-            5 => ['key' => 'orp',           'label' => 'ORP (RedOx)',           'unit' => ' mV', 'icon' => 'ri-bubble-chart-line'],
-            6 => ['key' => 'ultrasonico',   'label' => 'Nivel ultrasónico',     'unit' => ' cm', 'icon' => 'ri-radar-line'],
+            1 => ['key' => 'ph',            'label' => 'pH del agua',          'unit' => '',    'icon' => 'ri-test-tube-line'],
+            3 => ['key' => 'temp_agua',     'label' => 'Temperatura del agua', 'unit' => ' °C', 'icon' => 'ri-temp-cold-line'],
+            5 => ['key' => 'orp',           'label' => 'ORP (RedOx)',          'unit' => ' mV', 'icon' => 'ri-bubble-chart-line'],
+            6 => ['key' => 'ultrasonico',   'label' => 'Nivel ultrasónico',    'unit' => ' cm', 'icon' => 'ri-radar-line'],
         ];
 
         // 3) Rangos para la hortaliza seleccionada
@@ -34,21 +59,21 @@ class ComparacionController extends Controller
                 if (isset($sensorMap[$cfg->id_sensor])) {
                     $meta = $sensorMap[$cfg->id_sensor];
                     $ranges[$meta['key']] = [
-                        'min'  => (float)$cfg->valor_min_acept,
-                        'max'  => (float)$cfg->valor_max_acept,
-                        'unit' => $meta['unit'],
-                        'label'=> $meta['label'],
-                        'icon' => $meta['icon'],
+                        'min'   => (float)$cfg->valor_min_acept,
+                        'max'   => (float)$cfg->valor_max_acept,
+                        'unit'  => $meta['unit'],
+                        'label' => $meta['label'],
+                        'icon'  => $meta['icon'],
                     ];
                 }
             }
         }
 
-        // 4) Último registro de mediciones (según tu modelo: fecha)
+        // 4) Último registro de mediciones
         $latest = RegistroMediciones::orderByDesc('fecha')->first()
                  ?? RegistroMediciones::orderByDesc('created_at')->first();
 
-        // 5) Medidas mapeadas a las claves usadas en Blade (leyendo columnas reales del modelo)
+        // 5) Medidas mapeadas a las claves usadas en Blade
         $measurements = null;
         if ($latest) {
             $measurements = [
@@ -61,11 +86,6 @@ class ComparacionController extends Controller
             ];
         }
 
-        return view('Dashboard.ComparacionView.comparacion', [
-            'selectedCrop' => $selectedCrop,
-            'ranges'       => $ranges,
-            'measurements' => $measurements,
-            'latest'       => $latest,
-        ]);
+        return [$selectedCrop, $ranges, $measurements, $latest];
     }
 }

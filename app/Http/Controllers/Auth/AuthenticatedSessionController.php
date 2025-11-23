@@ -30,6 +30,8 @@ class AuthenticatedSessionController extends Controller
         // Usuario autenticado temporalmente
         $user = $request->user();
 
+        $isAdmin = method_exists($user, 'hasRole') ? $user->hasRole('admin') : (($user->role ?? null) === 'admin');
+        
         // Bloquear si el estado no es "Activo"
         if ($user->estado !== 'Activo') {
             $msg = match ($user->estado) {
@@ -50,8 +52,19 @@ class AuthenticatedSessionController extends Controller
         // Solo usuarios activos
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false))->with('success', 'Has iniciado sesión con éxito.');
+        // ==== Redirección según rol ====
+        // Ajusta los nombres de roles y rutas si los tienes distintos
+        if ($isAdmin) {
+            $defaultRoute = route('scada.index', absolute: false);
+        } else {
+            // ruta para usuario normal
+            $defaultRoute = route('dashboard', absolute: false);
+        }
+
+        return redirect()->intended($defaultRoute)
+            ->with('success', 'Has iniciado sesión con éxito.');
     }
+
 
 
     /**

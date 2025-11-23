@@ -295,111 +295,146 @@
         }
 
         function updateCharts(chartData) {
-            const isDark = document.documentElement.classList.contains('dark');
-            const axisColor = isDark ? '#d1d5db' : '#a0aec0';
-            const gridColor = isDark ? '#374151' : '#2d3748';
-            const legendColor = isDark ? '#d1d5db' : '#a0aec0';
+        const isDark = document.documentElement.classList.contains('dark');
+        const axisColor = isDark ? '#d1d5db' : '#a0aec0';
+        const gridColor = isDark ? '#374151' : '#2d3748';
+        const legendColor = isDark ? '#d1d5db' : '#a0aec0';
 
-            if (barChartInstance) {
-                barChartInstance.destroy();
-            }
-
-            barChartInstance = new Chart(document.getElementById('barChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['pH', 'ORP', 'Temp Agua', 'Nivel Agua'],
-                    datasets: [{
-                        label: 'Valor promedio',
-                        data: [
-                            chartData.averages.ph,
-                            chartData.averages.ce,
-                            chartData.averages.tempAgua,
-                            chartData.averages.nivel
-                        ],
-                        backgroundColor: isDark ? 
-                            ['#6366f1', '#d946ef', '#facc15', '#22d3ee'] : 
-                            ['#22d3ee', '#d946ef', '#facc15', '#22c55e']
-                    }]
-                },
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: true,
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        },
-                        x: { 
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { 
-                            labels: { color: legendColor, font: { size: 11 } }
-                        }
-                    }
-                }
-            });
-
-            if (lineChartInstance) {
-                lineChartInstance.destroy();
-            }
-
-            lineChartInstance = new Chart(document.getElementById('lineChart'), {
-                type: 'line',
-                data: {
-                    labels: chartData.labels,
-                    datasets: [
-                        { 
-                            label: 'pH', 
-                            data: chartData.datasets.ph, 
-                            borderColor: isDark ? '#6366f1' : '#22d3ee', 
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: false 
-                        },
-                        { 
-                            label: 'ORP', 
-                            data: chartData.datasets.ce, 
-                            borderColor: '#d946ef', 
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: false 
-                        },
-                        { 
-                            label: 'Temp. Agua', 
-                            data: chartData.datasets.tempAgua, 
-                            borderColor: '#facc15', 
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: false 
-                        }
-                    ]
-                },
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: false, 
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        },
-                        x: { 
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { 
-                            labels: { color: legendColor, font: { size: 11 } }
-                        }
-                    }
-                }
-            });
+        // Destruir gráfica anterior si existe
+        if (barChartInstance) {
+            barChartInstance.destroy();
         }
+
+        // Gráfica de Barras (Promedios) - TODOS los sensores
+        barChartInstance = new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: ['pH', 'ORP', 'Temp Agua', 'Temp Aire', 'Hum Aire', 'Nivel Agua'],
+                datasets: [{
+                    label: 'Valor promedio',
+                    data: [
+                        chartData.averages.ph,
+                        chartData.averages.ce,
+                        chartData.averages.tempAgua,
+                        chartData.averages.tempAire,
+                        chartData.averages.humAire,
+                        chartData.averages.nivelAgua
+                    ],
+                    backgroundColor: isDark ? 
+                        ['#6366f1', '#d946ef', '#facc15', '#22d3ee', '#10b981', '#f97316'] : 
+                        ['#22d3ee', '#d946ef', '#facc15', '#ef4444', '#10b981', '#f97316']
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: axisColor, font: { size: 10 } },
+                        grid: { color: gridColor }
+                    },
+                    x: { 
+                        ticks: { 
+                            color: axisColor, 
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: { color: gridColor }
+                    }
+                },
+                plugins: {
+                    legend: { 
+                        labels: { color: legendColor, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+
+        // Destruir gráfica anterior si existe
+        if (lineChartInstance) {
+            lineChartInstance.destroy();
+        }
+
+        // Gráfica de Líneas (Tiempo Real) - TODOS los sensores
+        lineChartInstance = new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    { 
+                        label: 'pH', 
+                        data: chartData.datasets.ph, 
+                        borderColor: '#6366f1', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false 
+                    },
+                    { 
+                        label: 'ORP', 
+                        data: chartData.datasets.ce, 
+                        borderColor: '#d946ef', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false 
+                    },
+                    { 
+                        label: 'Temp. Agua', 
+                        data: chartData.datasets.tempAgua, 
+                        borderColor: '#facc15', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false 
+                    },
+                    { 
+                        label: 'Temp. Aire', 
+                        data: chartData.datasets.tempAire, 
+                        borderColor: '#ef4444', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false 
+                    },
+                    { 
+                        label: 'Hum. Aire', 
+                        data: chartData.datasets.humAire, 
+                        borderColor: '#10b981', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false 
+                    },
+                    { 
+                        label: 'Nivel Agua', 
+                        data: chartData.datasets.nivelAgua, 
+                        borderColor: '#f97316', 
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: false 
+                    }
+                ]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { 
+                        beginAtZero: false, 
+                        ticks: { color: axisColor, font: { size: 10 } },
+                        grid: { color: gridColor }
+                    },
+                    x: { 
+                        ticks: { color: axisColor, font: { size: 10 } },
+                        grid: { color: gridColor }
+                    }
+                },
+                plugins: {
+                    legend: { 
+                        labels: { color: legendColor, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    }
 
         function createGauge(id, value, max, unit) {
             const canvas = document.getElementById(id);
@@ -510,6 +545,17 @@
                 attributeFilter: ['class'] 
             });
         });
+        document.addEventListener('DOMContentLoaded', () => {
+        initializeGauges();
+        fetchSensorData();
+        fetchChartData();
+
+        setInterval(() => {
+            fetchSensorData();
+            fetchChartData();
+        }, 2000);
+    });
+
     </script>
     @endpush
 </x-app-layout>
