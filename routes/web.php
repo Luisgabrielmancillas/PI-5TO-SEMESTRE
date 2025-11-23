@@ -87,3 +87,10 @@ Route::post('/traducir', [TranslateController::class, 'traducir'])->name('traduc
 Route::get('/notificaciones', [NotificacionController::class, 'obtenerNotificaciones'])->name('notificaciones.obtener');
 
 require __DIR__ . '/auth.php';
+
+Route::get('/hortalizas/seleccion-actual', function () {
+    return response()->json(
+        \App\Models\SeleccionHortalizas::where('seleccion', 1)->first()
+    );
+});
+

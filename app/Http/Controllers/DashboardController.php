@@ -68,29 +68,40 @@ class DashboardController extends Controller
             return Carbon::parse($f)->format('H:i');
         });
 
-        $ph       = $records->pluck('ph_value');
-        $ce       = $records->pluck('ce_value');
+        // Datos para todas las mediciones
+        $ph = $records->pluck('ph_value');
+        $ce = $records->pluck('ce_value');
         $tempAgua = $records->pluck('tagua_value');
+        $tempAire = $records->pluck('tam_value');
+        $humAire = $records->pluck('hum_value');
+        $nivelAgua = $records->pluck('us_value');
 
-        // Calcular promedios
-        $avgPh        = round($ph->avg(), 2);
-        $avgCe        = round($ce->avg(), 2);
-        $avgTempAgua  = round($tempAgua->avg(), 2);
-        $avgNivel     = round($records->pluck('us_value')->avg(), 2);
+        // Calcular promedios para TODOS los sensores
+        $avgPh = round($ph->avg(), 2);
+        $avgCe = round($ce->avg(), 2);
+        $avgTempAgua = round($tempAgua->avg(), 2);
+        $avgTempAire = round($tempAire->avg(), 2);
+        $avgHumAire = round($humAire->avg(), 2);
+        $avgNivelAgua = round($nivelAgua->avg(), 2);
 
         return response()->json([
-            'empty'    => false,
-            'labels'   => $labels,
+            'empty' => false,
+            'labels' => $labels,
             'datasets' => [
-                'ph'       => $ph,
-                'ce'       => $ce,
-                'tempAgua' => $tempAgua
+                'ph' => $ph,
+                'ce' => $ce,
+                'tempAgua' => $tempAgua,
+                'tempAire' => $tempAire,
+                'humAire' => $humAire,
+                'nivelAgua' => $nivelAgua
             ],
             'averages' => [
-                'ph'       => $avgPh,
-                'ce'       => $avgCe,
+                'ph' => $avgPh,
+                'ce' => $avgCe,
                 'tempAgua' => $avgTempAgua,
-                'nivel'    => $avgNivel
+                'tempAire' => $avgTempAire,
+                'humAire' => $avgHumAire,
+                'nivelAgua' => $avgNivelAgua
             ]
         ]);
     }
