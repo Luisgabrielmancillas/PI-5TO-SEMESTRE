@@ -4,40 +4,46 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class UserApiController extends Controller
 {
-
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required',
+        // Validar datos enviados
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        // Buscar usuario por email
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Credenciales incorrectas'
+                'message' => 'Usuario no encontrado'
+            ], 404);
+        }
+
+        // Verificar contraseña
+        if (!Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contraseña incorrecta'
             ], 401);
         }
 
-        $user = $request->user();
-
-
-        $token = $user->createToken('mobile')->plainTextToken;
-
+        // Todo OK
         return response()->json([
             'success' => true,
-            'token'   => $token,
-            'user'    => $user
+            'message' => 'Usuario válido',
+            'user' => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+            ]
         ]);
-    }
-
-
-    public function me(Request $request)
-    {
-        return response()->json($request->user());
     }
 }
