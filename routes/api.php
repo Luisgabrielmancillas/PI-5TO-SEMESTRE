@@ -9,7 +9,6 @@ use App\Http\Controllers\Api\SeleccionHortalizaApiController;
 
 
 Route::post('/login', [UserApiController::class, 'login']);
-Route::get('/user', [UserApiController::class, 'me']);
 Route::get('/actuadores', [DataApiController::class, 'actuadores']);
 Route::get('/config-sensores', [DataApiController::class, 'configSensores']);
 Route::get('/nutrientes', [DataApiController::class, 'nutrientes']);
