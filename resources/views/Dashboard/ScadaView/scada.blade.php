@@ -65,12 +65,24 @@
             </span>
         </div>
         
-        {{-- CÁMARA: solo pill, siempre ON --}}
-        <div id="cameraToggle" class="absolute top-[450px] left-[87%] z-20 flex flex-col items-center">
+
+        {{-- CÁMARA: vista + pill de estado --}}
+        <div id="cameraToggle" class="absolute top-[200px] left-[80%] z-20 flex flex-col items-center">
+            
+            {{-- Recuadro con la imagen de la cámara --}}
+            <div class="border border-gray-300 rounded-xl overflow-hidden mb-2 bg-black">
+                <img
+                    src="http://10.42.62.18:8000/stream.mjpg"
+                    alt="Cámara HydroBox"
+                    class="w-96 h-60 object-cover"
+                >
+            </div>
+
+            {{-- Mini componente de estado --}}
             <span id="cameraStatus" 
-                  class="mt-4 text-sm text-black px-3 py-1 rounded-full 
-                         bg-green-100 border border-2 border-green-300 transition duration-300 
-                         flex items-center space-x-2 whitespace-nowrap">
+                class="mt-2 text-sm text-black px-3 py-1 rounded-full 
+                        bg-green-100 border border-2 border-green-300 transition duration-300 
+                        flex items-center space-x-2 whitespace-nowrap">
                 <div id="cameraDot" class="w-2 h-2 rounded-full bg-green-700 transition duration-300"></div>
                 <span id="cameraText">Cámara: On</span>
             </span>
