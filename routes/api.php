@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DataApiController;
 use App\Http\Controllers\Api\UserApiController;
 use App\Http\Controllers\Api\SeleccionHortalizaApiController;
+use App\Http\Controllers\Api\RegistroActuadorApiController;
 
 
 
@@ -17,3 +18,8 @@ Route::get('/seleccion-hortalizas', [DataApiController::class, 'seleccionHortali
 Route::get('/sensores', [DataApiController::class, 'sensores']);
 Route::get('/hortaliza/actual', [SeleccionHortalizaApiController::class, 'get']);
 Route::post('/hortaliza/cambiar', [SeleccionHortalizaApiController::class, 'set']);
+
+
+Route::post('/actuador/estado', [RegistroActuadorApiController::class, 'estado']);
+Route::post('/actuador/encender', [RegistroActuadorApiController::class, 'encender']);
+Route::post('/actuador/apagar', [RegistroActuadorApiController::class, 'apagar']);
