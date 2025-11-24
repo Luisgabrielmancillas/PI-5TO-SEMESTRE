@@ -16,14 +16,23 @@
         </div>
     </x-slot>
 
-    <div class="bg-container">
+    {{-- Mensaje solo para móviles --}}
+    <div class="block md:hidden px-4 py-8">
+        <p class="text-center text-sm text-slate-500 dark:text-slate-400">
+            La interfaz SCADA solo está disponible en pantallas de escritorio.
+        </p>
+    </div>
+
+    {{-- Interfaz SCADA: solo en desktop --}}
+    <div class="bg-container hidden md:block">
         
+        {{-- Efecto de luz de lámpara --}}
         <img id="lighting" 
              src="{{ asset('images/Iluminacion1.png') }}"
              alt="Efecto de luz" 
              class="absolute lighting-image z-5 hidden transition-opacity duration-500">
 
-
+        {{-- LÁMPARA --}}
         <div id="lampControlGroup" class="absolute lamp-container left-[63%] -translate-x-1/2 flex flex-col items-center z-10 cursor-pointer">
             
             <button id="lampToggle" 
@@ -43,7 +52,7 @@
             </span>
         </div>
         
-        
+        {{-- VENTILADOR --}}
         <div id="fanToggle" class="absolute top-[55px] left-[37%] z-20 flex flex-col items-center cursor-pointer">
             <img id="fanImage" src="{{ asset('images/fan_off.png') }}" alt="Ventilador" class="w-24 h-auto transform hover:scale-105 transition duration-300">
             
@@ -56,60 +65,23 @@
             </span>
         </div>
         
-        <div id="cameraToggle" class="absolute top-[200px] left-[80%] z-20 flex flex-col items-center cursor-pointer">
-            <img id="cameraImage" src="{{ asset('images/camera.png') }}" alt="Cámara" class="w-24 h-auto transform hover:scale-105 transition duration-300">
-            
+        {{-- CÁMARA: solo pill, siempre ON --}}
+        <div id="cameraToggle" class="absolute top-[450px] left-[87%] z-20 flex flex-col items-center">
             <span id="cameraStatus" 
-                  class="mt-1 text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 transition duration-300 
+                  class="mt-4 text-sm text-black px-3 py-1 rounded-full 
+                         bg-green-100 border border-2 border-green-300 transition duration-300 
                          flex items-center space-x-2 whitespace-nowrap">
-                <div id="cameraDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
-                <span id="cameraText">Cámara: Off</span>
+                <div id="cameraDot" class="w-2 h-2 rounded-full bg-green-700 transition duration-300"></div>
+                <span id="cameraText">Cámara: On</span>
             </span>
         </div>
 
-        
-        <div id="tempSensor" class="absolute top-[78px] left-[47%] z-20 flex items-center">
-            <span id="tempValue" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 shadow-md whitespace-nowrap">
-                Temp: 25.0°C
-            </span> 
-            <img id="tempImage" src="{{ asset('images/temperatura.png') }}" alt="Sensor de Temperatura" class="ml-2 h-24 w-auto">
+        {{-- BLOQUE DE SENSORES (se refresca cada 10s) --}}
+        <div id="scada-sensors">
+            @include('Dashboard.ScadaView._sensors-block', ['latest' => $latest])
         </div>
 
-        <div id="humSensor" class="absolute top-[78px] left-[70%] z-20 flex items-center"> 
-            <img id="humImage" src="{{ asset('images/humedad.png') }}" alt="Sensor de Humedad" class="h-24 w-auto">
-            <span id="humValue" class="border border-2 text-sm text-black px-3 py-1 rounded-full bg-gray-50 border-gray-300 shadow-md whitespace-nowrap">
-                Hum: 65%
-            </span>
-        </div>
-        
-        <div class="absolute top-[79%] left-[32%] z-20 flex flex-col space-y-2 items-start">
-            
-            <span class="text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 shadow-md whitespace-nowrap">
-                T: 22.5°C
-            </span>
-
-            <span class="text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 shadow-md whitespace-nowrap">
-                ORP: 500 mV
-            </span>
-
-            <span class="text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 shadow-md whitespace-nowrap">
-                pH: 6.2
-            </span>
-
-        </div>
-        
-        <div class="absolute top-[75%] left-[58%] z-20">
-            <span class="text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 shadow-md whitespace-nowrap">
-                Ult: 27cm
-            </span>
-        </div>
-
-
+        {{-- BOMBAS DOSIFICADORAS --}}
         <div id="bd1Toggle" class="absolute top-[45%] left-[20.7%] z-20 flex flex-col items-center cursor-pointer">
             <img id="bd1Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N1" class="w-10 h-auto transform hover:scale-110 transition duration-300">
             <span id="bd1Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
@@ -134,6 +106,7 @@
             </span>
         </div>
 
+        {{-- BOMBA DE AGUA --}}
         <div id="baToggle" class="absolute top-[83.5%] left-[47.8%] z-20 flex flex-col items-center cursor-pointer">
             <img id="baImage" src="{{ asset('images/bomba_agua.png') }}" alt="Bomba de Agua" class="w-20 h-auto transform hover:scale-105 transition duration-300">
             
@@ -146,16 +119,17 @@
             </span>
         </div>
         
+        {{-- TERMINOLOGÍA --}}
         <div class="absolute bottom-8 right-16 z-10 p-4 rounded text-xs">
             <img id="terminologiaImage" src="{{ asset('images/terminologia.png') }}" alt="Terminología" class="w-96 h-auto border border-black">
         </div>
 
-
     </div>
+
     @push('scripts')
         <script>
             // =======================================================
-            // CÓDIGO JAVASCRIPT
+            // CÓDIGO JAVASCRIPT SCADA (actuadores + refresco sensores)
             // =======================================================
             
             // --- LÁMPARA ---
@@ -200,14 +174,6 @@
             const fanText = document.getElementById('fanText');
             let isFanOn = { value: false };
             
-            // --- CÁMARA (CAM) ---
-            const cameraToggle = document.getElementById('cameraToggle');
-            const cameraImage = document.getElementById('cameraImage');
-            const cameraDot = document.getElementById('cameraDot');
-            const cameraText = document.getElementById('cameraText');
-            let isCameraOn = { value: false };
-
-
             // --- CLASES DE ESTADO ---
             const statusClassesOff = ['bg-gray-50', 'border-gray-300'];
             const dotClassesOff = ['bg-gray-500'];
@@ -218,7 +184,6 @@
             // FUNCIÓN AUXILIAR GENÉRICA DE ACTUADORES
             // =======================================================
             function setupActuatorToggle(toggleId, imageElement, dotElement, textElement, initialName, isActuatorOnRef, imageSrcOn, imageSrcOff, applyShake = true) {
-                
                 toggleId.addEventListener('click', function() {
                     isActuatorOnRef.value = !isActuatorOnRef.value; 
                     const isOn = isActuatorOnRef.value;
@@ -258,9 +223,8 @@
                 });
             }
 
-
             // =======================================================
-            // LÓGICA DE LÁMPARA (Control de toggle unificado y posición de luz)
+            // LÓGICA DE LÁMPARA
             // =======================================================
             function toggleLamp() {
                 isLampOn = !isLampOn; 
@@ -290,33 +254,34 @@
                 }
             }
             
-            // Listener unificado para el grupo de la lámpara
             lampControlGroup.addEventListener('click', function(event) {
-                // Revisa si el clic fue en el span o en el espacio vacío del div
                 if (event.target.id === 'lampStatus' || event.target.tagName === 'SPAN' || event.target.tagName === 'DIV') {
                     toggleLamp();
                 }
             });
             
-            // Listener para el botón de la lámpara (imagen)
-            lampToggle.addEventListener('click', toggleLamp); // Se asegura que el botón (imagen) también llame a toggleLamp()
+            lampToggle.addEventListener('click', toggleLamp);
 
             // =======================================================
             // CONFIGURACIÓN DE ACTUADORES
             // =======================================================
-            
-            setupActuatorToggle(fanToggle, fanImage, fanDot, fanText, 'FAN', isFanOn, '{{ asset('images/fan.gif') }}', '{{ asset('images/fan_off.png') }}', false);
+            setupActuatorToggle(
+                fanToggle, 
+                fanImage, 
+                fanDot, 
+                fanText, 
+                'FAN', 
+                isFanOn, 
+                '{{ asset('images/fan.gif') }}', 
+                '{{ asset('images/fan_off.png') }}', 
+                false
+            );
             
             setupActuatorToggle(bd1Toggle, bd1Image, bd1Dot, bd1Text, 'BD1', isBD1On);
             setupActuatorToggle(bd2Toggle, bd2Image, bd2Dot, bd2Text, 'BD2', isBD2On);
             setupActuatorToggle(bd3Toggle, bd3Image, bd3Dot, bd3Text, 'BD3', isBD3On);
-            
             setupActuatorToggle(baToggle, baImage, baDot, baText, 'BA', isBAOn);
-            
-            setupActuatorToggle(cameraToggle, cameraImage, cameraDot, cameraText, 'Cámara', isCameraOn, null, null, false);
 
-
-            // Inicialización de estados al cargar la página
             lampText.textContent = 'Lámpara: Off';
             fanText.textContent = 'FAN: Off';
             fanImage.src = '{{ asset('images/fan_off.png') }}'; 
@@ -324,29 +289,67 @@
             bd2Text.textContent = 'BD2: Off';
             bd3Text.textContent = 'BD3: Off';
             baText.textContent = 'BA: Off';
-            cameraText.textContent = 'Cámara: Off';
+
+            // =======================================================
+            // REFRESCO PERIÓDICO DE SENSORES (cada 10s, HTML Blade)
+            // =======================================================
+            const scadaSensorsContainer = document.getElementById('scada-sensors');
+            const scadaBlockUrl = @json(route('scada.block'));
+
+            async function refreshSensors() {
+                if (!scadaSensorsContainer) return;
+
+                try {
+                    const response = await fetch(scadaBlockUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!response.ok) return;
+
+                    const html = await response.text();
+                    scadaSensorsContainer.innerHTML = html;
+                } catch (e) {
+                    console.error('Error al actualizar sensores SCADA:', e);
+                }
+            }
+
+            // cada 10 segundos (igual que la DB)
+            setInterval(refreshSensors, 10000);
         </script>
     @endpush
+
     @push('styles')
         <style>
             :root {
                 --top-offset: 0px; 
                 --image-lift: 35px;
-                --image-shift-x: 5px; 
+                /* Desplazamiento horizontal de TODO el SCADA */
+                --scada-shift-x: -120px; /* mueve todo ~120px a la izquierda */
             }
 
+            /* Tema claro: fondo blanco */
             .bg-container {
-                background-image: url('{{ asset('images/Fondo_B.png') }}');
+                background-image: url('{{ asset('images/Fondo_W.png') }}');
                 margin-top: 0;
-                min-height: calc(100vh + 100px);
+                min-height: calc(100vh + 70px);
                 position: relative;
                 width: 100%;
                 background-size: 100% auto;
-                background-position: calc(50% - var(--image-shift-x)) calc(50% - var(--image-lift));
+                background-position: calc(50% - 5px) calc(50% - var(--image-lift));
                 background-repeat: no-repeat;
                 overflow: hidden;
+                transform: translateX(var(--scada-shift-x));
             }
+
+            /* Tema oscuro: fondo B */
+            .dark .bg-container {
+                background-image: url('{{ asset('images/Fondo_B.png') }}');
+            }
+
             .lamp-container { top: 0px; } 
+
             .lighting-image { 
                 width: 320px; 
                 margin-top: 30px;
@@ -355,9 +358,9 @@
                 position: absolute;
                 transform: translateX(-50%);
             }
+
             .fan-container { top: 20px; left: 10%; } 
             
-
             @keyframes shake {
                 0% { transform: translateX(0); }
                 25% { transform: translateX(-1px); }

@@ -8,7 +8,10 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+    <form method="POST"
+          action="{{ route('login') }}"
+          class="space-y-5"
+          data-requires-legal="true">
         @csrf
 
         <!-- Email -->
@@ -65,8 +68,63 @@
             @endif
         </div>
 
+        <!-- Checks legales -->
+        <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300">
+            <!-- Aceptar todo -->
+            <label class="flex items-start gap-2 select-none">
+                <input type="checkbox"
+                       class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
+                              focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                       data-accept-all>
+                <span class="leading-snug">
+                    Aceptar todo
+                </span>
+            </label>
+
+            <!-- Términos y condiciones + Política de privacidad en la misma fila -->
+            <div class="pl-6 flex flex-wrap items-center gap-x-6 gap-y-2">
+                <!-- Términos y condiciones -->
+                <label class="inline-flex items-center gap-2 select-none">
+                    <input type="checkbox"
+                        name="accept_terms"
+                        required
+                        class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
+                                focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                        data-accept-terms>
+                    <button type="button"
+                            class="leading-snug font-medium text-indigo-600 hover:text-indigo-700
+                                dark:text-teal-300 dark:hover:text-teal-200 underline-offset-2 hover:underline"
+                            data-modal-open="modal-terms">
+                        Términos y Condiciones
+                    </button>
+                </label>
+
+                <!-- Política de privacidad -->
+                <label class="inline-flex items-center gap-2 select-none">
+                    <input type="checkbox"
+                        name="accept_privacy"
+                        required
+                        class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
+                                focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                        data-accept-privacy>
+                    <button type="button"
+                            class="leading-snug font-medium text-indigo-600 hover:text-indigo-700
+                                dark:text-teal-300 dark:hover:text-teal-200 underline-offset-2 hover:underline"
+                            data-modal-open="modal-privacy">
+                        Política de Privacidad
+                    </button>
+                </label>
+            </div>
+
+            <p class="hidden text-[11px] text-red-500 mt-1" data-accept-error>
+                Debes aceptar los Términos y la Política de Privacidad para continuar.
+            </p>
+        </div>
+
         <!-- CTA -->
-        <x-primary-button class="w-full justify-center">
+        <x-primary-button class="w-full justify-center opacity-60 cursor-not-allowed"
+                          data-submit-button
+                          disabled>
             {{ __('Continuar') }}
         </x-primary-button>
 
@@ -78,4 +136,7 @@
             </a>
         </div>
     </form>
+
+    {{-- Modales y JS de términos / privacidad --}}
+    @include('auth.partials.legal-modals')
 </x-guest-layout>

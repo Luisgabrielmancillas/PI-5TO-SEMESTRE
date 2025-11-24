@@ -42,6 +42,7 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
 
     Route::get('/comparacion',     [ComparacionController::class, 'index'])->name('comparacion');
     Route::get('/comparacion/block', [ComparacionController::class, 'block'])->name('comparacion.block');
+    
     Route::prefix('gestionusuarios')
         ->name('gestion.')
         ->middleware(['admin'])       
@@ -54,13 +55,15 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
             Route::put('/{user}/suspend',  [GestionController::class, 'suspend'])->name('suspend');
             Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
         });
-    Route::prefix('interfazscada')
+
+    Route::prefix('scada')
         ->name('scada.')
         ->middleware(['admin'])       
         ->group(function () {
             Route::get('/', [ScadaController::class, 'index'])->name('index');
+            Route::get('/block', [ScadaController::class, 'block'])->name('block');
         });
-});
+    });
 
 Route::middleware(['auth', 'active', 'verified', 'chat.desktop'])->group(function () {
     Route::post('/history/export-pdf', [HistoryController::class, 'exportPdf'])->name('history.exportPdf');
