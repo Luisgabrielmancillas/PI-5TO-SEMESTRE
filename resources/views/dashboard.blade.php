@@ -18,45 +18,6 @@
 
     <div class="flex flex-col w-full min-h-screen overflow-x-hidden overflow-y-auto">
         <div class="w-full px-3 sm:px-6 lg:px-8 py-4">
-            <!-- Tarjetas superiores -->
-            <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6 mb-6">
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Temperatura del aire</h5>
-                    <h2 id="tempAireValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
-                    <small id="tempAireTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Humedad del aire</h5>
-                    <h2 id="humAireValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--%</h2>
-                    <small id="humAireTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Temperatura del agua</h5>
-                    <h2 id="tempAguaValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--°C</h2>
-                    <small id="tempAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Nivel pH del agua</h5>
-                    <h2 id="phValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
-                    <small id="phTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Nivel del agua</h5>
-                    <h2 id="nivelAguaValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">--</h2>
-                    <small id="nivelAguaTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
-                </div>
-
-                <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-3 sm:p-4 text-center">
-                    <h5 class="text-gray-700 dark:text-gray-200 font-semibold text-sm sm:text-base">Nivel ORP</h5>
-                    <h2 id="orpValue" class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">-- mV</h2>
-                    <small id="orpTime" class="text-gray-500 dark:text-gray-400 text-xs">--/-- --:--:--</small>
-                </div>
-            </div>
-
             <!-- Sección principal -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
 
@@ -201,7 +162,7 @@
     <script>
        let barChartInstance = null;
 let lineChartInstance = null;
-let currentRanges = {}; // Almacenar los rangos actuales
+let currentRanges = {}; 
 
 async function fetchSensorData() {
     try {
@@ -211,20 +172,7 @@ async function fetchSensorData() {
         }
         const data = await response.json();
         
-        // Actualizar tarjetas
-        document.getElementById('tempAireValue').textContent = data.tempAire.toFixed(1) + '°C';
-        document.getElementById('humAireValue').textContent = data.humAire.toFixed(1) + '%';
-        document.getElementById('tempAguaValue').textContent = data.tempAgua.toFixed(1) + '°C';
-        document.getElementById('phValue').textContent = data.ph.toFixed(1);
-        document.getElementById('orpValue').textContent = data.orp.toFixed(1) + ' mV';
-        document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1) + ' cm';
-        
-        const timeElements = document.querySelectorAll('[id$="Time"]');
-        timeElements.forEach(element => {
-            element.textContent = data.timestamp;
-        });
 
-        // Guardar rangos si vienen en la respuesta
         if (data.ranges) {
             currentRanges = data.ranges;
         }
@@ -314,12 +262,12 @@ function updateCharts(chartData) {
     const gridColor = isDark ? '#374151' : '#2d3748';
     const legendColor = isDark ? '#d1d5db' : '#a0aec0';
 
-    // Destruir gráfica anterior si existe
+
     if (barChartInstance) {
         barChartInstance.destroy();
     }
 
-    // Gráfica de Barras (Promedios) - TODOS los sensores
+
     barChartInstance = new Chart(document.getElementById('barChart'), {
         type: 'bar',
         data: {
@@ -366,12 +314,12 @@ function updateCharts(chartData) {
         }
     });
 
-    // Destruir gráfica anterior si existe
+
     if (lineChartInstance) {
         lineChartInstance.destroy();
     }
 
-    // Gráfica de Líneas (Tiempo Real) - TODOS los sensores
+
     lineChartInstance = new Chart(document.getElementById('lineChart'), {
         type: 'line',
         data: {
@@ -461,20 +409,20 @@ function createGauge(id, value, max, unit) {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Manejar valores fuera de rango - limitar visualmente pero mostrar valor real
-    const displayValue = Math.min(value, max * 1.1); // Permitir hasta 10% sobre el máximo para visualización
-    const normalizedValue = Math.min(value / max, 1.1); // Normalizar considerando overflow
+ 
+    const displayValue = Math.min(value, max * 1.1);
+    const normalizedValue = Math.min(value / max, 1.1); 
 
     const isDark = document.documentElement.classList.contains('dark');
     
-    // Cambiar color si está fuera de rango
+
     let gaugeColor;
     if (value > max) {
-        gaugeColor = isDark ? '#ef4444' : '#dc2626'; // Rojo para valores sobre el máximo
+        gaugeColor = isDark ? '#ef4444' : '#dc2626'; 
     } else if (value < (max * 0.2)) {
-        gaugeColor = isDark ? '#f59e0b' : '#d97706'; // Amarillo/naranja para valores muy bajos
+        gaugeColor = isDark ? '#f59e0b' : '#d97706'; 
     } else {
-        // Gradiente normal
+
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, isDark ? '#6366f1' : '#22d3ee');
         gradient.addColorStop(1, isDark ? '#22d3ee' : '#22c55e');
@@ -485,14 +433,14 @@ function createGauge(id, value, max, unit) {
     const endAngle   = 2.25 * Math.PI;
     const angleRange = endAngle - startAngle;
 
-    // Fondo del gauge
+
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, endAngle);
     ctx.strokeStyle = isDark ? '#374151' : '#e5e7eb';
     ctx.lineWidth = 10;
     ctx.stroke();
 
-    // Valor actual
+
     const fillAngle = startAngle + (angleRange * normalizedValue);
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, startAngle, fillAngle);
@@ -500,7 +448,7 @@ function createGauge(id, value, max, unit) {
     ctx.lineWidth = 8;
     ctx.stroke();
 
-    // Aguja/marcador
+
     const markerRadius = radius - 4;
     const markerX = centerX + markerRadius * Math.cos(fillAngle);
     const markerY = centerY + markerRadius * Math.sin(fillAngle);
@@ -517,7 +465,7 @@ function createGauge(id, value, max, unit) {
     ctx.fillStyle = isDark ? '#facc15' : '#000000';
     ctx.fill();
 
-    // Mostrar valor límite si está fuera de rango
+
     if (value > max) {
         ctx.fillStyle = isDark ? '#ef4444' : '#dc2626';
         ctx.font = 'bold 10px Arial';
@@ -564,7 +512,7 @@ function updateGauge(id, value, max, unit) {
         valueElement.textContent = value.toFixed(1) + (unit ? unit : '');
     }
     
-    // Para elementos móviles
+
     const mobileValueElement = document.getElementById(id + 'ValueMobile');
     if (mobileValueElement) {
         mobileValueElement.textContent = value.toFixed(1) + (unit ? unit : '');
@@ -595,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// Inicialización adicional para asegurar funcionamiento
+
 document.addEventListener('DOMContentLoaded', () => {
     initializeGauges();
     fetchSensorData();
