@@ -648,31 +648,16 @@
                 let audio = null;
 
 
+                // Desactivar audio: no cargar ni reproducir sonidos
                 function cargarAudio() {
-                    if (!audioCargado) {
-                        audio = new Audio("{{ asset('sounds/alert.wav') }}");
-                        audio.volume = 0.7;
-                        audio.preload = 'auto';
-                        audioCargado = true;
-                        audio.load();
-                    }
-                    return audio;
+                    audioCargado = true;
+                    audio = null;
+                    return null;
                 }
 
                 function reproducirSonido() {
-                    try {
-                        const audio = cargarAudio();
-                        if (audio) {
-                            const audioClone = audio.cloneNode();
-                            audioClone.volume = 0.7;
-                            audioClone.play().catch(e => {
-                                console.log("🔇 Sonido bloqueado (interacción requerida):", e);
-                                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                            });
-                        }
-                    } catch (error) {
-                        console.log("🔇 Error reproduciendo sonido:", error);
-                    }
+                    // Función intencionalmente vacía: reproducción desactivada
+                    return;
                 }
 
 

@@ -22,10 +22,7 @@ class ComparacionController extends Controller
         ]);
     }
 
-    /**
-     * Endpoint que devuelve SOLO el bloque de tarjetas para refrescarlo por AJAX.
-     * Lo llamará el JS cada 10s.
-     */
+
     public function block()
     {
         [$selectedCrop, $ranges, $measurements, $latest] = $this->buildComparisonData();
@@ -34,18 +31,12 @@ class ComparacionController extends Controller
             'ranges'       => $ranges,
             'measurements' => $measurements,
             'latest'       => $latest,
-            // si quisieras también podrías pasar selectedCrop
-            // 'selectedCrop' => $selectedCrop,
         ]);
     }
 
-    /**
-     * Centraliza TODA la lógica que ya tenías en index()
-     * para poder reutilizarla en index() y block().
-     */
     protected function buildComparisonData()
     {
-        // 1) Hortaliza seleccionada (igual que en tu index original)
+        // 1) Hortaliza seleccionada
         $selectedCrop = SeleccionHortalizas::where('seleccion', 1)
             ->orderByDesc('fecha')
             ->first();
@@ -78,11 +69,11 @@ class ComparacionController extends Controller
             }
         }
 
-        // 4) Último registro de mediciones (según tu modelo: fecha / created_at)
+        // 4) Último registro de mediciones
         $latest = RegistroMediciones::orderByDesc('fecha')->first()
                  ?? RegistroMediciones::orderByDesc('created_at')->first();
 
-        // 5) Medidas mapeadas a las claves usadas en Blade (leyendo columnas reales del modelo)
+        // 5) Medidas mapeadas a las claves usadas en Blade
         $measurements = null;
         if ($latest) {
             $measurements = [
