@@ -169,4 +169,27 @@
             icono.classList.toggle('rotate-180'); // Rota la flecha al abrir
         }
     </script>
+
+    <script>
+        let currentSelected = {{ $selectedCrop->id_hortaliza ?? 0 }};
+        
+        setInterval(async () => {
+            try {
+                const response = await fetch("/hortalizas/seleccion-actual");
+                const data = await response.json();
+            
+                const newSelected = data?.id_hortaliza ?? 0;
+            
+                if (newSelected !== currentSelected) {
+                    location.reload();
+                }
+            
+            } catch (error) {
+                console.error("Error consultando selección:", error);
+            }
+        
+        }, 2000);
+    </script>
+
+
 </x-app-layout>

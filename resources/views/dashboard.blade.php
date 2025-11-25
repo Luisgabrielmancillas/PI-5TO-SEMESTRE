@@ -199,317 +199,414 @@
 
     @push('scripts')
     <script>
-        let barChartInstance = null;
-        let lineChartInstance = null;
+       let barChartInstance = null;
+let lineChartInstance = null;
+let currentRanges = {}; // Almacenar los rangos actuales
 
-        async function fetchSensorData() {
-            try {
-                const response = await fetch('{{ route("dashboard.latest") }}');
-                if (!response.ok) {
-                    throw new Error('Error al obtener datos');
-                }
-                const data = await response.json();
-                
-                document.getElementById('tempAireValue').textContent = data.tempAire.toFixed(1) + '°C';
-                document.getElementById('humAireValue').textContent = data.humAire.toFixed(1) + '%';
-                document.getElementById('tempAguaValue').textContent = data.tempAgua.toFixed(1) + '°C';
-                document.getElementById('phValue').textContent = data.ph.toFixed(1);
-                document.getElementById('orpValue').textContent = data.orp.toFixed(1) + ' mV';
-                document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1) + ' cm';
-                
-                const timeElements = document.querySelectorAll('[id$="Time"]');
-                timeElements.forEach(element => {
-                    element.textContent = data.timestamp;
-                });
-
-                updateGauge('gaugeTempAire', data.tempAire, 50, '°C');
-                updateGauge('gaugeHumedad', data.humAire, 100, '%');
-                updateGauge('gaugeTempAgua', data.tempAgua, 50, '°C');
-                updateGauge('gaugePH', data.ph, 14, '');
-                updateGauge('gaugeNivel', data.nivelAgua, 100, ' cm');
-                updateGauge('gaugeORP', data.orp, 100, 'mV');
-                
-                updateGauge('gaugeTempAireMobile', data.tempAire, 50, '°C');
-                updateGauge('gaugeHumedadMobile', data.humAire, 100, '%');
-                updateGauge('gaugeTempAguaMobile', data.tempAgua, 50, '°C');
-                updateGauge('gaugePHMobile', data.ph, 14, '');
-                updateGauge('gaugeNivelMobile', data.nivelAgua, 100, ' cm');
-                updateGauge('gaugeORPMobile', data.orp, 100, 'mV');
-            } catch (error) {
-                console.error('Error fetching sensor data:', error);
-            }
+async function fetchSensorData() {
+    try {
+        const response = await fetch('{{ route("dashboard.latest") }}');
+        if (!response.ok) {
+            throw new Error('Error al obtener datos');
         }
-
-        async function fetchChartData() {
-            try {
-                const response = await fetch('{{ route("dashboard.chart") }}');
-                if (!response.ok) {
-                    throw new Error('Error al obtener datos de gráficas');
-                }
-                const data = await response.json();
-
-                if (data.empty) {
-                    showChartsEmptyState();
-                } else {
-                    hideChartsEmptyState();
-                    updateCharts(data);
-                }
-                
-            } catch (error) {
-                console.error('Error fetching chart data:', error);
-                showChartsEmptyState();
-            }
-        }
-
-        function showChartsEmptyState() {
-            const barCanvas   = document.getElementById('barChart');
-            const lineCanvas  = document.getElementById('lineChart');
-            const barEmpty    = document.getElementById('barChartEmpty');
-            const lineEmpty   = document.getElementById('lineChartEmpty');
-
-            if (barChartInstance) {
-                barChartInstance.destroy();
-                barChartInstance = null;
-            }
-            if (lineChartInstance) {
-                lineChartInstance.destroy();
-                lineChartInstance = null;
-            }
-
-            if (barCanvas)  barCanvas.classList.add('hidden');
-            if (lineCanvas) lineCanvas.classList.add('hidden');
-            if (barEmpty)   barEmpty.classList.remove('hidden');
-            if (lineEmpty)  lineEmpty.classList.remove('hidden');
-        }
-
-        function hideChartsEmptyState() {
-            const barCanvas   = document.getElementById('barChart');
-            const lineCanvas  = document.getElementById('lineChart');
-            const barEmpty    = document.getElementById('barChartEmpty');
-            const lineEmpty   = document.getElementById('lineChartEmpty');
-
-            if (barCanvas)  barCanvas.classList.remove('hidden');
-            if (lineCanvas) lineCanvas.classList.remove('hidden');
-            if (barEmpty)   barEmpty.classList.add('hidden');
-            if (lineEmpty)  lineEmpty.classList.add('hidden');
-        }
-
-        function updateCharts(chartData) {
-            const isDark = document.documentElement.classList.contains('dark');
-            const axisColor = isDark ? '#d1d5db' : '#a0aec0';
-            const gridColor = isDark ? '#374151' : '#2d3748';
-            const legendColor = isDark ? '#d1d5db' : '#a0aec0';
-
-            if (barChartInstance) {
-                barChartInstance.destroy();
-            }
-
-            barChartInstance = new Chart(document.getElementById('barChart'), {
-                type: 'bar',
-                data: {
-                    labels: ['pH', 'ORP', 'Temp Agua', 'Nivel Agua'],
-                    datasets: [{
-                        label: 'Valor promedio',
-                        data: [
-                            chartData.averages.ph,
-                            chartData.averages.ce,
-                            chartData.averages.tempAgua,
-                            chartData.averages.nivel
-                        ],
-                        backgroundColor: isDark ? 
-                            ['#6366f1', '#d946ef', '#facc15', '#22d3ee'] : 
-                            ['#22d3ee', '#d946ef', '#facc15', '#22c55e']
-                    }]
-                },
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: true,
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        },
-                        x: { 
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { 
-                            labels: { color: legendColor, font: { size: 11 } }
-                        }
-                    }
-                }
-            });
-
-            if (lineChartInstance) {
-                lineChartInstance.destroy();
-            }
-
-            lineChartInstance = new Chart(document.getElementById('lineChart'), {
-                type: 'line',
-                data: {
-                    labels: chartData.labels,
-                    datasets: [
-                        { 
-                            label: 'pH', 
-                            data: chartData.datasets.ph, 
-                            borderColor: isDark ? '#6366f1' : '#22d3ee', 
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: false 
-                        },
-                        { 
-                            label: 'ORP', 
-                            data: chartData.datasets.ce, 
-                            borderColor: '#d946ef', 
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: false 
-                        },
-                        { 
-                            label: 'Temp. Agua', 
-                            data: chartData.datasets.tempAgua, 
-                            borderColor: '#facc15', 
-                            borderWidth: 2,
-                            tension: 0.3,
-                            fill: false 
-                        }
-                    ]
-                },
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { 
-                        y: { 
-                            beginAtZero: false, 
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        },
-                        x: { 
-                            ticks: { color: axisColor, font: { size: 10 } },
-                            grid: { color: gridColor }
-                        }
-                    },
-                    plugins: {
-                        legend: { 
-                            labels: { color: legendColor, font: { size: 11 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        function createGauge(id, value, max, unit) {
-            const canvas = document.getElementById(id);
-            if (!canvas) return; 
-            
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = Math.min(centerX, centerY) - 8;
+        const data = await response.json();
         
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const safeValue = Math.min(value, max);
+        // Actualizar tarjetas
+        document.getElementById('tempAireValue').textContent = data.tempAire.toFixed(1) + '°C';
+        document.getElementById('humAireValue').textContent = data.humAire.toFixed(1) + '%';
+        document.getElementById('tempAguaValue').textContent = data.tempAgua.toFixed(1) + '°C';
+        document.getElementById('phValue').textContent = data.ph.toFixed(1);
+        document.getElementById('orpValue').textContent = data.orp.toFixed(1) + ' mV';
+        document.getElementById('nivelAguaValue').textContent = data.nivelAgua.toFixed(1) + ' cm';
         
-            const isDark = document.documentElement.classList.contains('dark');
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, isDark ? '#6366f1' : '#22d3ee');
-            gradient.addColorStop(1, isDark ? '#22d3ee' : '#22c55e');
-        
-            const startAngle = 0.75 * Math.PI;
-            const endAngle   = 2.25 * Math.PI;
-            const angleRange = endAngle - startAngle;
-
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-            ctx.strokeStyle = isDark ? '#d1d5db' : '#2d2f48';
-            ctx.lineWidth = 10;
-            ctx.stroke();
-
-            const fillAngle = startAngle + (angleRange * (safeValue / max));
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, startAngle, fillAngle);
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 8;
-            ctx.stroke();
-
-            const markerRadius = radius - 4;
-            const markerX = centerX + markerRadius * Math.cos(fillAngle);
-            const markerY = centerY + markerRadius * Math.sin(fillAngle);
-        
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(markerX, markerY);
-            ctx.strokeStyle = isDark ? '#facc15' : '#000000';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        
-            ctx.beginPath();
-            ctx.arc(markerX, markerY, 3, 0, 2 * Math.PI);
-            ctx.fillStyle = isDark ? '#facc15' : '#000000';
-            ctx.fill();
-        }
-
-        const gaugeConfigs = {
-            'gaugeTempAire': { value: 0, max: 50, unit: '°C' },
-            'gaugeHumedad': { value: 0, max: 100, unit: '%' },
-            'gaugeTempAgua': { value: 0, max: 50, unit: '°C' },
-            'gaugePH': { value: 0, max: 14, unit: '' },
-            'gaugeNivel': { value: 0, max: 100, unit: '' },
-            'gaugeORP': { value: 0, max: 100, unit: 'mV' },
-            'gaugeTempAireMobile': { value: 0, max: 50, unit: '°C' },
-            'gaugeHumedadMobile': { value: 0, max: 100, unit: '%' },
-            'gaugeTempAguaMobile': { value: 0, max: 50, unit: '°C' },
-            'gaugePHMobile': { value: 0, max: 14, unit: '' },
-            'gaugeNivelMobile': { value: 0, max: 100, unit: '' },
-            'gaugeORPMobile': { value: 0, max: 100, unit: 'mV' }
-        };
-
-        function initializeGauges() {
-            Object.keys(gaugeConfigs).forEach(id => {
-                const config = gaugeConfigs[id];
-                const canvas = document.getElementById(id);
-                if (canvas) {
-                    canvas.width = 100;
-                    canvas.height = 100;
-                    createGauge(id, config.value, config.max, config.unit);
-                }
-            });
-        }
-
-        function updateGauge(id, value, max, unit) {
-            const valueElement = document.getElementById(id + 'Value');
-            if (valueElement) {
-                valueElement.textContent = value.toFixed(1) + (unit ? unit : '');
-            }
-            
-            const canvas = document.getElementById(id);
-            if (canvas) {
-                createGauge(id, value, max, unit);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeGauges();
-            
-            fetchSensorData();
-            fetchChartData();
-            
-            setInterval(fetchSensorData, 10000);
-            setInterval(fetchChartData, 30000);
-            
-            const observer = new MutationObserver(() => {
-                initializeGauges();
-                fetchChartData(); 
-            });
-            observer.observe(document.documentElement, { 
-                attributes: true, 
-                attributeFilter: ['class'] 
-            });
+        const timeElements = document.querySelectorAll('[id$="Time"]');
+        timeElements.forEach(element => {
+            element.textContent = data.timestamp;
         });
+
+        // Guardar rangos si vienen en la respuesta
+        if (data.ranges) {
+            currentRanges = data.ranges;
+        }
+
+        // Actualizar gauges con rangos dinámicos
+        updateGauge('gaugeTempAire', data.tempAire, currentRanges.tempAire?.max || 50, '°C');
+        updateGauge('gaugeHumedad', data.humAire, currentRanges.humAire?.max || 100, '%');
+        updateGauge('gaugeTempAgua', data.tempAgua, currentRanges.tempAgua?.max || 50, '°C');
+        updateGauge('gaugePH', data.ph, currentRanges.ph?.max || 14, '');
+        updateGauge('gaugeNivel', data.nivelAgua, currentRanges.nivelAgua?.max || 100, ' cm');
+        updateGauge('gaugeORP', data.orp, currentRanges.orp?.max || 100, 'mV');
+        
+        // Gauges móviles
+        updateGauge('gaugeTempAireMobile', data.tempAire, currentRanges.tempAire?.max || 50, '°C');
+        updateGauge('gaugeHumedadMobile', data.humAire, currentRanges.humAire?.max || 100, '%');
+        updateGauge('gaugeTempAguaMobile', data.tempAgua, currentRanges.tempAgua?.max || 50, '°C');
+        updateGauge('gaugePHMobile', data.ph, currentRanges.ph?.max || 14, '');
+        updateGauge('gaugeNivelMobile', data.nivelAgua, currentRanges.nivelAgua?.max || 100, ' cm');
+        updateGauge('gaugeORPMobile', data.orp, currentRanges.orp?.max || 100, 'mV');
+    } catch (error) {
+        console.error('Error fetching sensor data:', error);
+    }
+}
+
+async function fetchChartData() {
+    try {
+        const response = await fetch('{{ route("dashboard.chart") }}');
+        if (!response.ok) {
+            throw new Error('Error al obtener datos de gráficas');
+        }
+        const data = await response.json();
+
+        // Actualizar rangos si vienen en la respuesta de gráficas
+        if (data.ranges) {
+            currentRanges = data.ranges;
+        }
+
+        if (data.empty) {
+            showChartsEmptyState();
+        } else {
+            hideChartsEmptyState();
+            updateCharts(data);
+        }
+        
+    } catch (error) {
+        console.error('Error fetching chart data:', error);
+        showChartsEmptyState();
+    }
+}
+
+function showChartsEmptyState() {
+    const barCanvas   = document.getElementById('barChart');
+    const lineCanvas  = document.getElementById('lineChart');
+    const barEmpty    = document.getElementById('barChartEmpty');
+    const lineEmpty   = document.getElementById('lineChartEmpty');
+
+    if (barChartInstance) {
+        barChartInstance.destroy();
+        barChartInstance = null;
+    }
+    if (lineChartInstance) {
+        lineChartInstance.destroy();
+        lineChartInstance = null;
+    }
+
+    if (barCanvas)  barCanvas.classList.add('hidden');
+    if (lineCanvas) lineCanvas.classList.add('hidden');
+    if (barEmpty)   barEmpty.classList.remove('hidden');
+    if (lineEmpty)  lineEmpty.classList.remove('hidden');
+}
+
+function hideChartsEmptyState() {
+    const barCanvas   = document.getElementById('barChart');
+    const lineCanvas  = document.getElementById('lineChart');
+    const barEmpty    = document.getElementById('barChartEmpty');
+    const lineEmpty   = document.getElementById('lineChartEmpty');
+
+    if (barCanvas)  barCanvas.classList.remove('hidden');
+    if (lineCanvas) lineCanvas.classList.remove('hidden');
+    if (barEmpty)   barEmpty.classList.add('hidden');
+    if (lineEmpty)  lineEmpty.classList.add('hidden');
+}
+
+function updateCharts(chartData) {
+    const isDark = document.documentElement.classList.contains('dark');
+    const axisColor = isDark ? '#d1d5db' : '#a0aec0';
+    const gridColor = isDark ? '#374151' : '#2d3748';
+    const legendColor = isDark ? '#d1d5db' : '#a0aec0';
+
+    // Destruir gráfica anterior si existe
+    if (barChartInstance) {
+        barChartInstance.destroy();
+    }
+
+    // Gráfica de Barras (Promedios) - TODOS los sensores
+    barChartInstance = new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: {
+            labels: ['pH', 'ORP', 'Temp Agua', 'Temp Aire', 'Hum Aire', 'Nivel Agua'],
+            datasets: [{
+                label: 'Valor promedio',
+                data: [
+                    chartData.averages.ph,
+                    chartData.averages.ce,
+                    chartData.averages.tempAgua,
+                    chartData.averages.tempAire,
+                    chartData.averages.humAire,
+                    chartData.averages.nivelAgua
+                ],
+                backgroundColor: isDark ? 
+                    ['#6366f1', '#d946ef', '#facc15', '#22d3ee', '#10b981', '#f97316'] : 
+                    ['#22d3ee', '#d946ef', '#facc15', '#ef4444', '#10b981', '#f97316']
+            }]
+        },
+        options: { 
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { 
+                y: { 
+                    beginAtZero: true,
+                    ticks: { color: axisColor, font: { size: 10 } },
+                    grid: { color: gridColor }
+                },
+                x: { 
+                    ticks: { 
+                        color: axisColor, 
+                        font: { size: 10 },
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: { color: gridColor }
+                }
+            },
+            plugins: {
+                legend: { 
+                    labels: { color: legendColor, font: { size: 11 } }
+                }
+            }
+        }
+    });
+
+    // Destruir gráfica anterior si existe
+    if (lineChartInstance) {
+        lineChartInstance.destroy();
+    }
+
+    // Gráfica de Líneas (Tiempo Real) - TODOS los sensores
+    lineChartInstance = new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [
+                { 
+                    label: 'pH', 
+                    data: chartData.datasets.ph, 
+                    borderColor: '#6366f1', 
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false 
+                },
+                { 
+                    label: 'ORP', 
+                    data: chartData.datasets.ce, 
+                    borderColor: '#d946ef', 
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false 
+                },
+                { 
+                    label: 'Temp. Agua', 
+                    data: chartData.datasets.tempAgua, 
+                    borderColor: '#facc15', 
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false 
+                },
+                { 
+                    label: 'Temp. Aire', 
+                    data: chartData.datasets.tempAire, 
+                    borderColor: '#ef4444', 
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false 
+                },
+                { 
+                    label: 'Hum. Aire', 
+                    data: chartData.datasets.humAire, 
+                    borderColor: '#10b981', 
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false 
+                },
+                { 
+                    label: 'Nivel Agua', 
+                    data: chartData.datasets.nivelAgua, 
+                    borderColor: '#f97316', 
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false 
+                }
+            ]
+        },
+        options: { 
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { 
+                y: { 
+                    beginAtZero: false, 
+                    ticks: { color: axisColor, font: { size: 10 } },
+                    grid: { color: gridColor }
+                },
+                x: { 
+                    ticks: { color: axisColor, font: { size: 10 } },
+                    grid: { color: gridColor }
+                }
+            },
+            plugins: {
+                legend: { 
+                    labels: { color: legendColor, font: { size: 11 } }
+                }
+            }
+        }
+    });
+}
+
+function createGauge(id, value, max, unit) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return; 
+    
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 8;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Manejar valores fuera de rango - limitar visualmente pero mostrar valor real
+    const displayValue = Math.min(value, max * 1.1); // Permitir hasta 10% sobre el máximo para visualización
+    const normalizedValue = Math.min(value / max, 1.1); // Normalizar considerando overflow
+
+    const isDark = document.documentElement.classList.contains('dark');
+    
+    // Cambiar color si está fuera de rango
+    let gaugeColor;
+    if (value > max) {
+        gaugeColor = isDark ? '#ef4444' : '#dc2626'; // Rojo para valores sobre el máximo
+    } else if (value < (max * 0.2)) {
+        gaugeColor = isDark ? '#f59e0b' : '#d97706'; // Amarillo/naranja para valores muy bajos
+    } else {
+        // Gradiente normal
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, isDark ? '#6366f1' : '#22d3ee');
+        gradient.addColorStop(1, isDark ? '#22d3ee' : '#22c55e');
+        gaugeColor = gradient;
+    }
+
+    const startAngle = 0.75 * Math.PI;
+    const endAngle   = 2.25 * Math.PI;
+    const angleRange = endAngle - startAngle;
+
+    // Fondo del gauge
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+    ctx.strokeStyle = isDark ? '#374151' : '#e5e7eb';
+    ctx.lineWidth = 10;
+    ctx.stroke();
+
+    // Valor actual
+    const fillAngle = startAngle + (angleRange * normalizedValue);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, startAngle, fillAngle);
+    ctx.strokeStyle = gaugeColor;
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    // Aguja/marcador
+    const markerRadius = radius - 4;
+    const markerX = centerX + markerRadius * Math.cos(fillAngle);
+    const markerY = centerY + markerRadius * Math.sin(fillAngle);
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(markerX, markerY);
+    ctx.strokeStyle = isDark ? '#facc15' : '#000000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(markerX, markerY, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = isDark ? '#facc15' : '#000000';
+    ctx.fill();
+
+    // Mostrar valor límite si está fuera de rango
+    if (value > max) {
+        ctx.fillStyle = isDark ? '#ef4444' : '#dc2626';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('¡ALTO!', centerX, centerY + 25);
+    } else if (value < (max * 0.2)) {
+        ctx.fillStyle = isDark ? '#f59e0b' : '#d97706';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('BAJO', centerX, centerY + 25);
+    }
+}
+
+const gaugeConfigs = {
+    'gaugeTempAire': { value: 0, max: 50, unit: '°C' },
+    'gaugeHumedad': { value: 0, max: 100, unit: '%' },
+    'gaugeTempAgua': { value: 0, max: 50, unit: '°C' },
+    'gaugePH': { value: 0, max: 14, unit: '' },
+    'gaugeNivel': { value: 0, max: 100, unit: '' },
+    'gaugeORP': { value: 0, max: 100, unit: 'mV' },
+    'gaugeTempAireMobile': { value: 0, max: 50, unit: '°C' },
+    'gaugeHumedadMobile': { value: 0, max: 100, unit: '%' },
+    'gaugeTempAguaMobile': { value: 0, max: 50, unit: '°C' },
+    'gaugePHMobile': { value: 0, max: 14, unit: '' },
+    'gaugeNivelMobile': { value: 0, max: 100, unit: '' },
+    'gaugeORPMobile': { value: 0, max: 100, unit: 'mV' }
+};
+
+function initializeGauges() {
+    Object.keys(gaugeConfigs).forEach(id => {
+        const config = gaugeConfigs[id];
+        const canvas = document.getElementById(id);
+        if (canvas) {
+            canvas.width = 100;
+            canvas.height = 100;
+            createGauge(id, config.value, config.max, config.unit);
+        }
+    });
+}
+
+function updateGauge(id, value, max, unit) {
+    const valueElement = document.getElementById(id + 'Value');
+    if (valueElement) {
+        valueElement.textContent = value.toFixed(1) + (unit ? unit : '');
+    }
+    
+    // Para elementos móviles
+    const mobileValueElement = document.getElementById(id + 'ValueMobile');
+    if (mobileValueElement) {
+        mobileValueElement.textContent = value.toFixed(1) + (unit ? unit : '');
+    }
+    
+    const canvas = document.getElementById(id);
+    if (canvas) {
+        createGauge(id, value, max, unit);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGauges();
+    
+    fetchSensorData();
+    fetchChartData();
+    
+    setInterval(fetchSensorData, 10000);
+    setInterval(fetchChartData, 30000);
+    
+    const observer = new MutationObserver(() => {
+        initializeGauges();
+        fetchChartData(); 
+    });
+    observer.observe(document.documentElement, { 
+        attributes: true, 
+        attributeFilter: ['class'] 
+    });
+});
+
+// Inicialización adicional para asegurar funcionamiento
+document.addEventListener('DOMContentLoaded', () => {
+    initializeGauges();
+    fetchSensorData();
+    fetchChartData();
+
+    setInterval(() => {
+        fetchSensorData();
+        fetchChartData();
+    }, 2000);
+});
+
     </script>
     @endpush
 </x-app-layout>
