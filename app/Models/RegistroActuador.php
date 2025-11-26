@@ -8,12 +8,12 @@ class RegistroActuador extends Model
 {
     protected $table = 'registro_actuador';
     protected $primaryKey = 'id_registro';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_actuador',
         'estado_anterior',
         'estado_actual',
+        'fecha_cambio',
     ];
-
-    public $timestamps = true;
 }
