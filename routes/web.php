@@ -62,6 +62,8 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         ->group(function () {
             Route::get('/', [ScadaController::class, 'index'])->name('index');
             Route::get('/block', [ScadaController::class, 'block'])->name('block');
+            Route::post('/actuators/toggle', [ScadaController::class, 'toggleActuator'])->name('toggle');
+            Route::get('/actuators/states', [ScadaController::class, 'actuatorStates'])->name('states');
         });
     });
 
