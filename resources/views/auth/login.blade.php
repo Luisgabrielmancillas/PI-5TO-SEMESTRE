@@ -10,15 +10,22 @@
 
     <form method="POST"
           action="{{ route('login') }}"
-          class="space-y-5"
-          data-requires-legal="true">
+          class="space-y-5">
         @csrf
 
         <!-- Email -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
             <div class="mt-1">
-                <x-text-input id="email" class="block w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="tu@correo.com" />
+                <x-text-input id="email"
+                              class="block w-full"
+                              type="email"
+                              name="email"
+                              :value="old('email')"
+                              required
+                              autofocus
+                              autocomplete="username"
+                              placeholder="tu@correo.com" />
             </div>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
@@ -56,7 +63,11 @@
         <!-- Remember + Forgot -->
         <div class="flex items-center justify-between">
             <label for="remember_me" class="inline-flex items-center select-none">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                <input id="remember_me"
+                       type="checkbox"
+                       class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
+                              focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                       name="remember">
                 <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Recordarme</span>
             </label>
 
@@ -68,75 +79,18 @@
             @endif
         </div>
 
-        <!-- Checks legales -->
-        <div class="space-y-2 text-xs text-gray-600 dark:text-gray-300">
-            <!-- Aceptar todo -->
-            <label class="flex items-start gap-2 select-none">
-                <input type="checkbox"
-                       class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
-                              focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
-                       data-accept-all>
-                <span class="leading-snug">
-                    Aceptar todo
-                </span>
-            </label>
-
-            <!-- Términos y condiciones + Política de privacidad en la misma fila -->
-            <div class="pl-6 flex flex-wrap items-center gap-x-6 gap-y-2">
-                <!-- Términos y condiciones -->
-                <label class="inline-flex items-center gap-2 select-none">
-                    <input type="checkbox"
-                        name="accept_terms"
-                        required
-                        class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
-                                focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
-                        data-accept-terms>
-                    <button type="button"
-                            class="leading-snug font-medium text-indigo-600 hover:text-indigo-700
-                                dark:text-teal-300 dark:hover:text-teal-200 underline-offset-2 hover:underline"
-                            data-modal-open="modal-terms">
-                        Términos y Condiciones
-                    </button>
-                </label>
-
-                <!-- Política de privacidad -->
-                <label class="inline-flex items-center gap-2 select-none">
-                    <input type="checkbox"
-                        name="accept_privacy"
-                        required
-                        class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm
-                                focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
-                        data-accept-privacy>
-                    <button type="button"
-                            class="leading-snug font-medium text-indigo-600 hover:text-indigo-700
-                                dark:text-teal-300 dark:hover:text-teal-200 underline-offset-2 hover:underline"
-                            data-modal-open="modal-privacy">
-                        Política de Privacidad
-                    </button>
-                </label>
-            </div>
-
-            <p class="hidden text-[11px] text-red-500 mt-1" data-accept-error>
-                Debes aceptar los Términos y la Política de Privacidad para continuar.
-            </p>
-        </div>
-
         <!-- CTA -->
-        <x-primary-button class="w-full justify-center opacity-60 cursor-not-allowed"
-                          data-submit-button
-                          disabled>
+        <x-primary-button class="w-full justify-center">
             {{ __('Continuar') }}
         </x-primary-button>
 
         <!-- Divider + link a registro -->
         <div class="text-center text-sm text-gray-500 dark:text-gray-400">
             <span>¿No tienes cuenta?</span>
-            <a href="{{ route('register') }}" class="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+            <a href="{{ route('register') }}"
+               class="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
                 Regístrate
             </a>
         </div>
     </form>
-
-    {{-- Modales y JS de términos / privacidad --}}
-    @include('auth.partials.legal-modals')
 </x-guest-layout>

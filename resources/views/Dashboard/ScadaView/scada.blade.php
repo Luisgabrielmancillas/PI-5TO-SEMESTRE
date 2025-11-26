@@ -72,21 +72,23 @@
             {{-- Recuadro con la imagen de la cámara --}}
             <div class="border border-gray-300 rounded-xl overflow-hidden mb-2 bg-black">
                 <img
+                    id="cameraStream"
                     src="http://10.42.62.18:8000/stream.mjpg"
                     alt="Cámara HydroBox"
                     class="w-96 h-60 object-cover"
                 >
             </div>
 
-            {{-- Mini componente de estado --}}
+            {{-- Mini componente de estado (por defecto: OFF) --}}
             <span id="cameraStatus" 
                 class="mt-2 text-sm text-black px-3 py-1 rounded-full 
-                        bg-green-100 border border-2 border-green-300 transition duration-300 
+                        bg-gray-50 border border-2 border-gray-300 transition duration-300 
                         flex items-center space-x-2 whitespace-nowrap">
-                <div id="cameraDot" class="w-2 h-2 rounded-full bg-green-700 transition duration-300"></div>
-                <span id="cameraText">Cámara: On</span>
+                <div id="cameraDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
+                <span id="cameraText">Cámara: Off</span>
             </span>
         </div>
+
 
         {{-- BLOQUE DE SENSORES (se refresca cada 10s) --}}
         <div id="scada-sensors">
@@ -133,7 +135,7 @@
         
         {{-- TERMINOLOGÍA --}}
         <div class="absolute bottom-8 right-16 z-10 p-4 rounded text-xs">
-            <img id="terminologiaImage" src="{{ asset('images/terminologia.png') }}" alt="Terminología" class="w-96 h-auto border border-black">
+            <img id="terminologiaImage" src="{{ asset('images/terminologia.jpeg') }}" alt="Terminología" class="w-96 h-auto border border-black">
         </div>
 
     </div>
@@ -191,6 +193,48 @@
             const dotClassesOff = ['bg-gray-500'];
             const statusClassesOn = ['bg-green-100', 'border-green-300'];
             const dotClassesOn = ['bg-green-700']; 
+
+
+            // =======================================================
+            // ESTADO DE CÁMARA SEGÚN SI CARGA EL STREAM
+            // =======================================================
+            const cameraStream = document.getElementById('cameraStream');
+            const cameraStatus = document.getElementById('cameraStatus');
+            const cameraDot    = document.getElementById('cameraDot');
+            const cameraText   = document.getElementById('cameraText');
+
+            function setCameraState(isOn) {
+                if (!cameraStatus || !cameraDot || !cameraText) return;
+
+                if (isOn) {
+                    cameraText.textContent = 'Cámara: On';
+                    cameraStatus.classList.remove(...statusClassesOff);
+                    cameraStatus.classList.add(...statusClassesOn);
+                    cameraDot.classList.remove(...dotClassesOff);
+                    cameraDot.classList.add(...dotClassesOn);
+                } else {
+                    cameraText.textContent = 'Cámara: Off';
+                    cameraStatus.classList.remove(...statusClassesOn);
+                    cameraStatus.classList.add(...statusClassesOff);
+                    cameraDot.classList.remove(...dotClassesOn);
+                    cameraDot.classList.add(...dotClassesOff);
+                }
+            }
+
+            // Por default la dejamos en OFF
+            setCameraState(false);
+
+            if (cameraStream) {
+                // Si la imagen del stream carga al menos una vez → la marcamos como ON
+                cameraStream.addEventListener('load', () => {
+                    setCameraState(true);
+                });
+
+                // Si hay error al cargar la URL del stream → OFF
+                cameraStream.addEventListener('error', () => {
+                    setCameraState(false);
+                });
+            }
 
             // =======================================================
             // FUNCIÓN AUXILIAR GENÉRICA DE ACTUADORES
