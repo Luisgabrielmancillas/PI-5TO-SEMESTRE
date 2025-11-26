@@ -4,6 +4,7 @@ namespace App\Services;
 
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\ConnectionSettings;
+use Illuminate\Support\Facades\Log;
 
 class MqttActuatorsClient
 {
@@ -15,24 +16,29 @@ class MqttActuatorsClient
         $user     = config('hydrobox_mqtt.user') ?: null;
         $pass     = config('hydrobox_mqtt.pass') ?: null;
 
-        $settings = new ConnectionSettings();
-
-        if ($user !== null && $pass !== null) {
-            $settings
-                ->setUsername($user)
-                ->setPassword($pass);
-        }
-
-        $settings->setKeepAliveInterval(30);
+        $settings = (new ConnectionSettings)
+            ->setUsername($user)
+            ->setPassword($pass)
+            ->setKeepAliveInterval(30);
+            // OJO: algunas versiones no tienen setCleanSession, por eso no lo usamos
 
         $mqtt = new MqttClient($server, $port, $clientId);
 
-        // El segundo parámetro `true` ya indica clean session
-        $mqtt->connect($settings, true);
+        try {
+            // true = conexión con sesión limpia
+            $mqtt->connect($settings, true);
 
-        $mqtt->publish($topic, $payload, MqttClient::QOS_AT_LEAST_ONCE);
+            $mqtt->publish($topic, $payload, MqttClient::QOS_AT_LEAST_ONCE);
 
-        $mqtt->disconnect();
+            $mqtt->disconnect();
+        } catch (\Throwable $e) {
+            Log::warning('Error enviando comando MQTT de actuadores', [
+                'topic'   => $topic,
+                'payload' => $payload,
+                'error'   => $e->getMessage(),
+            ]);
+            // No relanzamos la excepción: la vista seguirá funcionando
+        }
     }
 
     public static function sendSwitch(string $deviceId, bool $on): void

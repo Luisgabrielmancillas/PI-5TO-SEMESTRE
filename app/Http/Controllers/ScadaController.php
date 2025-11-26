@@ -83,7 +83,7 @@ class ScadaController extends Controller
 
         // 3) Enviar comando por MQTT SOLO si sabemos el deviceId
         if ($deviceId !== null) {
-            /* MqttActuatorsClient::sendSwitch($deviceId, $isOn); */
+            MqttActuatorsClient::sendSwitch($deviceId, $isOn);
         }
 
         // 4) Actualizar (o crear) la fila de registro_actuador
