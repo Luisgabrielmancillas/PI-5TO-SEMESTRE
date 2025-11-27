@@ -11,6 +11,9 @@ use App\Services\MqttActuatorsClient;
 
 class ScadaController extends Controller
 {
+    /**
+     * Mapa id_actuador -> deviceId MQTT
+     */
     protected array $deviceMap = [
         1 => 'doser_b', // Bomba FloraGro
         2 => 'doser_a', // Bomba FloraMicro
@@ -69,21 +72,13 @@ class ScadaController extends Controller
         $isOn       = (bool) $data['on'];
 
         // 2) Mapeo id_actuador -> deviceId que entiende tu gateway MQTT
-        // Ajusta si tu amigo usó otro orden para las peristálticas 💡
-        $map = [
-            1 => 'doser_b',   // Bomba FloraGro
-            2 => 'doser_a',   // Bomba FloraMicro
-            3 => 'doser_c',   // Bomba FloraBloom
-            4 => 'pump',      // Bomba de Agua
-            5 => 'light',     // Lámpara LED
-            6 => 'fan',       // Ventilador
-        ];
+        $map = $this->deviceMap;
 
         $deviceId = $map[$idActuador] ?? null;
 
         // 3) Enviar comando por MQTT SOLO si sabemos el deviceId
         if ($deviceId !== null) {
-            MqttActuatorsClient::sendSwitch($deviceId, $isOn);
+            /* MqttActuatorsClient::sendSwitch($deviceId, $isOn); */
         }
 
         // 4) Actualizar (o crear) la fila de registro_actuador
@@ -149,5 +144,102 @@ class ScadaController extends Controller
     {
         return RegistroMediciones::orderByDesc('fecha')->first()
             ?? RegistroMediciones::orderByDesc('created_at')->first();
+    }
+
+    // ==========================================================
+    //      NUEVA LÓGICA DE DOSIFICACIÓN MANUAL PERISTÁLTICAS
+    // ==========================================================
+
+    /**
+     * Arranca una dosificación manual para las bombas peristálticas (id 1,2,3).
+     * - Envía comando MQTT con los mililitros.
+     * - Marca estado_actual = 1 en registro_actuador.
+     * - Devuelve la duración estimada (segundos) para que el front haga el timer.
+     */
+    public function manualDoseStart(Request $request)
+    {
+        $data = $request->validate([
+            'id_actuador' => 'required|integer|in:1,2,3',
+            'ml'          => 'required|integer|min:1|max:2000',
+        ]);
+
+        $idActuador = (int) $data['id_actuador'];
+        $ml         = (int) $data['ml'];
+
+        $deviceId = $this->deviceMap[$idActuador] ?? null;
+        if (!$deviceId) {
+            return response()->json([
+                'ok'      => false,
+                'message' => 'Actuador no encontrado',
+            ], 404);
+        }
+
+        // 🔧 Factor de conversión ml -> segundos (ajústalo cuando calibres la bomba)
+        $secondsPerMl = (float) config('hydrobox_mqtt.dose_seconds_per_ml', 1.0);
+        $duration     = max(1, (int) ceil($ml * $secondsPerMl));
+
+        // DB: estado_actual = 1
+        $registro = RegistroActuador::where('id_actuador', $idActuador)->first();
+
+        if ($registro) {
+            $registro->estado_anterior = $registro->estado_actual;
+            $registro->estado_actual   = 1;
+            $registro->fecha_cambio    = now();
+            $registro->save();
+        } else {
+            RegistroActuador::create([
+                'id_actuador'     => $idActuador,
+                'estado_anterior' => 0,
+                'estado_actual'   => 1,
+                'fecha_cambio'    => now(),
+            ]);
+        }
+
+        // MQTT: enviamos la dosis en ml (el bridge se encarga del tiempo real de encendido)
+        /* MqttActuatorsClient::sendDose($deviceId, $ml); */
+
+        return response()->json([
+            'ok'       => true,
+            'duration' => $duration, // segundos estimados para mantener bloqueado el modal
+        ]);
+    }
+
+    /**
+     * Finaliza la dosificación manual:
+     * - Envía comando de apagado por MQTT.
+     * - Marca estado_actual = 0 en registro_actuador.
+     */
+    public function manualDoseStop(Request $request)
+    {
+        $data = $request->validate([
+            'id_actuador' => 'required|integer|in:1,2,3',
+        ]);
+
+        $idActuador = (int) $data['id_actuador'];
+
+        $deviceId = $this->deviceMap[$idActuador] ?? null;
+
+        // DB: estado_actual = 0
+        $registro = RegistroActuador::where('id_actuador', $idActuador)->first();
+
+        if ($registro) {
+            $registro->estado_anterior = $registro->estado_actual;
+            $registro->estado_actual   = 0;
+            $registro->fecha_cambio    = now();
+            $registro->save();
+        } else {
+            RegistroActuador::create([
+                'id_actuador'     => $idActuador,
+                'estado_anterior' => 1,
+                'estado_actual'   => 0,
+                'fecha_cambio'    => now(),
+            ]);
+        }
+
+        if ($deviceId) {
+            /* MqttActuatorsClient::sendSwitch($deviceId, false); */
+        }
+
+        return response()->json(['ok' => true]);
     }
 }

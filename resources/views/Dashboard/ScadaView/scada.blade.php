@@ -25,55 +25,53 @@
 
     {{-- Interfaz SCADA: solo en desktop --}}
     <div class="bg-container hidden md:block">
-        
+
         {{-- Efecto de luz de lámpara --}}
-        <img id="lighting" 
+        <img id="lighting"
              src="{{ asset('images/Iluminacion1.png') }}"
-             alt="Efecto de luz" 
+             alt="Efecto de luz"
              class="absolute lighting-image z-5 hidden transition-opacity duration-500">
 
         {{-- LÁMPARA (id_actuador = 5 -> light) --}}
         <div id="lampControlGroup"
              data-actuator-id="5"
              class="absolute lamp-container left-[63%] -translate-x-1/2 flex flex-col items-center z-10 cursor-pointer">
-            
-            <button id="lampToggle" 
+
+            <button id="lampToggle"
                     class="cursor-pointer focus:outline-none p-0 border-none bg-transparent transform hover:scale-105 transition duration-300">
-                
+
                 <img id="lampImage" src="{{ asset('images/lampara.png') }}" alt="Lámpara" class="w-96 h-auto">
             </button>
-            
-            <span id="lampStatus" 
-                  class="mt-1 text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 transition duration-300 
+
+            <span id="lampStatus"
+                  class="mt-1 text-sm text-black px-3 py-1 rounded-full
+                         bg-gray-50 border border-2 border-gray-300 transition duration-300
                          flex items-center space-x-2 whitespace-nowrap">
-                
+
                 <div id="lampDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
-                
+
                 <span id="lampText">Lámpara: Off</span>
             </span>
         </div>
-        
+
         {{-- VENTILADOR (id_actuador = 6 -> fan) --}}
         <div id="fanToggle"
              data-actuator-id="6"
              class="absolute top-[55px] left-[37%] z-20 flex flex-col items-center cursor-pointer">
             <img id="fanImage" src="{{ asset('images/fan_off.png') }}" alt="Ventilador" class="w-24 h-auto transform hover:scale-105 transition duration-300">
-            
-            <span id="fanStatus" 
-                  class="text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 transition duration-300 
+
+            <span id="fanStatus"
+                  class="text-sm text-black px-3 py-1 rounded-full
+                         bg-gray-50 border border-2 border-gray-300 transition duration-300
                          flex items-center space-x-2 whitespace-nowrap">
                 <div id="fanDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
                 <span id="fanText">FAN: Off</span>
             </span>
         </div>
-        
 
-        {{-- CÁMARA: vista + pill de estado --}}
+        {{-- CÁMARA --}}
         <div id="cameraToggle" class="absolute top-[200px] left-[80%] z-20 flex flex-col items-center">
-            
-            {{-- Recuadro con la imagen de la cámara --}}
+
             <div class="border border-gray-300 rounded-xl overflow-hidden mb-2 bg-black">
                 <img
                     id="cameraStream"
@@ -83,24 +81,22 @@
                 >
             </div>
 
-            {{-- Mini componente de estado (por defecto: OFF) --}}
-            <span id="cameraStatus" 
-                class="mt-2 text-sm text-black px-3 py-1 rounded-full 
-                        bg-gray-50 border border-2 border-gray-300 transition duration-300 
+            <span id="cameraStatus"
+                  class="mt-2 text-sm text-black px-3 py-1 rounded-full
+                        bg-gray-50 border border-2 border-gray-300 transition duración-300
                         flex items-center space-x-2 whitespace-nowrap">
-                <div id="cameraDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
+                <div id="cameraDot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
                 <span id="cameraText">Cámara: Off</span>
             </span>
         </div>
 
-
-        {{-- BLOQUE DE SENSORES (se refresca cada 10s) --}}
+        {{-- BLOQUE DE SENSORES --}}
         <div id="scada-sensors">
             @include('Dashboard.ScadaView._sensors-block', ['latest' => $latest])
         </div>
 
         {{-- BOMBAS DOSIFICADORAS --}}
-        {{-- BD1 = FloraMicro = id_actuador 2 --}}
+        {{-- BD1 = Peristáltica A — FloraMicro = id_actuador 2 (IZQUIERDA) --}}
         <div id="bd1Toggle"
              data-actuator-id="2"
              class="absolute top-[45%] left-[20.7%] z-20 flex flex-col items-center cursor-pointer">
@@ -111,24 +107,24 @@
             </span>
         </div>
 
-        {{-- BD2 = FloraGro = id_actuador 1 --}}
+        {{-- BD2 = Peristáltica B — FloraBloom = id_actuador 3 (CENTRO) --}}
         <div id="bd2Toggle"
-             data-actuator-id="1"
+             data-actuator-id="3"
              class="absolute top-[37%] left-[25.8%] z-20 flex flex-col items-center cursor-pointer">
             <img id="bd2Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N2" class="w-10 h-auto transform hover:scale-110 transition duration-300">
             <span id="bd2Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
-                <div id="bd2Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
+                <div id="bd2Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
                 <span id="bd2Text">BD2: Off</span>
             </span>
         </div>
 
-        {{-- BD3 = FloraBloom = id_actuador 3 --}}
+        {{-- BD3 = Peristáltica C — FloraGro = id_actuador 1 (DERECHA) --}}
         <div id="bd3Toggle"
-             data-actuator-id="3"
+             data-actuator-id="1"
              class="absolute top-[30%] left-[31.6%] z-20 flex flex-col items-center cursor-pointer">
             <img id="bd3Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N3" class="w-10 h-auto transform hover:scale-110 transition duration-300">
-            <span id="bd3Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
-                <div id="bd3Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
+            <span id="bd3Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duración-300 flex items-center space-x-2 whitespace-nowrap">
+                <div id="bd3Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
                 <span id="bd3Text">BD3: Off</span>
             </span>
         </div>
@@ -138,21 +134,127 @@
              data-actuator-id="4"
              class="absolute top-[83.5%] left-[47.8%] z-20 flex flex-col items-center cursor-pointer">
             <img id="baImage" src="{{ asset('images/bomba_agua.png') }}" alt="Bomba de Agua" class="w-20 h-auto transform hover:scale-105 transition duration-300">
-            
-            <span id="baStatus" 
-                  class="text-sm text-black px-3 py-1 rounded-full 
-                         bg-gray-50 border border-2 border-gray-300 transition duration-300 
+
+            <span id="baStatus"
+                  class="text-sm text-black px-3 py-1 rounded-full
+                         bg-gray-50 border border-2 border-gray-300 transition duración-300
                          flex items-center space-x-2 whitespace-nowrap">
-                <div id="baDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
+                <div id="baDot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
                 <span id="baText">BA: Off</span>
             </span>
         </div>
-        
+
         {{-- TERMINOLOGÍA --}}
         <div class="absolute bottom-8 right-16 z-10 p-4 rounded text-xs">
             <img id="terminologiaImage" src="{{ asset('images/terminologia.jpeg') }}" alt="Terminología" class="w-96 h-auto border border-black">
         </div>
 
+    </div>
+
+    {{-- ========================================================
+         MODAL DOSIFICACIÓN PERISTÁLTICAS (Automática / Manual)
+       ======================================================== --}}
+    <div id="doseModalOverlay"
+         class="fixed inset-0 z-40 hidden items-center justify-center bg-black/50">
+        <div
+            class="w-full max-w-xl rounded-3xl shadow-2xl px-6 py-6 relative
+                   bg-white text-slate-900
+                   dark:bg-slate-900 dark:text-slate-50"
+        >
+            <h3 class="text-2xl font-semibold mb-5">
+                Dosificar — <span id="doseDeviceName">Peristáltica</span>
+            </h3>
+
+            {{-- Tabs Automática / Manual --}}
+            <div
+                class="inline-flex mb-5 rounded-full bg-slate-100 dark:bg-slate-800
+                       p-1 gap-1 w-full max-w-xs"
+            >
+                <button
+                    id="doseTabAuto"
+                    type="button"
+                    class="flex-1 px-4 py-1.5 text-sm rounded-full font-medium
+                           transition-colors"
+                >
+                    Automática
+                </button>
+                <button
+                    id="doseTabManual"
+                    type="button"
+                    class="flex-1 px-4 py-1.5 text-sm rounded-full font-medium
+                           transition-colors"
+                >
+                    Manual
+                </button>
+            </div>
+
+            {{-- Sección Automática (solo info + cancelar) --}}
+            <div id="doseAutoSection" class="space-y-4">
+                <p id="doseAutoInfo"
+                   class="text-sm text-slate-700 dark:text-slate-200">
+                    Próxima dosis programada para lunes a las 10:00 a.m.
+                </p>
+
+                <div class="flex gap-3 pt-2">
+                    <button
+                        type="button"
+                        class="px-5 py-2 rounded-full border
+                               border-slate-300 text-sm text-slate-700
+                               dark:border-slate-500 dark:text-slate-200
+                               dose-cancel-btn"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+
+            {{-- Sección Manual --}}
+            <div id="doseManualSection" class="space-y-4 hidden">
+                <label class="block text-sm font-medium">
+                    Mililitros (ml)
+                    <input
+                        id="doseMlInput"
+                        type="number"
+                        min="0"
+                        max="10"
+                        class="mt-1 w-full rounded-2xl border px-3 py-2 text-sm
+                               bg-slate-50 text-slate-900 border-slate-300
+                               focus:outline-none focus:ring-2 focus:ring-cyan-500
+                               dark:bg-slate-800 dark:text-slate-50
+                               dark:border-slate-600"
+                    />
+                </label>
+
+                {{-- Mensaje de error visual --}}
+                <p id="doseMlError"
+                   class="mt-1 text-xs text-red-600 dark:text-red-400 hidden">
+                </p>
+
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    Mientras se dosifica, esta ventana permanecerá bloqueada hasta terminar.
+                </p>
+
+                <div class="flex gap-3 pt-2">
+                    <button
+                        id="doseManualStart"
+                        type="button"
+                        class="px-5 py-2 rounded-full bg-cyan-500 text-white
+                               font-semibold text-sm"
+                    >
+                        Dosificar ahora
+                    </button>
+                    <button
+                        type="button"
+                        class="px-5 py-2 rounded-full border
+                               border-slate-300 text-sm text-slate-700
+                               dark:border-slate-500 dark:text-slate-200
+                               dose-cancel-btn"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     @push('scripts')
@@ -163,62 +265,64 @@
             const toggleUrl      = @json(route('scada.toggle'));
             const actuatorStates = @json($actuatorStatesById ?? []);
             const statesUrl      = @json(route('scada.states'));
+            const scadaBlockUrl  = @json(route('scada.block'));
+            const manualDoseStartUrl = @json(route('scada.dose.manual.start'));
+            const manualDoseStopUrl  = @json(route('scada.dose.manual.stop'));
             const csrfTokenMeta  = document.querySelector('meta[name="csrf-token"]');
             const csrfToken      = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
 
             // =======================================================
             // CÓDIGO JAVASCRIPT SCADA (actuadores + refresco sensores)
             // =======================================================
-            
+
             // --- LÁMPARA ---
             const lampToggle       = document.getElementById('lampToggle');
-            const lampControlGroup = document.getElementById('lampControlGroup'); 
+            const lampControlGroup = document.getElementById('lampControlGroup');
             const lampStatus       = document.getElementById('lampStatus');
-            const lampDot          = document.getElementById('lampDot'); 
+            const lampDot          = document.getElementById('lampDot');
             const lampText         = document.getElementById('lampText');
-            const lightingImage    = document.getElementById('lighting'); 
+            const lightingImage    = document.getElementById('lighting');
             let   isLampOn         = false;
             const lampActuatorId   = lampControlGroup ? lampControlGroup.dataset.actuatorId : null;
 
             // --- BOMBAS DOSIFICADORAS ---
             const bd1Toggle = document.getElementById('bd1Toggle');
             const bd1Image  = document.getElementById('bd1Image');
-            const bd1Dot    = document.getElementById('bd1Dot'); 
+            const bd1Dot    = document.getElementById('bd1Dot');
             const bd1Text   = document.getElementById('bd1Text');
-            let   isBD1On   = { value: false }; 
+            let   isBD1On   = { value: false };
 
             const bd2Toggle = document.getElementById('bd2Toggle');
             const bd2Image  = document.getElementById('bd2Image');
-            const bd2Dot    = document.getElementById('bd2Dot'); 
+            const bd2Dot    = document.getElementById('bd2Dot');
             const bd2Text   = document.getElementById('bd2Text');
             let   isBD2On   = { value: false };
 
             const bd3Toggle = document.getElementById('bd3Toggle');
             const bd3Image  = document.getElementById('bd3Image');
-            const bd3Dot    = document.getElementById('bd3Dot'); 
+            const bd3Dot    = document.getElementById('bd3Dot');
             const bd3Text   = document.getElementById('bd3Text');
             let   isBD3On   = { value: false };
-            
+
             // --- BOMBA DE AGUA (BA) ---
             const baToggle = document.getElementById('baToggle');
             const baImage  = document.getElementById('baImage');
-            const baDot    = document.getElementById('baDot'); 
+            const baDot    = document.getElementById('baDot');
             const baText   = document.getElementById('baText');
             let   isBAOn   = { value: false };
-            
+
             // --- VENTILADOR (FAN) ---
             const fanToggle = document.getElementById('fanToggle');
             const fanImage  = document.getElementById('fanImage');
             const fanDot    = document.getElementById('fanDot');
             const fanText   = document.getElementById('fanText');
             let   isFanOn   = { value: false };
-            
+
             // --- CLASES DE ESTADO ---
             const statusClassesOff = ['bg-gray-50', 'border-gray-300'];
             const dotClassesOff    = ['bg-gray-500'];
             const statusClassesOn  = ['bg-green-100', 'border-green-300'];
-            const dotClassesOn     = ['bg-green-700']; 
-
+            const dotClassesOn     = ['bg-green-700'];
 
             // =======================================================
             // ESTADO DE CÁMARA SEGÚN SI CARGA EL STREAM
@@ -246,28 +350,24 @@
                 }
             }
 
-            // Por default la dejamos en OFF
             setCameraState(false);
 
             if (cameraStream) {
-                cameraStream.addEventListener('load', () => {
-                    setCameraState(true);
-                });
-
-                cameraStream.addEventListener('error', () => {
-                    setCameraState(false);
-                });
+                cameraStream.addEventListener('load', () => setCameraState(true));
+                cameraStream.addEventListener('error', () => setCameraState(false));
             }
 
             // =======================================================
             // HELPER PARA PINTAR UN ACTUADOR
             // =======================================================
-            function paintActuator(toggleEl, imageEl, dotEl, textEl, label, isOn, imageSrcOn, imageSrcOff, applyShake = true) {
+            function paintActuator(toggleEl, imageEl, dotEl, textEl, label, isOn, imageSrcOn = null, imageSrcOff = null, applyShake = true) {
                 if (!toggleEl) return;
 
                 const statusSpan = toggleEl.querySelector('span');
 
-                textEl.textContent = `${label}: ${isOn ? 'On' : 'Off'}`;
+                if (textEl) {
+                    textEl.textContent = `${label}: ${isOn ? 'On' : 'Off'}`;
+                }
 
                 if (applyShake && imageEl) {
                     if (isOn) imageEl.classList.add('animate-shake');
@@ -318,7 +418,7 @@
             }
 
             // =======================================================
-            // FUNCIÓN GENÉRICA DE ACTUADORES (BD1, BD2, BD3, BA, FAN)
+            // FUNCIÓN GENÉRICA DE ACTUADORES (BA, FAN)
             // =======================================================
             function setupActuatorToggle(
                 toggleEl,
@@ -327,8 +427,8 @@
                 textEl,
                 label,
                 isActuatorOnRef,
-                imageSrcOn,
-                imageSrcOff,
+                imageSrcOn = null,
+                imageSrcOff = null,
                 applyShake = true
             ) {
                 if (!toggleEl) return;
@@ -350,6 +450,287 @@
 
                     if (actuatorId) {
                         sendActuatorToggleToServer(actuatorId, isOn);
+                    }
+                });
+            }
+
+            // =======================================================
+            // MODAL DE DOSIFICACIÓN PARA PERISTÁLTICAS
+            // =======================================================
+            const doseOverlay       = document.getElementById('doseModalOverlay');
+            const doseDeviceNameEl  = document.getElementById('doseDeviceName');
+            const doseTabAuto       = document.getElementById('doseTabAuto');
+            const doseTabManual     = document.getElementById('doseTabManual');
+            const doseAutoSection   = document.getElementById('doseAutoSection');
+            const doseManualSection = document.getElementById('doseManualSection');
+            const doseAutoInfo      = document.getElementById('doseAutoInfo');
+            const doseMlInput       = document.getElementById('doseMlInput');
+            const doseMlError       = document.getElementById('doseMlError');
+            const doseManualStart   = document.getElementById('doseManualStart');
+            // No hay botón de automática ahora; esto será null
+            const doseAutoStart     = document.getElementById('doseAutoStart');
+            const doseCancelButtons = document.querySelectorAll('.dose-cancel-btn');
+
+            let currentDoseActuatorId = null;
+            let doseBusy = false;
+            let doseTimer = null;
+            let doseErrorTimeout = null;
+
+            function computeNextMondayText() {
+                const now = new Date();
+                const day = now.getDay(); // 0=Domingo, 1=Lunes...
+                const targetHour = 10;
+                const targetMinute = 0;
+
+                let target = new Date(now);
+                let labelToday = false;
+
+                if (day === 1) {
+                    const beforeTarget =
+                        now.getHours() < targetHour ||
+                        (now.getHours() === targetHour && now.getMinutes() < targetMinute);
+                    if (beforeTarget) {
+                        labelToday = true;
+                    }
+                }
+
+                if (!labelToday) {
+                    let diff = (1 - day + 7) % 7;
+                    if (diff === 0) {
+                        diff = 7; // lunes pero ya pasó la hora
+                    }
+                    target.setDate(now.getDate() + diff);
+                }
+
+                const dateStr = target.toLocaleDateString('es-MX', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                });
+
+                if (labelToday) {
+                    return 'Próxima dosis programada para hoy a las 10:00 a.m.';
+                }
+                return `Próxima dosis programada para ${dateStr} a las 10:00 a.m.`;
+            }
+
+            function selectDoseTab(mode) {
+                const isAuto = (mode === 'auto');
+                if (!doseTabAuto || !doseTabManual || !doseAutoSection || !doseManualSection) return;
+
+                // Auto
+                doseTabAuto.classList.toggle('bg-slate-700', isAuto);
+                doseTabAuto.classList.toggle('text-slate-50', isAuto);
+                doseTabAuto.classList.toggle('text-slate-300', !isAuto);
+
+                // Manual
+                doseTabManual.classList.toggle('bg-slate-700', !isAuto);
+                doseTabManual.classList.toggle('text-slate-50', !isAuto);
+                doseTabManual.classList.toggle('text-slate-300', isAuto);
+
+                doseAutoSection.classList.toggle('hidden', !isAuto);
+                doseManualSection.classList.toggle('hidden', isAuto);
+            }
+
+            function clearDoseMlError() {
+                if (!doseMlInput || !doseMlError) return;
+
+                doseMlInput.classList.remove(
+                    'border-red-500',
+                    'bg-red-50',
+                    'dark:border-red-500',
+                    'dark:bg-red-950/30'
+                );
+                doseMlError.classList.add('hidden');
+                doseMlError.textContent = '';
+
+                if (doseErrorTimeout) {
+                    clearTimeout(doseErrorTimeout);
+                    doseErrorTimeout = null;
+                }
+            }
+
+            function showDoseMlError(message) {
+                if (!doseMlInput || !doseMlError) return;
+
+                clearDoseMlError();
+
+                doseMlInput.classList.add(
+                    'border-red-500',
+                    'bg-red-50',
+                    'dark:border-red-500',
+                    'dark:bg-red-950/30'
+                );
+                doseMlError.textContent = message;
+                doseMlError.classList.remove('hidden');
+
+                doseErrorTimeout = setTimeout(() => {
+                    clearDoseMlError();
+                }, 3000);
+            }
+
+            function setDoseBusy(isBusy) {
+                doseBusy = isBusy;
+
+                if (doseManualStart) doseManualStart.disabled = isBusy;
+                if (doseAutoStart)   doseAutoStart.disabled   = isBusy;
+                if (doseMlInput)     doseMlInput.readOnly     = isBusy;
+
+                doseCancelButtons.forEach(btn => {
+                    btn.disabled = isBusy;
+                    if (isBusy) {
+                        btn.classList.add('opacity-60', 'cursor-not-allowed');
+                    } else {
+                        btn.classList.remove('opacity-60', 'cursor-not-allowed');
+                    }
+                });
+            }
+
+            function openDoseModal(actuatorId, label) {
+                currentDoseActuatorId = actuatorId;
+
+                if (doseDeviceNameEl) {
+                    doseDeviceNameEl.textContent = label || 'Peristáltica';
+                }
+                if (doseMlInput) {
+                    doseMlInput.value = '0'; // valor por defecto
+                }
+                clearDoseMlError();
+
+                if (doseAutoInfo) {
+                    doseAutoInfo.textContent = computeNextMondayText();
+                }
+
+                selectDoseTab('auto');
+                setDoseBusy(false);
+
+                if (doseOverlay) {
+                    doseOverlay.classList.remove('hidden');
+                    doseOverlay.classList.add('flex');
+                }
+            }
+
+            function closeDoseModal() {
+                if (doseBusy) return; // no se puede cerrar mientras se dosifica
+                currentDoseActuatorId = null;
+                clearDoseMlError();
+                if (doseTimer) {
+                    clearTimeout(doseTimer);
+                    doseTimer = null;
+                }
+                if (doseOverlay) {
+                    doseOverlay.classList.add('hidden');
+                    doseOverlay.classList.remove('flex');
+                }
+            }
+
+            if (doseOverlay) {
+                doseOverlay.addEventListener('click', (event) => {
+                    if (event.target === doseOverlay) {
+                        closeDoseModal();
+                    }
+                });
+            }
+
+            if (doseTabAuto && doseTabManual) {
+                doseTabAuto.addEventListener('click', () => {
+                    if (!doseBusy) selectDoseTab('auto');
+                });
+                doseTabManual.addEventListener('click', () => {
+                    if (!doseBusy) selectDoseTab('manual');
+                });
+            }
+
+            doseCancelButtons.forEach(btn => {
+                btn.addEventListener('click', () => closeDoseModal());
+            });
+
+            if (doseManualStart) {
+                doseManualStart.addEventListener('click', async () => {
+                    if (doseBusy) return;
+                    if (!currentDoseActuatorId || !manualDoseStartUrl) return;
+
+                    const raw = doseMlInput?.value ?? '0';
+                    const ml  = parseInt(raw, 10);
+
+                    // Validaciones
+                    if (!Number.isFinite(ml) || ml <= 0) {
+                        showDoseMlError('Ingresa una cantidad mayor a 0 ml.');
+                        return;
+                    }
+                    if (ml > 10) {
+                        showDoseMlError('No se pueden suministrar más de 10 ml en una sola dosis.');
+                        return;
+                    }
+
+                    clearDoseMlError();
+                    setDoseBusy(true);
+
+                    try {
+                        const resp = await fetch(manualDoseStartUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: JSON.stringify({
+                                id_actuador: currentDoseActuatorId,
+                                ml: ml,
+                            }),
+                        });
+
+                        if (!resp.ok) {
+                            console.error('Error HTTP al iniciar dosis manual', resp.status);
+                            setDoseBusy(false);
+                            return;
+                        }
+
+                        const json = await resp.json();
+                        if (!json.ok) {
+                            console.error('Respuesta no OK al iniciar dosis manual', json);
+                            setDoseBusy(false);
+                            return;
+                        }
+
+                        const durationSec = typeof json.duration === 'number' ? json.duration : 0;
+
+                        if (typeof refreshActuatorStates === 'function') {
+                            refreshActuatorStates();
+                        }
+
+                        if (durationSec > 0 && manualDoseStopUrl) {
+                            doseTimer = setTimeout(async () => {
+                                try {
+                                    await fetch(manualDoseStopUrl, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest',
+                                            'X-CSRF-TOKEN': csrfToken,
+                                        },
+                                        body: JSON.stringify({
+                                            id_actuador: currentDoseActuatorId,
+                                        }),
+                                    });
+                                } catch (e) {
+                                    console.error('Error al finalizar dosis manual', e);
+                                } finally {
+                                    setDoseBusy(false);
+                                    closeDoseModal();
+                                    if (typeof refreshActuatorStates === 'function') {
+                                        refreshActuatorStates();
+                                    }
+                                }
+                            }, durationSec * 1000);
+                        } else {
+                            setDoseBusy(false);
+                            closeDoseModal();
+                        }
+                    } catch (e) {
+                        console.error('Exception iniciando dosis manual', e);
+                        setDoseBusy(false);
                     }
                 });
             }
@@ -395,7 +776,6 @@
                 }
             }
 
-            // Estado inicial de la lámpara desde la DB
             if (lampActuatorId && actuatorStates[lampActuatorId] === 1) {
                 applyLampUi(true);
             } else {
@@ -418,7 +798,7 @@
             }
 
             // =======================================================
-            // CONFIGURACIÓN DE ACTUADORES (BD1, BD2, BD3, BA, FAN)
+            // CONFIGURACIÓN DE ACTUADORES (solo BA y FAN)
             // =======================================================
             setupActuatorToggle(
                 fanToggle,
@@ -431,20 +811,48 @@
                 '{{ asset('images/fan_off.png') }}',
                 false
             );
-            
-            setupActuatorToggle(bd1Toggle, bd1Image, bd1Dot, bd1Text, 'BD1', isBD1On);
-            setupActuatorToggle(bd2Toggle, bd2Image, bd2Dot, bd2Text, 'BD2', isBD2On);
-            setupActuatorToggle(bd3Toggle, bd3Image, bd3Dot, bd3Text, 'BD3', isBD3On);
-            setupActuatorToggle(baToggle,  baImage,  baDot,  baText,  'BA',  isBAOn);
+
+            setupActuatorToggle(
+                baToggle,
+                baImage,
+                baDot,
+                baText,
+                'BA',
+                isBAOn
+            );
+
+            // Los clics de BD1/BD2/BD3 abren el modal de dosificación
+            function labelForDoser(actuatorId) {
+                const idNum = parseInt(actuatorId, 10);
+                // Nuevo mapeo:
+                // 2 -> A Micro, 3 -> B Bloom, 1 -> C Gro
+                if (idNum === 2) return 'Peristáltica A — FloraMicro';
+                if (idNum === 3) return 'Peristáltica B — FloraBloom';
+                if (idNum === 1) return 'Peristáltica C — FloraGro';
+                return 'Peristáltica';
+            }
+
+            function attachDoseClick(toggleEl) {
+                if (!toggleEl) return;
+                const actuatorId = toggleEl.dataset.actuatorId;
+                if (!actuatorId) return;
+
+                toggleEl.addEventListener('click', () => {
+                    openDoseModal(parseInt(actuatorId, 10), labelForDoser(actuatorId));
+                });
+            }
+
+            attachDoseClick(bd1Toggle);
+            attachDoseClick(bd2Toggle);
+            attachDoseClick(bd3Toggle);
 
             // =======================================================
             // REFRESCO PERIÓDICO DE SENSORES (cada 10s, HTML Blade)
             // =======================================================
             const scadaSensorsContainer = document.getElementById('scada-sensors');
-            const scadaBlockUrl = @json(route('scada.block'));
 
             async function refreshSensors() {
-                if (!scadaSensorsContainer) return;
+                if (!scadaSensorsContainer || !scadaBlockUrl) return;
 
                 try {
                     const response = await fetch(scadaBlockUrl, {
@@ -474,22 +882,21 @@
                     if (!resp.ok) return;
                     const data = await resp.json();
 
-                    // Actualizamos cada actuador conocido (por id_actuador)
-                    // BD1 = 2
+                    // BD1 = id 2
                     if (data['2'] !== undefined) {
                         const on = data['2'] === 1;
                         isBD1On.value = on;
                         paintActuator(bd1Toggle, bd1Image, bd1Dot, bd1Text, 'BD1', on);
                     }
-                    // BD2 = 1
-                    if (data['1'] !== undefined) {
-                        const on = data['1'] === 1;
+                    // BD2 = id 3 (Bloom)
+                    if (data['3'] !== undefined) {
+                        const on = data['3'] === 1;
                         isBD2On.value = on;
                         paintActuator(bd2Toggle, bd2Image, bd2Dot, bd2Text, 'BD2', on);
                     }
-                    // BD3 = 3
-                    if (data['3'] !== undefined) {
-                        const on = data['3'] === 1;
+                    // BD3 = id 1 (Gro)
+                    if (data['1'] !== undefined) {
+                        const on = data['1'] === 1;
                         isBD3On.value = on;
                         paintActuator(bd3Toggle, bd3Image, bd3Dot, bd3Text, 'BD3', on);
                     }
@@ -525,8 +932,11 @@
                 }
             }
 
-            // Timers
-            setInterval(refreshSensors, 10000);      // sensores cada 10s
+            // Timers iniciales
+            refreshSensors();
+            refreshActuatorStates();
+
+            setInterval(refreshSensors, 10000);       // sensores cada 10s
             setInterval(refreshActuatorStates, 5000); // actuadores cada 5s
         </script>
     @endpush
@@ -534,13 +944,11 @@
     @push('styles')
         <style>
             :root {
-                --top-offset: 0px; 
+                --top-offset: 0px;
                 --image-lift: 35px;
-                /* Desplazamiento horizontal de TODO el SCADA */
-                --scada-shift-x: -120px; /* mueve todo ~120px a la izquierda */
+                --scada-shift-x: -120px;
             }
 
-            /* Tema claro: fondo blanco */
             .bg-container {
                 background-image: url('{{ asset('images/Fondo_W.png') }}');
                 margin-top: 0;
@@ -554,24 +962,23 @@
                 transform: translateX(var(--scada-shift-x));
             }
 
-            /* Tema oscuro: fondo B */
             .dark .bg-container {
                 background-image: url('{{ asset('images/Fondo_B.png') }}');
             }
 
-            .lamp-container { top: 0px; } 
+            .lamp-container { top: 0px; }
 
-            .lighting-image { 
-                width: 320px; 
+            .lighting-image {
+                width: 320px;
                 margin-top: 30px;
                 margin-left: 5px;
-                opacity: 0.8; 
+                opacity: 0.8;
                 position: absolute;
                 transform: translateX(-50%);
             }
 
-            .fan-container { top: 20px; left: 10%; } 
-            
+            .fan-container { top: 20px; left: 10%; }
+
             @keyframes shake {
                 0% { transform: translateX(0); }
                 25% { transform: translateX(-1px); }
@@ -581,7 +988,7 @@
             }
 
             .animate-shake {
-                animation: shake 0.2s infinite; 
+                animation: shake 0.2s infinite;
             }
         </style>
     @endpush
