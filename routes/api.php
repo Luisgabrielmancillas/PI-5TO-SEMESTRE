@@ -20,5 +20,4 @@ Route::get('/hortaliza/actual', [SeleccionHortalizaApiController::class, 'get'])
 Route::post('/hortaliza/cambiar', [SeleccionHortalizaApiController::class, 'set']);
 
 Route::post('/actuador/estado', [RegistroActuadorApiController::class, 'estado']);
-Route::post('/actuador/encender', [RegistroActuadorApiController::class, 'encender']);
-Route::post('/actuador/apagar', [RegistroActuadorApiController::class, 'apagar']);
+Route::post('/actuador/cambiar-estado', [RegistroActuadorApiController::class, 'cambiarEstado']);
