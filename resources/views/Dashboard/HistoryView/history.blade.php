@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center gap-3">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Gestión de usuarios') }}
+                {{ __('Historial') }}
             </h2>
 
             {{-- Grupo derecho: botón PDF + pill de hortaliza --}}
@@ -389,7 +389,7 @@
         </script>
     @endpush
 
-    {{-- ====== JS TABLA (paginación + filtro por rango) ====== --}}
+    {{-- ====== JS TABLA (paginación + filtro por rango + auto-refresh) ====== --}}
     <script>
     (() => {
         const tableRangeSelect = document.getElementById('tableRangeSelect');
@@ -397,9 +397,16 @@
         const pagWrap = document.getElementById('tablePagination');
         const urlTable = "{{ route('history.table') }}";
 
+        // Guardamos la última URL usada (para mantener la página actual)
+        let lastTableUrl = null;
+
         async function refreshTable(url = null) {
+            if (!tableRangeSelect || !tbody || !pagWrap) return;
+
             const params = new URLSearchParams({ tableRange: tableRangeSelect.value });
-            const target = url ? url : `${urlTable}?${params.toString()}`;
+            const target = url || `${urlTable}?${params.toString()}`;
+
+            lastTableUrl = target;
 
             const res = await fetch(target, { headers: {'X-Requested-With':'XMLHttpRequest'} });
             const json = await res.json();
@@ -409,19 +416,31 @@
         }
 
         // Filtro por rango
-        tableRangeSelect.addEventListener('change', () => refreshTable());
+        if (tableRangeSelect) {
+            tableRangeSelect.addEventListener('change', () => refreshTable());
+        }
 
         // Delegación de eventos para paginación (no necesitamos re-enganchar)
-        pagWrap.addEventListener('click', (e) => {
-            const a = e.target.closest('a[href]');
-            if (!a) return;
-            e.preventDefault();
-            refreshTable(a.href);
-        });
+        if (pagWrap) {
+            pagWrap.addEventListener('click', (e) => {
+                const a = e.target.closest('a[href]');
+                if (!a) return;
+                e.preventDefault();
+                refreshTable(a.href);
+            });
+        }
+
+        // Auto-refresh de tabla cada 10 segundos, respetando rango y página actual
+        const TABLE_REFRESH_MS = 10000;
+        setInterval(() => {
+            // Si ya se navegó a otra página, se respeta esa URL;
+            // si no, construye una nueva con el rango actual.
+            refreshTable(lastTableUrl);
+        }, TABLE_REFRESH_MS);
     })();
     </script>
 
-    {{-- ====== JS GRÁFICAS (tu partial existente) ====== --}}
+    {{-- ====== JS GRÁFICAS (partial) ====== --}}
     @include('Dashboard.HistoryView.partials.graphs.scripts', [
         'initialSensor' => $initialSensor,
         'initialRange'  => $initialRange,

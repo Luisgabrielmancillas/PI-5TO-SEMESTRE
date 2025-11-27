@@ -188,7 +188,7 @@
     </table>
 
     {{-- RESUMEN GRÁFICO --}}
-    <h3 class="section-title">Resumen gráfico</h3>
+    <h3 class="section-title">Promedio Sensores</h3>
 
     @php
         $labels  = $chartData['labels']  ?? [];

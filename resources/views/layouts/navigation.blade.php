@@ -17,12 +17,7 @@
                     $isAdmin = method_exists($user, 'hasRole')
                         ? $user->hasRole('admin')
                         : (($user->role ?? null) === 'admin');
-
-                    if ($isAdmin) {
-                        $homeRoute = route('scada.index');
-                    } else {
-                        $homeRoute = route('dashboard');
-                    }
+                    $homeRoute = route('scada.index');
                 @endphp
                 <!-- Logo -->
                 <a href="{{ $homeRoute }}" class="shrink-0">
@@ -33,26 +28,23 @@
                 @auth
                 <div class="hidden sm:flex items-center">
                     <div class="flex items-center gap-2 bg-gray-100/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-1">
-                        @if($isAdmin)
-                            <a href="{{ route('scada.index') }}"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
-                                    {{ $isScad
-                                        ? 'bg-white text-slate-700 shadow-sm dark:bg-gray-700 dark:text-slate-200'
-                                        : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
-                                <svg class="h-5 w-5 {{ $isScad ? 'text-slate-600 dark:text-slate-300' : 'text-gray-400 dark:text-gray-400' }}"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
-                                    <path d="M6.5 10h5.5"/>
-                                    <path d="M6.5 13h4"/>
-                                    <path d="M6.5 16h3"/>
-                                    <circle cx="18.5" cy="9" r="2"/>
-                                    <path d="M16 14h1.5a2 2 0 0 0 2-2v-1"/>
-                                </svg>
-                                <span>Scada</span>
-                            </a>
-                        @endif
-
+                        <a href="{{ route('scada.index') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                                {{ $isScad
+                                    ? 'bg-white text-slate-700 shadow-sm dark:bg-gray-700 dark:text-slate-200'
+                                    : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
+                            <svg class="h-5 w-5 {{ $isScad ? 'text-slate-600 dark:text-slate-300' : 'text-gray-400 dark:text-gray-400' }}"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>
+                                <path d="M6.5 10h5.5"/>
+                                <path d="M6.5 13h4"/>
+                                <path d="M6.5 16h3"/>
+                                <circle cx="18.5" cy="9" r="2"/>
+                                <path d="M16 14h1.5a2 2 0 0 0 2-2v-1"/>
+                            </svg>
+                            <span>Scada</span>
+                        </a>
 
                         <a href="{{ route('dashboard') }}"
                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition {{ $isDash ? 'bg-white text-indigo-700 shadow-sm dark:bg-gray-700 dark:text-indigo-200' : 'text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white' }}">
@@ -238,13 +230,11 @@
     <!-- Menú móvil -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
         <div class="pt-2 pb-3 space-y-1">
-            @if($isAdmin)
-                <a href="{{ route('scada.index') }}"
-                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
-                {{ request()->routeIs('scada.index') ? 'bg-slate-50 border-slate-500 text-slate-700 dark:bg-gray-700 dark:text-slate-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
-                    Interfaz Scada
-                </a>
-            @endif
+            <a href="{{ route('scada.index') }}"
+            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
+            {{ request()->routeIs('scada.index') ? 'bg-slate-50 border-slate-500 text-slate-700 dark:bg-gray-700 dark:text-slate-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+                Interfaz Scada
+            </a>
             <a href="{{ route('dashboard') }}"
                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium 
                {{ request()->routeIs('dashboard') ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-gray-700 dark:text-indigo-200' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 dark:text-gray-300 dark:hover:bg-gray-700' }}">

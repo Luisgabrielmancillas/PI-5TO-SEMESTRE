@@ -43,29 +43,29 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
     Route::get('/comparacion',     [ComparacionController::class, 'index'])->name('comparacion');
     Route::get('/comparacion/block', [ComparacionController::class, 'block'])->name('comparacion.block');
     
-    Route::prefix('gestionusuarios')
-        ->name('gestion.')
-        ->middleware(['admin'])       
-        ->group(function () {
-            Route::get('/',         [GestionController::class, 'index'])->name('index');
-            Route::get('/table',    [GestionController::class, 'table'])->name('table');
-
-            Route::put('/{user}/accept',   [GestionController::class, 'accept'])->name('accept');
-            Route::put('/{user}/activate', [GestionController::class, 'activate'])->name('activate');
-            Route::put('/{user}/suspend',  [GestionController::class, 'suspend'])->name('suspend');
-            Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
-        });
-
-    Route::prefix('scada')
-        ->name('scada.')
-        ->middleware(['admin'])       
-        ->group(function () {
-            Route::get('/', [ScadaController::class, 'index'])->name('index');
-            Route::get('/block', [ScadaController::class, 'block'])->name('block');
-            Route::post('/actuators/toggle', [ScadaController::class, 'toggleActuator'])->name('toggle');
-            Route::get('/actuators/states', [ScadaController::class, 'actuatorStates'])->name('states');
-        });
+    Route::prefix('gestionusuarios')->name('gestion.')->middleware(['admin'])       ->group(function () {
+        Route::get('/',         [GestionController::class, 'index'])->name('index');
+        Route::get('/table',    [GestionController::class, 'table'])->name('table');
+        Route::put('/{user}/accept',   [GestionController::class, 'accept'])->name('accept');
+        Route::put('/{user}/activate', [GestionController::class, 'activate'])->name('activate');
+        Route::put('/{user}/suspend',  [GestionController::class, 'suspend'])->name('suspend');
+        Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
     });
+
+    Route::prefix('scada')->group(function () {
+        Route::get('/', [ScadaController::class, 'index'])->name('scada.index');
+        Route::get('/block', [ScadaController::class, 'block'])->name('scada.block');
+        Route::get('/actuators/states', [ScadaController::class, 'actuatorStates'])->name('scada.states');
+    });
+    
+    Route::prefix('scada')->middleware(['admin'])->group(function () {
+        Route::post('/dose/manual/start', [ScadaController::class, 'manualDoseStart'])->name('scada.dose.manual.start');
+        Route::post('/dose/manual/stop', [ScadaController::class, 'manualDoseStop'])->name('scada.dose.manual.stop');
+        Route::post('/actuators/toggle', [ScadaController::class, 'toggleActuator'])->name('scada.toggle');
+    });
+
+
+});
 
 Route::middleware(['auth', 'active', 'verified', 'chat.desktop'])->group(function () {
     Route::post('/history/export-pdf', [HistoryController::class, 'exportPdf'])->name('history.exportPdf');
