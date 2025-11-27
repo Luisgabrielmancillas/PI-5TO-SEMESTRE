@@ -78,7 +78,7 @@ class ScadaController extends Controller
 
         // 3) Enviar comando por MQTT SOLO si sabemos el deviceId
         if ($deviceId !== null) {
-            /* MqttActuatorsClient::sendSwitch($deviceId, $isOn); */
+            MqttActuatorsClient::sendSwitch($deviceId, $isOn);
         }
 
         // 4) Actualizar (o crear) la fila de registro_actuador
@@ -196,7 +196,7 @@ class ScadaController extends Controller
         }
 
         // MQTT: enviamos la dosis en ml (el bridge se encarga del tiempo real de encendido)
-        /* MqttActuatorsClient::sendDose($deviceId, $ml); */
+        MqttActuatorsClient::sendDose($deviceId, $ml);
 
         return response()->json([
             'ok'       => true,
@@ -237,7 +237,7 @@ class ScadaController extends Controller
         }
 
         if ($deviceId) {
-            /* MqttActuatorsClient::sendSwitch($deviceId, false); */
+            MqttActuatorsClient::sendSwitch($deviceId, false);
         }
 
         return response()->json(['ok' => true]);

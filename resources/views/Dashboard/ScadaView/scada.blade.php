@@ -16,6 +16,11 @@
         </div>
     </x-slot>
 
+    @php
+        // 👇 Solo los admins pueden controlar actuadores
+        $canControlActuators = auth()->check() && auth()->user()->role === 'admin';
+    @endphp
+
     {{-- Mensaje solo para móviles --}}
     <div class="block md:hidden px-4 py-8">
         <p class="text-center text-sm text-slate-500 dark:text-slate-400">
@@ -35,7 +40,8 @@
         {{-- LÁMPARA (id_actuador = 5 -> light) --}}
         <div id="lampControlGroup"
              data-actuator-id="5"
-             class="absolute lamp-container left-[63%] -translate-x-1/2 flex flex-col items-center z-10 cursor-pointer">
+             class="absolute lamp-container left-[63%] -translate-x-1/2 flex flex-col items-center z-10
+                    {{ $canControlActuators ? 'cursor-pointer' : 'cursor-default pointer-events-none' }}">
 
             <button id="lampToggle"
                     class="cursor-pointer focus:outline-none p-0 border-none bg-transparent transform hover:scale-105 transition duration-300">
@@ -54,7 +60,8 @@
         {{-- VENTILADOR (id_actuador = 6 -> fan) --}}
         <div id="fanToggle"
              data-actuator-id="6"
-             class="absolute top-[55px] left-[37%] z-20 flex flex-col items-center cursor-pointer">
+             class="absolute top-[55px] left-[37%] z-20 flex flex-col items-center
+                    {{ $canControlActuators ? 'cursor-pointer' : 'cursor-default pointer-events-none' }}">
             <img id="fanImage" src="{{ asset('images/fan_off.png') }}" alt="Ventilador" class="w-24 h-auto transform hover:scale-105 transition duration-300">
 
             <span id="fanStatus"
@@ -69,7 +76,6 @@
         {{-- CÁMARA --}}
         <div id="cameraToggle" class="absolute top-[200px] left-[80%] z-20 flex flex-col items-center">
 
-            {{-- Recuadro con la imagen de la cámara (wrapper con id para hover/click) --}}
             <div id="cameraFrame"
                  class="camera-frame w-82 h-60 border border-gray-300 rounded-xl overflow-hidden mb-2 bg-black">
                 <img
@@ -98,7 +104,8 @@
         {{-- BD1 = Peristáltica A — FloraMicro = id_actuador 2 (IZQUIERDA) --}}
         <div id="bd1Toggle"
              data-actuator-id="2"
-             class="absolute top-[45%] left-[20.7%] z-20 flex flex-col items-center cursor-pointer">
+             class="absolute top-[45%] left-[20.7%] z-20 flex flex-col items-center
+                    {{ $canControlActuators ? 'cursor-pointer' : 'cursor-default pointer-events-none' }}">
             <img id="bd1Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N1" class="w-10 h-auto transform hover:scale-110 transition duration-300">
             <span id="bd1Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
                 <div id="bd1Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
@@ -109,10 +116,11 @@
         {{-- BD2 = Peristáltica B — FloraBloom = id_actuador 3 (CENTRO) --}}
         <div id="bd2Toggle"
              data-actuator-id="3"
-             class="absolute top-[37%] left-[25.8%] z-20 flex flex-col items-center cursor-pointer">
+             class="absolute top-[37%] left-[25.8%] z-20 flex flex-col items-center
+                    {{ $canControlActuators ? 'cursor-pointer' : 'cursor-default pointer-events-none' }}">
             <img id="bd2Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N2" class="w-10 h-auto transform hover:scale-110 transition duration-300">
-            <span id="bd2Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duración-300 flex items-center space-x-2 whitespace-nowrap">
-                <div id="bd2Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
+            <span id="bd2Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
+                <div id="bd2Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
                 <span id="bd2Text">BD2: Off</span>
             </span>
         </div>
@@ -120,10 +128,11 @@
         {{-- BD3 = Peristáltica C — FloraGro = id_actuador 1 (DERECHA) --}}
         <div id="bd3Toggle"
              data-actuator-id="1"
-             class="absolute top-[30%] left-[31.6%] z-20 flex flex-col items-center cursor-pointer">
-            <img id="bd3Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N3" class="w-10 h-auto transform hover:scale-110 transition duración-300">
-            <span id="bd3Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duración-300 flex items-center space-x-2 whitespace-nowrap">
-                <div id="bd3Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
+             class="absolute top-[30%] left-[31.6%] z-20 flex flex-col items-center
+                    {{ $canControlActuators ? 'cursor-pointer' : 'cursor-default pointer-events-none' }}">
+            <img id="bd3Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N3" class="w-10 h-auto transform hover:scale-110 transition duration-300">
+            <span id="bd3Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
+                <div id="bd3Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
                 <span id="bd3Text">BD3: Off</span>
             </span>
         </div>
@@ -131,14 +140,15 @@
         {{-- BOMBA DE AGUA = id_actuador 4 --}}
         <div id="baToggle"
              data-actuator-id="4"
-             class="absolute top-[83.5%] left-[47.8%] z-20 flex flex-col items-center cursor-pointer">
+             class="absolute top-[83.5%] left-[47.8%] z-20 flex flex-col items-center
+                    {{ $canControlActuators ? 'cursor-pointer' : 'cursor-default pointer-events-none' }}">
             <img id="baImage" src="{{ asset('images/bomba_agua.png') }}" alt="Bomba de Agua" class="w-20 h-auto transform hover:scale-105 transition duration-300">
 
             <span id="baStatus"
                   class="text-sm text-black px-3 py-1 rounded-full
-                         bg-gray-50 border border-2 border-gray-300 transition duración-300
+                         bg-gray-50 border border-2 border-gray-300 transition duration-300
                          flex items-center space-x-2 whitespace-nowrap">
-                <div id="baDot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
+                <div id="baDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
                 <span id="baText">BA: Off</span>
             </span>
         </div>
@@ -187,7 +197,7 @@
                 </button>
             </div>
 
-            {{-- Sección Automática (solo info + cancelar) --}}
+            {{-- Sección Automática --}}
             <div id="doseAutoSection" class="space-y-4">
                 <p id="doseAutoInfo"
                    class="text-sm text-slate-700 dark:text-slate-200">
@@ -224,7 +234,6 @@
                     />
                 </label>
 
-                {{-- Mensaje de error visual --}}
                 <p id="doseMlError"
                    class="mt-1 text-xs text-red-600 dark:text-red-400 hidden">
                 </p>
@@ -269,6 +278,9 @@
             const manualDoseStopUrl  = @json(route('scada.dose.manual.stop'));
             const csrfTokenMeta      = document.querySelector('meta[name="csrf-token"]');
             const csrfToken          = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+            // 👇 Flag desde Blade: solo admin puede controlar
+            const canControlActuators = @json($canControlActuators ?? false);
 
             // =======================================================
             // CÓDIGO JAVASCRIPT SCADA (actuadores + refresco sensores)
@@ -345,7 +357,6 @@
                     cameraDot.classList.remove(...dotClassesOff);
                     cameraDot.classList.add(...dotClassesOn);
 
-                    // Habilitar hover / escala SOLO cuando hay imagen
                     if (cameraFrame) {
                         cameraFrame.classList.add('camera-online', 'cursor-pointer');
                     }
@@ -362,7 +373,6 @@
                 }
             }
 
-            // Por default la dejamos en OFF
             setCameraState(false);
 
             if (cameraStream) {
@@ -370,7 +380,6 @@
                 cameraStream.addEventListener('error', () => setCameraState(false));
             }
 
-            // Click en la cámara → abrir nuevo tab SOLO si está ON
             if (cameraFrame && cameraStream) {
                 cameraFrame.addEventListener('click', () => {
                     if (!cameraIsOn) return;
@@ -418,9 +427,11 @@
             }
 
             // =======================================================
-            // ENVIAR TOGGLE AL BACKEND (Ajax -> Laravel -> MQTT)
+            // ENVIAR TOGGLE AL BACKEND
             // =======================================================
             async function sendActuatorToggleToServer(actuatorId, isOn) {
+                // Usuarios normales no pueden mandar comandos
+                if (!canControlActuators) return;
                 if (!toggleUrl || !actuatorId) return;
 
                 try {
@@ -463,8 +474,14 @@
                     ? actuatorStates[actuatorId] === 1
                     : false;
 
+                // Siempre pintamos el estado (visible para todos)
                 isActuatorOnRef.value = initial;
                 paintActuator(toggleEl, imageEl, dotEl, textEl, label, initial, imageSrcOn, imageSrcOff, applyShake);
+
+                // Solo admin puede hacer click para cambiar
+                if (!canControlActuators) {
+                    return;
+                }
 
                 toggleEl.addEventListener('click', function() {
                     isActuatorOnRef.value = !isActuatorOnRef.value;
@@ -491,7 +508,7 @@
             const doseMlInput       = document.getElementById('doseMlInput');
             const doseMlError       = document.getElementById('doseMlError');
             const doseManualStart   = document.getElementById('doseManualStart');
-            const doseAutoStart     = document.getElementById('doseAutoStart'); // (probablemente null)
+            const doseAutoStart     = document.getElementById('doseAutoStart'); // (si existe)
             const doseCancelButtons = document.querySelectorAll('.dose-cancel-btn');
 
             let currentDoseActuatorId = null;
@@ -520,7 +537,7 @@
                 if (!labelToday) {
                     let diff = (1 - day + 7) % 7;
                     if (diff === 0) {
-                        diff = 7; // lunes pero ya pasó la hora
+                        diff = 7;
                     }
                     target.setDate(now.getDate() + diff);
                 }
@@ -542,12 +559,10 @@
                 const isAuto = (mode === 'auto');
                 if (!doseTabAuto || !doseTabManual || !doseAutoSection || !doseManualSection) return;
 
-                // Auto
                 doseTabAuto.classList.toggle('bg-slate-700', isAuto);
                 doseTabAuto.classList.toggle('text-slate-50', isAuto);
                 doseTabAuto.classList.toggle('text-slate-300', !isAuto);
 
-                // Manual
                 doseTabManual.classList.toggle('bg-slate-700', !isAuto);
                 doseTabManual.classList.toggle('text-slate-50', !isAuto);
                 doseTabManual.classList.toggle('text-slate-300', isAuto);
@@ -611,6 +626,9 @@
             }
 
             function openDoseModal(actuatorId, label) {
+                // si no es admin: no abrir
+                if (!canControlActuators) return;
+
                 currentDoseActuatorId = actuatorId;
 
                 if (doseDeviceNameEl) {
@@ -671,6 +689,7 @@
 
             if (doseManualStart) {
                 doseManualStart.addEventListener('click', async () => {
+                    if (!canControlActuators) return; // seguridad extra
                     if (doseBusy) return;
                     if (!currentDoseActuatorId || !manualDoseStartUrl) return;
 
@@ -758,10 +777,10 @@
             }
 
             // =======================================================
-            // LÓGICA DE LÁMPARA (usa DB + MQTT pero con overlay de luz)
+            // LÓGICA DE LÁMPARA
             // =======================================================
             function applyLampUi(isOn) {
-                if (!lampControlGroup) return;
+                if (!lampControlGroup || !lampStatus || !lampDot || !lightingImage || !lampText) return;
 
                 isLampOn = isOn;
 
@@ -790,6 +809,9 @@
             }
 
             async function toggleLamp() {
+                // Solo admin
+                if (!canControlActuators) return;
+
                 const next = !isLampOn;
                 applyLampUi(next);
 
@@ -820,7 +842,7 @@
             }
 
             // =======================================================
-            // CONFIGURACIÓN DE ACTUADORES (solo BA y FAN)
+            // CONFIGURACIÓN DE ACTUADORES (BA y FAN)
             // =======================================================
             setupActuatorToggle(
                 fanToggle,
@@ -843,7 +865,7 @@
                 isBAOn
             );
 
-            // Los clics de BD1/BD2/BD3 abren el modal de dosificación
+            // Dosificadoras: abrir modal (solo admin)
             function labelForDoser(actuatorId) {
                 const idNum = parseInt(actuatorId, 10);
                 if (idNum === 2) return 'Peristáltica A — FloraMicro';
@@ -857,6 +879,8 @@
                 const actuatorId = toggleEl.dataset.actuatorId;
                 if (!actuatorId) return;
 
+                if (!canControlActuators) return;
+
                 toggleEl.addEventListener('click', () => {
                     openDoseModal(parseInt(actuatorId, 10), labelForDoser(actuatorId));
                 });
@@ -867,7 +891,7 @@
             attachDoseClick(bd3Toggle);
 
             // =======================================================
-            // REFRESCO PERIÓDICO DE SENSORES (cada 10s, HTML Blade)
+            // REFRESCO PERIÓDICO DE SENSORES
             // =======================================================
             const scadaSensorsContainer = document.getElementById('scada-sensors');
 
@@ -902,36 +926,30 @@
                     if (!resp.ok) return;
                     const data = await resp.json();
 
-                    // BD1 = id 2
                     if (data['2'] !== undefined) {
                         const on = data['2'] === 1;
                         isBD1On.value = on;
                         paintActuator(bd1Toggle, bd1Image, bd1Dot, bd1Text, 'BD1', on);
                     }
-                    // BD2 = id 3 (Bloom)
                     if (data['3'] !== undefined) {
                         const on = data['3'] === 1;
                         isBD2On.value = on;
                         paintActuator(bd2Toggle, bd2Image, bd2Dot, bd2Text, 'BD2', on);
                     }
-                    // BD3 = id 1 (Gro)
                     if (data['1'] !== undefined) {
                         const on = data['1'] === 1;
                         isBD3On.value = on;
                         paintActuator(bd3Toggle, bd3Image, bd3Dot, bd3Text, 'BD3', on);
                     }
-                    // BA = 4
                     if (data['4'] !== undefined) {
                         const on = data['4'] === 1;
                         isBAOn.value = on;
                         paintActuator(baToggle, baImage, baDot, baText, 'BA', on);
                     }
-                    // Lámpara = 5
                     if (data['5'] !== undefined) {
                         const on = data['5'] === 1;
                         applyLampUi(on);
                     }
-                    // FAN = 6
                     if (data['6'] !== undefined) {
                         const on = data['6'] === 1;
                         isFanOn.value = on;
@@ -978,8 +996,6 @@
                 background-size: 100% auto;
                 background-position: calc(50% - 5px) calc(50% - var(--image-lift));
                 background-repeat: no-repeat;
-
-                /* dejamos que el contenido se pueda salir un poco */
                 overflow: visible;
                 transform: translateX(var(--scada-shift-x));
             }
@@ -999,8 +1015,6 @@
                 transform: translateX(-50%);
             }
 
-            .fan-container { top: 20px; left: 10%; }
-
             @keyframes shake {
                 0% { transform: translateX(0); }
                 25% { transform: translateX(-1px); }
@@ -1013,13 +1027,10 @@
                 animation: shake 0.2s infinite;
             }
 
-            /* ===========================
-               Cámara: ESCALAR EL RECUADRO
-               =========================== */
             .camera-frame {
                 position: relative;
                 overflow: hidden;
-                transform-origin: center center; /* escala sobre su propio eje */
+                transform-origin: center center;
                 transition: transform 0.25s ease, box-shadow 0.25s ease;
             }
 
@@ -1030,11 +1041,10 @@
                 object-fit: cover;
             }
 
-            /* solo cuando está online se permite el efecto */
             .camera-frame.camera-online:hover {
                 transform: scale(1.25);
                 box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-                z-index: 40; /* por si se monta sobre otros elementos */
+                z-index: 40;
             }
         </style>
     @endpush

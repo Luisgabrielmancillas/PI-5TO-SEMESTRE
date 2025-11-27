@@ -52,14 +52,19 @@ Route::middleware(['auth', 'active', 'verified'])->group(function () {
         Route::delete('/{user}',       [GestionController::class, 'reject'])->name('reject');
     });
 
-    Route::prefix('scada')->name('scada.')->middleware(['admin'])       ->group(function () {
-        Route::get('/', [ScadaController::class, 'index'])->name('index');
-        Route::get('/block', [ScadaController::class, 'block'])->name('block');
-        Route::post('/actuators/toggle', [ScadaController::class, 'toggleActuator'])->name('toggle');
-        Route::get('/actuators/states', [ScadaController::class, 'actuatorStates'])->name('states');
-        Route::post('/dose/manual/start', [ScadaController::class, 'manualDoseStart'])->name('dose.manual.start');
-        Route::post('/dose/manual/stop', [ScadaController::class, 'manualDoseStop'])->name('dose.manual.stop');
+    Route::prefix('scada')->group(function () {
+        Route::get('/', [ScadaController::class, 'index'])->name('scada.index');
+        Route::get('/block', [ScadaController::class, 'block'])->name('scada.block');
+        Route::get('/actuators/states', [ScadaController::class, 'actuatorStates'])->name('scada.states');
     });
+    
+    Route::prefix('scada')->middleware(['admin'])->group(function () {
+        Route::post('/dose/manual/start', [ScadaController::class, 'manualDoseStart'])->name('scada.dose.manual.start');
+        Route::post('/dose/manual/stop', [ScadaController::class, 'manualDoseStop'])->name('scada.dose.manual.stop');
+        Route::post('/actuators/toggle', [ScadaController::class, 'toggleActuator'])->name('scada.toggle');
+    });
+
+
 });
 
 Route::middleware(['auth', 'active', 'verified', 'chat.desktop'])->group(function () {
