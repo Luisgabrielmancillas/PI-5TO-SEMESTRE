@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 use App\Models\RegistroActuador;
 use Illuminate\Support\Facades\DB;
 
@@ -27,44 +28,71 @@ class RegistroActuadorApiController extends Controller
     }
 
 
-    public function cambiarEstado(Request $request)
+        public function cambiarEstado(Request $request)
     {
         // 1) Validar datos de entrada
         $data = $request->validate([
             'id_actuador' => 'required|integer',
-            // puedes usar 'boolean' si quieres true/false, pero con el SP es más claro 0/1
-            'estado'      => 'required|in:0,1',
+            'estado'      => 'required|in:0,1',  // 0 = OFF, 1 = ON
         ]);
 
         $idActuador = (int) $data['id_actuador'];
-        $estado     = (int) $data['estado']; // 1 = ON, 0 = OFF
+        $estado     = (int) $data['estado'];
 
         try {
-            // 2) Llamar al procedure
+            // 2) Intentar usar el PROCEDURE (si existe y funciona)
             DB::statement('CALL sp_cambiar_estado_actuador(?, ?)', [
                 $idActuador,
                 $estado,
             ]);
-        } catch (\Illuminate\Database\QueryException $e) {
-            // Si el PROCEDURE hizo SIGNAL 'Actuador no encontrado'
-            if (str_contains($e->getMessage(), 'Actuador no encontrado')) {
+        } catch (QueryException $e) {
+            // ⚠️ Si el procedure no existe o falla, hacemos el cambio "a mano" en una transacción
+            if (str_contains($e->getMessage(), 'sp_cambiar_estado_actuador')) {
+
+                DB::transaction(function () use ($idActuador, $estado) {
+                    // Leer estado anterior
+                    $anterior = DB::table('actuadores')
+                        ->where('id_actuador', $idActuador)
+                        ->value('estado_actual');
+
+                    if ($anterior === null) {
+                        throw new \RuntimeException('Actuador no encontrado');
+                    }
+
+                    // Actualizar tabla actuadores
+                    DB::table('actuadores')
+                        ->where('id_actuador', $idActuador)
+                        ->update(['estado_actual' => $estado]);
+
+                    // Insertar en historial
+                    DB::table('registro_actuador')->insert([
+                        'id_actuador'     => $idActuador,
+                        'estado_anterior' => (int) $anterior,
+                        'estado_actual'   => $estado,
+                        'fecha_cambio'    => now(),
+                    ]);
+                });
+
+            } else {
+                // Otro error de BD → devolvemos 500
                 return response()->json([
                     'success' => false,
-                    'message' => 'Actuador no encontrado',
-                ], 404);
+                    'message' => 'Error al cambiar el estado del actuador',
+                    'error'   => $e->getMessage(),
+                ], 500);
             }
-
-            // Otro error de BD
+        } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cambiar el estado del actuador',
+                'error'   => $e->getMessage(),
             ], 500);
         }
 
-        // 3) Leer el último registro del historial para regresarlo en la respuesta
+        // 3) Leer último registro del historial para regresarlo
         $registro = DB::table('registro_actuador')
             ->where('id_actuador', $idActuador)
-            ->orderByDesc('id_registro')   // mismo que usabas antes
+            ->orderByDesc('id_registro')
             ->first();
 
         return response()->json([
@@ -73,5 +101,6 @@ class RegistroActuadorApiController extends Controller
             'registro' => $registro,
         ]);
     }
+
 
 }
