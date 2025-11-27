@@ -9,9 +9,12 @@
         if ($val === null) return ['state' => 'na', 'msg' => 'Sin datos'];
         if ($min === null || $max === null) return ['state' => 'na', 'msg' => 'Rango no definido'];
 
+        // 🔴 Fuera de rango
         if ($val < $min || $val > $max) {
             return ['state' => 'bad', 'msg' => 'Valor fuera del rango aceptado'];
         }
+
+        // 🟠 Cerca del límite (10% del rango)
         $span = max($max - $min, 0.00001);
         $tol  = 0.10 * $span;
 
@@ -20,18 +23,22 @@
         } elseif ($val >= $max - $tol) {
             return ['state' => 'warn', 'msg' => 'Cerca del máximo aceptado'];
         }
+
+        // 🟢 Dentro de rango cómodo
         return ['state' => 'ok', 'msg' => 'Dentro de rango'];
     };
 
+    // 🔴🟠🟢 Colores de la tarjeta
     $cardClass = function($state) {
         return match ($state) {
             'bad'  => 'ring-1 ring-rose-200 bg-rose-50/70 dark:bg-rose-900/10 dark:ring-rose-800',
             'warn' => 'ring-1 ring-amber-200 bg-amber-50/70 dark:bg-amber-900/10 dark:ring-amber-800',
-            'ok'   => 'ring-1 ring-slate-200 bg-white dark:bg-slate-800/40 dark:ring-white/10',
+            'ok'   => 'ring-1 ring-emerald-200 bg-emerald-50/70 dark:bg-emerald-900/10 dark:ring-emerald-800',
             default=> 'ring-1 ring-slate-200 bg-white dark:bg-slate-800/40 dark:ring-white/10',
         };
     };
 
+    // Colores del texto del mensajito de estado
     $badgeClass = function($state) {
         return match ($state) {
             'bad'  => 'text-rose-700 dark:text-rose-300',
@@ -53,11 +60,11 @@
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($ranges as $key => $r)
             @php
-                $val = $measurements[$key] ?? null;
-                $state = $judge($val, $r['min'] ?? null, $r['max'] ?? null);
-                $classes = $cardClass($state['state']);
-                $icon = $r['icon'] ?? 'ri-information-line';
-                $unit = $r['unit'] ?? '';
+                $val    = $measurements[$key] ?? null;
+                $state  = $judge($val, $r['min'] ?? null, $r['max'] ?? null);
+                $classes= $cardClass($state['state']);
+                $icon   = $r['icon'] ?? 'ri-information-line';
+                $unit   = $r['unit'] ?? '';
             @endphp
 
             <article class="rounded-xl p-4 {{ $classes }}">
@@ -82,7 +89,8 @@
                         Rango: {{ $fmt($r['min'] ?? 0) }}–{{ $fmt($r['max'] ?? 0) }}{{ $unit }}
                     </p>
 
-                    @if(in_array($state['state'], ['warn','bad']))
+                    {{-- Ahora también mostramos el mensaje cuando está OK (verde) --}}
+                    @if(in_array($state['state'], ['warn','bad','ok']))
                         <div class="mt-3 text-xs font-medium {{ $badgeClass($state['state']) }}">
                             {{ $state['msg'] }}
                         </div>

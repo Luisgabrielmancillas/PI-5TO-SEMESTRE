@@ -7,6 +7,8 @@
   const urlData = "{{ route('history.data') }}";
   let charts = [];
 
+  const CHARTS_REFRESH_MS = 10000; // 10s para auto-refresh
+
   // === tema y paleta base ===
   function prefersDark() {
     return document.documentElement.classList.contains('dark');
@@ -23,18 +25,17 @@
 
   // === colores por sensor (ajusta nombres si tus labels cambian) ===
   function sensorColor(label) {
-    // normalizamos para mapear
     const key = (label || '').toLowerCase();
     const dark = prefersDark();
     const map = {
-      'humedad':                 dark ? '#22d3ee' : '#0ea5e9', // cyan/sky
-      'temp. ambiente':    dark ? '#fbbf24' : '#f59e0b', // amber
-      'ph':                      dark ? '#818cf8' : '#6366f1', // indigo
-      'orp':                     dark ? '#34d399' : '#10b981', // emerald
-      'temp. agua':    dark ? '#f472b6' : '#ec4899', // pink
-      'ultrasónico':             dark ? '#fca5a5' : '#ef4444', // red
+      'humedad':        dark ? '#22d3ee' : '#0ea5e9', // cyan/sky
+      'temp. ambiente': dark ? '#fbbf24' : '#f59e0b', // amber
+      'ph':             dark ? '#818cf8' : '#6366f1', // indigo
+      'orp':            dark ? '#34d399' : '#10b981', // emerald
+      'temp. agua':     dark ? '#f472b6' : '#ec4899', // pink
+      'ultrasonico':    dark ? '#fca5a5' : '#ef4444', // red (por si viene sin acento)
+      'ultrasónico':    dark ? '#fca5a5' : '#ef4444', // red
     };
-    // fallback si no matchea
     return map[key] || (dark ? '#93c5fd' : '#2563eb');
   }
 
@@ -95,11 +96,14 @@
       if (opt.value === 'all') opt.disabled = !isAllSensor;
     });
     if (!isAllSensor && rangeSelect.value === 'all') {
+      // regla lógica que ya tenías: "all" solo cuando sensor=all
       rangeSelect.value = 'week';
     }
   }
 
   async function loadData() {
+    if (!sensorSelect || !rangeSelect || !host) return;
+
     disableAllIfNeeded();
 
     const params = new URLSearchParams({
@@ -167,7 +171,7 @@
               data: item.series,
               tension: .35,
               borderColor: c,
-              backgroundColor: prefersDark() ? c + '26' : c + '26', // leve fill (0x26 ≈ 15% alpha)
+              backgroundColor: prefersDark() ? c + '26' : c + '26',
               pointBackgroundColor: c,
               pointRadius: 3
             }]
@@ -217,16 +221,21 @@
   }
 
   // Eventos
-  sensorSelect.addEventListener('change', loadData);
-  rangeSelect.addEventListener('change', loadData);
+  if (sensorSelect) sensorSelect.addEventListener('change', loadData);
+  if (rangeSelect)  rangeSelect.addEventListener('change', loadData);
 
   // Re-render cuando cambie el tema (.dark en <html>)
   const obs = new MutationObserver(() => loadData());
   obs.observe(document.documentElement, { attributes:true, attributeFilter:['class'] });
 
-  // Primer render
-  sensorSelect.value = @json($initialSensor);
-  rangeSelect.value  = @json($initialRange);
+  // Primer render (respetando lo que viene del back)
+  if (sensorSelect) sensorSelect.value = @json($initialSensor);
+  if (rangeSelect)  rangeSelect.value  = @json($initialRange);
   loadData();
+
+  // Auto-refresh de gráficas cada 10 segundos (mantiene los filtros actuales)
+  setInterval(() => {
+    loadData();
+  }, CHARTS_REFRESH_MS);
 })();
 </script>
