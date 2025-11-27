@@ -39,7 +39,6 @@
 
             <button id="lampToggle"
                     class="cursor-pointer focus:outline-none p-0 border-none bg-transparent transform hover:scale-105 transition duration-300">
-
                 <img id="lampImage" src="{{ asset('images/lampara.png') }}" alt="Lámpara" class="w-96 h-auto">
             </button>
 
@@ -47,9 +46,7 @@
                   class="mt-1 text-sm text-black px-3 py-1 rounded-full
                          bg-gray-50 border border-2 border-gray-300 transition duration-300
                          flex items-center space-x-2 whitespace-nowrap">
-
                 <div id="lampDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
-
                 <span id="lampText">Lámpara: Off</span>
             </span>
         </div>
@@ -72,20 +69,22 @@
         {{-- CÁMARA --}}
         <div id="cameraToggle" class="absolute top-[200px] left-[80%] z-20 flex flex-col items-center">
 
-            <div class="border border-gray-300 rounded-xl overflow-hidden mb-2 bg-black">
+            {{-- Recuadro con la imagen de la cámara (wrapper con id para hover/click) --}}
+            <div id="cameraFrame"
+                 class="camera-frame w-82 h-60 border border-gray-300 rounded-xl overflow-hidden mb-2 bg-black">
                 <img
                     id="cameraStream"
                     src="http://10.42.62.18:8000/stream.mjpg"
                     alt="Cámara HydroBox"
-                    class="w-96 h-60 object-cover"
+                    class="w-full h-full object-cover"
                 >
             </div>
 
             <span id="cameraStatus"
                   class="mt-2 text-sm text-black px-3 py-1 rounded-full
-                        bg-gray-50 border border-2 border-gray-300 transition duración-300
+                        bg-gray-50 border border-2 border-gray-300 transition duration-300
                         flex items-center space-x-2 whitespace-nowrap">
-                <div id="cameraDot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
+                <div id="cameraDot" class="w-2 h-2 rounded-full bg-gray-500 transition duration-300"></div>
                 <span id="cameraText">Cámara: Off</span>
             </span>
         </div>
@@ -112,7 +111,7 @@
              data-actuator-id="3"
              class="absolute top-[37%] left-[25.8%] z-20 flex flex-col items-center cursor-pointer">
             <img id="bd2Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N2" class="w-10 h-auto transform hover:scale-110 transition duration-300">
-            <span id="bd2Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duration-300 flex items-center space-x-2 whitespace-nowrap">
+            <span id="bd2Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duración-300 flex items-center space-x-2 whitespace-nowrap">
                 <div id="bd2Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
                 <span id="bd2Text">BD2: Off</span>
             </span>
@@ -122,7 +121,7 @@
         <div id="bd3Toggle"
              data-actuator-id="1"
              class="absolute top-[30%] left-[31.6%] z-20 flex flex-col items-center cursor-pointer">
-            <img id="bd3Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N3" class="w-10 h-auto transform hover:scale-110 transition duration-300">
+            <img id="bd3Image" src="{{ asset('images/bomba_dosificadora.png') }}" alt="Bomba D. N3" class="w-10 h-auto transform hover:scale-110 transition duración-300">
             <span id="bd3Status" class="text-sm text-black px-3 py-1 rounded-full bg-gray-50 border border-2 border-gray-300 transition duración-300 flex items-center space-x-2 whitespace-nowrap">
                 <div id="bd3Dot" class="w-2 h-2 rounded-full bg-gray-500 transition duración-300"></div>
                 <span id="bd3Text">BD3: Off</span>
@@ -262,14 +261,14 @@
             // =======================================================
             // CONSTANTES DE RUTAS / ESTADOS INICIALES
             // =======================================================
-            const toggleUrl      = @json(route('scada.toggle'));
-            const actuatorStates = @json($actuatorStatesById ?? []);
-            const statesUrl      = @json(route('scada.states'));
-            const scadaBlockUrl  = @json(route('scada.block'));
+            const toggleUrl          = @json(route('scada.toggle'));
+            const actuatorStates     = @json($actuatorStatesById ?? []);
+            const statesUrl          = @json(route('scada.states'));
+            const scadaBlockUrl      = @json(route('scada.block'));
             const manualDoseStartUrl = @json(route('scada.dose.manual.start'));
             const manualDoseStopUrl  = @json(route('scada.dose.manual.stop'));
-            const csrfTokenMeta  = document.querySelector('meta[name="csrf-token"]');
-            const csrfToken      = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+            const csrfTokenMeta      = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken          = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
 
             // =======================================================
             // CÓDIGO JAVASCRIPT SCADA (actuadores + refresco sensores)
@@ -328,11 +327,15 @@
             // ESTADO DE CÁMARA SEGÚN SI CARGA EL STREAM
             // =======================================================
             const cameraStream = document.getElementById('cameraStream');
+            const cameraFrame  = document.getElementById('cameraFrame');
             const cameraStatus = document.getElementById('cameraStatus');
             const cameraDot    = document.getElementById('cameraDot');
             const cameraText   = document.getElementById('cameraText');
+            let   cameraIsOn   = false;
 
             function setCameraState(isOn) {
+                cameraIsOn = isOn;
+
                 if (!cameraStatus || !cameraDot || !cameraText) return;
 
                 if (isOn) {
@@ -341,20 +344,41 @@
                     cameraStatus.classList.add(...statusClassesOn);
                     cameraDot.classList.remove(...dotClassesOff);
                     cameraDot.classList.add(...dotClassesOn);
+
+                    // Habilitar hover / escala SOLO cuando hay imagen
+                    if (cameraFrame) {
+                        cameraFrame.classList.add('camera-online', 'cursor-pointer');
+                    }
                 } else {
                     cameraText.textContent = 'Cámara: Off';
                     cameraStatus.classList.remove(...statusClassesOn);
                     cameraStatus.classList.add(...statusClassesOff);
                     cameraDot.classList.remove(...dotClassesOn);
                     cameraDot.classList.add(...dotClassesOff);
+
+                    if (cameraFrame) {
+                        cameraFrame.classList.remove('camera-online', 'cursor-pointer');
+                    }
                 }
             }
 
+            // Por default la dejamos en OFF
             setCameraState(false);
 
             if (cameraStream) {
                 cameraStream.addEventListener('load', () => setCameraState(true));
                 cameraStream.addEventListener('error', () => setCameraState(false));
+            }
+
+            // Click en la cámara → abrir nuevo tab SOLO si está ON
+            if (cameraFrame && cameraStream) {
+                cameraFrame.addEventListener('click', () => {
+                    if (!cameraIsOn) return;
+                    const url = cameraStream.getAttribute('src');
+                    if (url) {
+                        window.open(url, '_blank');
+                    }
+                });
             }
 
             // =======================================================
@@ -467,8 +491,7 @@
             const doseMlInput       = document.getElementById('doseMlInput');
             const doseMlError       = document.getElementById('doseMlError');
             const doseManualStart   = document.getElementById('doseManualStart');
-            // No hay botón de automática ahora; esto será null
-            const doseAutoStart     = document.getElementById('doseAutoStart');
+            const doseAutoStart     = document.getElementById('doseAutoStart'); // (probablemente null)
             const doseCancelButtons = document.querySelectorAll('.dose-cancel-btn');
 
             let currentDoseActuatorId = null;
@@ -594,7 +617,7 @@
                     doseDeviceNameEl.textContent = label || 'Peristáltica';
                 }
                 if (doseMlInput) {
-                    doseMlInput.value = '0'; // valor por defecto
+                    doseMlInput.value = '0';
                 }
                 clearDoseMlError();
 
@@ -612,7 +635,7 @@
             }
 
             function closeDoseModal() {
-                if (doseBusy) return; // no se puede cerrar mientras se dosifica
+                if (doseBusy) return;
                 currentDoseActuatorId = null;
                 clearDoseMlError();
                 if (doseTimer) {
@@ -654,7 +677,6 @@
                     const raw = doseMlInput?.value ?? '0';
                     const ml  = parseInt(raw, 10);
 
-                    // Validaciones
                     if (!Number.isFinite(ml) || ml <= 0) {
                         showDoseMlError('Ingresa una cantidad mayor a 0 ml.');
                         return;
@@ -824,8 +846,6 @@
             // Los clics de BD1/BD2/BD3 abren el modal de dosificación
             function labelForDoser(actuatorId) {
                 const idNum = parseInt(actuatorId, 10);
-                // Nuevo mapeo:
-                // 2 -> A Micro, 3 -> B Bloom, 1 -> C Gro
                 if (idNum === 2) return 'Peristáltica A — FloraMicro';
                 if (idNum === 3) return 'Peristáltica B — FloraBloom';
                 if (idNum === 1) return 'Peristáltica C — FloraGro';
@@ -958,7 +978,9 @@
                 background-size: 100% auto;
                 background-position: calc(50% - 5px) calc(50% - var(--image-lift));
                 background-repeat: no-repeat;
-                overflow: hidden;
+
+                /* dejamos que el contenido se pueda salir un poco */
+                overflow: visible;
                 transform: translateX(var(--scada-shift-x));
             }
 
@@ -989,6 +1011,30 @@
 
             .animate-shake {
                 animation: shake 0.2s infinite;
+            }
+
+            /* ===========================
+               Cámara: ESCALAR EL RECUADRO
+               =========================== */
+            .camera-frame {
+                position: relative;
+                overflow: hidden;
+                transform-origin: center center; /* escala sobre su propio eje */
+                transition: transform 0.25s ease, box-shadow 0.25s ease;
+            }
+
+            .camera-frame img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            /* solo cuando está online se permite el efecto */
+            .camera-frame.camera-online:hover {
+                transform: scale(1.25);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+                z-index: 40; /* por si se monta sobre otros elementos */
             }
         </style>
     @endpush
